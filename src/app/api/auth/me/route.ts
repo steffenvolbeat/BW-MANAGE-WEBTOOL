@@ -6,6 +6,7 @@ export async function GET() {
     const user = await getCurrentUser();
     return NextResponse.json({ user });
   } catch {
-    return NextResponse.json({ user: null }, { status: 401 });
+    // Nicht eingeloggt → 200 mit user: null (kein Browser-Konsolenfehler)
+    return NextResponse.json({ user: null });
   }
 }
