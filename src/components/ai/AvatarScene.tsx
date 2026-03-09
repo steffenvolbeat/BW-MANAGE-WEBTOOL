@@ -95,7 +95,7 @@ const COLLAR_COLOR = new THREE.Color("#e2e8f0");
 
 // ── Einzelner Augapfel ────────────────────────────────────────────────────────
 
-function Eye({ position, blinkRef }: { position: [number, number, number]; blinkRef: React.RefObject<THREE.Mesh | null> }) {
+function Eye({ position, blinkRef }: { position: [number, number, number]; blinkRef: React.Ref<THREE.Mesh> }) {
   return (
     <group position={position}>
       {/* Weißes Auge */}
@@ -131,7 +131,7 @@ function Eye({ position, blinkRef }: { position: [number, number, number]; blink
 
 function AvatarModel({ isSpeaking, emotion, mouthOpen = 0 }: AvatarModelProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const headRef = useRef<THREE.Mesh>(null);
+  const headRef = useRef<THREE.Group>(null);
   const mouthRef = useRef<THREE.Mesh>(null);
   const leftBlinkRef = useRef<THREE.Mesh>(null);
   const rightBlinkRef = useRef<THREE.Mesh>(null);

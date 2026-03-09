@@ -4,12 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3000",
-    "build": "next build",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "build:prisma": "prisma generate && prisma migrate deploy && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "db:seed": "prisma db seed",
     "cy:open": "cypress open",
     "cy:run": "cypress run"
+
   },
   "prisma": {
     "seed": "node prisma/seed.js"
@@ -18,8 +21,8 @@
     "@heroicons/react": "^2.1.5",
     "@prisma/adapter-pg": "^7.4.1",
     "@prisma/client": "^7.4.1",
-    "@react-three/drei": "^10.7.7",
-    "@react-three/fiber": "^9.5.0",
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.17.10",
     "@simplewebauthn/browser": "^13.2.2",
     "@simplewebauthn/server": "^13.2.3",
     "@types/d3": "^7.4.3",
@@ -40,7 +43,7 @@
     "qrcode": "^1.5.4",
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "react-leaflet": "^5.0.0",
+    "react-leaflet": "^4.2.1",
     "react-markdown": "^10.1.0",
     "three": "^0.183.2"
   },

@@ -1,11 +1,11 @@
 "use client";
-import { useState, FormEvent, useRef } from "react";
+import { useState, FormEvent, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { EyeIcon, EyeSlashIcon, ShieldCheckIcon, KeyIcon, FingerPrintIcon } from "@heroicons/react/24/outline";
 import { startAuthentication } from "@simplewebauthn/browser";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -384,5 +384,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-linear-to-br from-blue-950 via-slate-900 to-slate-800" />}>
+      <LoginPageContent />
+    </Suspense>
   );
 }
