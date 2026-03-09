@@ -1,0 +1,526 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String     @id @default(cuid())
+  email          String     @unique
+  name           String?
+  password       String?
+  emailVerified  Boolean    @default(false)
+  avatarUrl      String?
+  role           Role       @default(USER)
+  status         UserStatus @default(ACTIVE)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  // 2FA / MFA (TOTP)
+  mfaEnabled     Boolean    @default(false)
+  mfaSecret      String?    // verschlüsseltes TOTP-Secret (AES)
+  mfaBackupCodes String[]   // gehashte Backup-Codes
+
+  // WebAuthn / Biometrie
+  webauthnChallenge   String?
+  webauthnCredentials WebAuthnCredential[]
+
+  // Relations
+  applications      Application[]
+  documents         Document[]
+  contacts          Contact[]
+  activities        Activity[]
+  events            Event[]
+  notes             Note[]
+  meetings          Meeting[]
+  reminders         Reminder[]
+  boardsOwned       Board[]       @relation("BoardOwner")
+  boardMemberships  BoardMember[] @relation("BoardMembership")
+  assignedCards     Card[]        @relation("CardAssignee")
+  interviewSessions InterviewSession[]
+  legalContracts    LegalContract[]
+
+  @@map("users")
+}
+
+model Application {
+  id              String      @id @default(cuid())
+  companyName     String
+  position        String
+  location        String
+  country         String
+  isInland        Boolean     @default(true)
+  status          ApplicationStatus @default(APPLIED)
+  priority        Priority    @default(MEDIUM)
+  jobType         JobType     @default(FULLTIME)
+  salary          String?
+  jobUrl          String?
+  companyUrl      String?
+  appliedAt       DateTime    @default(now())
+  responseAt      DateTime?
+  notesText       String?    @map("notes")
+  requirements    String?
+  
+  // Relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documents       ApplicationDocument[]
+  activities      Activity[]
+  events          Event[]
+  notes           Note[]
+  meetings        Meeting[]
+  reminders       Reminder[]
+
+  @@map("applications")
+}
+
+model Document {
+  id              String      @id @default(cuid())
+  name            String
+  fileName        String
+  fileSize        Int
+  fileType        String
+  filePath        String?
+  type            DocumentType
+  tags            String[]
+  description     String?
+  uploadedAt      DateTime    @default(now())
+  lastModified    DateTime    @updatedAt
+
+  // Relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications    ApplicationDocument[]
+
+  @@map("documents")
+}
+
+model ApplicationDocument {
+  id              String      @id @default(cuid())
+  applicationId   String
+  documentId      String
+  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  document        Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([applicationId, documentId])
+  @@map("application_documents")
+}
+
+model Contact {
+  id              String      @id @default(cuid())
+  firstName       String
+  lastName        String
+  company         String?
+  position        String?
+  email           String?
+  phone           String?
+  linkedIn        String?
+  xing            String?
+  location        String?
+  country         String?
+  isInland        Boolean     @default(true)
+  contactType     ContactType @default(RECRUITER)
+  industry        String?
+  notesText       String?    @map("notes")
+  tags            String[]
+  isFavorite      Boolean     @default(false)
+  lastContact     DateTime?
+  nextFollowUp    DateTime?
+  addedAt         DateTime    @default(now())
+  source          String?
+  
+  // Relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activities      Activity[]
+  notes           Note[]
+  meetings        Meeting[]
+  reminders       Reminder[]
+
+  @@map("contacts")
+}
+
+model Event {
+  id          String     @id @default(cuid())
+  title       String
+  company     String?
+  type        EventType
+  date        DateTime
+  time        String
+  location    String?
+  notes       String?
+  duration    Int?       // in minutes
+  isInland    Boolean    @default(true)
+  
+  // Relations
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+
+  @@map("events")
+}
+
+model Note {
+  id           String      @id @default(cuid())
+  title        String
+  content      String
+  tags         String[]
+  category     String      @default("general")
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  // Relations
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application  Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  contactId    String?
+  contact      Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@map("notes")
+}
+
+model Activity {
+  id              String      @id @default(cuid())
+  type            ActivityType
+  title           String
+  description     String
+  relatedEntity   String
+  relatedId       String?
+  timestamp       DateTime    @default(now())
+  status          ActivityStatus @default(COMPLETED)
+  metadata        Json?
+  
+  // Relations
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId   String?
+  application     Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  contactId       String?
+  contact         Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@map("activities")
+}
+
+
+model Meeting {
+  id            String        @id @default(cuid())
+  title         String
+  platform      MeetingPlatform @default(LOCAL)
+  meetingUrl    String?
+  scheduledAt   DateTime
+  duration      Int?          // in Minuten
+  description   String?
+  notes         String?
+  status        MeetingStatus @default(SCHEDULED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Relations
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application   Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  contactId     String?
+  contact       Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@map("meetings")
+}
+
+model Reminder {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  dueAt       DateTime
+  isDone      Boolean        @default(false)
+  priority    Priority       @default(MEDIUM)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // Relations
+  userId      String
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  application Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  contactId   String?
+  contact     Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  @@map("reminders")
+}
+
+// ─── KANBAN BOARD ───────────────────────────────────────────────────────────
+
+model Board {
+  id        String       @id @default(cuid())
+  name      String
+  ownerId   String
+  owner     User         @relation("BoardOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members   BoardMember[]
+  columns   BoardColumn[]
+  cards     Card[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("kanban_boards")
+}
+
+model BoardMember {
+  id        String     @id @default(cuid())
+  boardId   String
+  userId    String
+  board     Board      @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user      User       @relation("BoardMembership", fields: [userId], references: [id], onDelete: Cascade)
+  role      BoardRole  @default(VIEWER)
+  createdAt DateTime   @default(now())
+
+  @@unique([boardId, userId])
+  @@map("kanban_board_members")
+}
+
+model BoardColumn {
+  id        String   @id @default(cuid())
+  boardId   String
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  title     String
+  position  Int      @default(0)
+  createdAt DateTime @default(now())
+  cards     Card[]
+
+  @@map("kanban_columns")
+}
+
+model Card {
+  id          String     @id @default(cuid())
+  boardId     String
+  board       Board      @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  columnId    String
+  column      BoardColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      String     @default("open")
+  assigneeId  String?
+  assignee    User?      @relation("CardAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  metadata    Json?
+  dueDate     DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("kanban_cards")
+}
+
+enum BoardRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+
+// ─── ENUMS ────────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  REVIEWED
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  OFFER_RECEIVED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+  OTHER
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum JobType {
+  FULLTIME
+  PARTTIME
+  CONTRACT
+  FREELANCE
+  INTERNSHIP
+}
+
+enum DocumentType {
+  CV
+  COVER_LETTER
+  CERTIFICATE
+  PORTFOLIO
+  REFERENCE
+  OTHER
+}
+
+enum ContactType {
+  RECRUITER
+  HR_MANAGER
+  HIRING_MANAGER
+  TEAM_LEAD
+  COLLEAGUE
+  REFERRER
+}
+
+enum EventType {
+  INTERVIEW_PHONE
+  INTERVIEW_VIDEO
+  INTERVIEW_ONSITE
+  DEADLINE
+  FOLLOW_UP
+}
+
+enum ActivityType {
+  APPLICATION_SUBMITTED
+  INTERVIEW_SCHEDULED
+  DOCUMENT_UPLOADED
+  CONTACT_ADDED
+  STATUS_CHANGED
+  REMINDER_SET
+  EMAIL_SENT
+  NOTE_CREATED
+}
+
+enum ActivityStatus {
+  COMPLETED
+  PENDING
+  FAILED
+}
+
+enum MeetingPlatform {
+  ZOOM
+  TEAMS
+  MEET
+  LOOM
+  PHONE
+  ONSITE
+  LOCAL
+  OTHER
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  ONGOING
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+}
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE 8: AI INTERVIEW SIMULATOR
+// ─────────────────────────────────────────────────────────────────────────────
+
+model InterviewSession {
+  id            String             @id @default(cuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  jobTitle      String
+  company       String?
+  difficulty    String             @default("MEDIUM")  // "EASY"|"MEDIUM"|"HARD"
+  mode          String             @default("TEXT")     // "TEXT"|"VOICE"
+  status        InterviewSessionStatus @default(ACTIVE)
+  score         Float?             // 0–100 Gesamtscore
+  durationMin   Int?               // tatsächliche Dauer in Minuten
+  feedback      Json?              // strukturiertes KI-Feedback
+  messages      InterviewMessage[]
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  @@map("interview_sessions")
+}
+
+model InterviewMessage {
+  id          String          @id @default(cuid())
+  sessionId   String
+  session     InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role        String          // "interviewer" | "candidate"
+  content     String          // Klartext – lokal (kein Versand an externe LLM wenn local mode)
+  audioPath   String?         // Optionaler lokaler Audio-Pfad (Voice Mode)
+  fillerWords Int             @default(0)
+  starMethod  Boolean         @default(false)
+  sentiment   Float?          // -1.0 bis 1.0
+  createdAt   DateTime        @default(now())
+
+  @@map("interview_messages")
+}
+
+enum InterviewSessionStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ABORTED
+}
+
+
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE 13: LEGAL TECH – VERTRAGSANALYSE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Nur Metadaten – Vertragsinhalt bleibt ausschließlich client-seitig (On-Device RAG)
+model LegalContract {
+  id            String         @id @default(cuid())
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  contractType  ContractType   @default(EMPLOYMENT)
+  analysisStatus String        @default("PENDING") // "PENDING"|"ANALYZING"|"DONE"|"ERROR"
+  riskLevel     String?        // "LOW"|"MEDIUM"|"HIGH"
+  riskCount     Int            @default(0)
+  clauseCount   Int            @default(0)
+  findings      Json?
+  documentId    String?
+  uploadedAt    DateTime       @default(now())
+  analyzedAt    DateTime?
+
+  @@map("legal_contracts")
+}
+
+model WebAuthnCredential {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  credentialId String    @unique  // Base64URL encoded
+  publicKey    Bytes               // COSE-kodierter Public Key
+  counter      BigInt    @default(0)
+  deviceType   String    @default("singleDevice") // "singleDevice" | "multiDevice"
+  backedUp     Boolean   @default(false)
+  transports   String[]            // ["internal", "usb", "ble", "nfc"]
+  name         String    @default("Gerät")
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@map("webauthn_credentials")
+}
+
+enum ContractType {
+  EMPLOYMENT
+  FREELANCE
+  NDA
+  SERVICE
+  CONSULTING
+  OTHER
+}
+
+

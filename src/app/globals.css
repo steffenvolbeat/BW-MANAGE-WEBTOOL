@@ -1,0 +1,251 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --surface: #f1f5f9;
+  --border: #e5e7eb;
+  --muted: #475569;
+  --muted-foreground: #64748b;
+  --accent: #2563eb;
+  --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+  --placeholder: #374151;
+}
+
+.dark {
+  --background: #0b1220;
+  --foreground: #e2e8f0;
+  --card: #0f172a;
+  --surface: #0b1220;
+  --border: #1f2937;
+  --muted: #94a3b8;
+  --muted-foreground: #cbd5e1;
+  --accent: #60a5fa;
+  --shadow-soft: 0 14px 50px rgba(0, 0, 0, 0.45);
+  --placeholder: #94a3b8;
+}
+
+/* Dark-mode overrides for common utility classes (cards/containers/text) */
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-slate-50 {
+  background-color: var(--card) !important;
+}
+
+.dark .border-gray-200,
+.dark .border-slate-200,
+.dark .border-gray-100,
+.dark .border-slate-100 {
+  border-color: var(--border) !important;
+}
+
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-slate-900 {
+  color: var(--foreground) !important;
+}
+
+.dark .text-gray-700,
+.dark .text-gray-600,
+.dark .text-slate-700,
+.dark .text-slate-600 {
+  color: var(--muted-foreground) !important;
+}
+
+.dark .text-gray-500,
+.dark .text-slate-500,
+.dark .text-gray-400,
+.dark .text-slate-400 {
+  color: var(--muted) !important;
+}
+
+.dark .hover\:bg-gray-50:hover,
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-gray-100:hover,
+.dark .hover\:bg-slate-100:hover {
+  background-color: #111827 !important;
+}
+
+/* Form controls in dark mode (inputs/selects/textareas) */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark select,
+.dark textarea {
+  background-color: #0f172a !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+  border-color: #60a5fa !important;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+input::placeholder,
+textarea::placeholder,
+.calendar-shell input::placeholder,
+.calendar-shell textarea::placeholder {
+  color: var(--placeholder) !important;
+  opacity: 1 !important;
+}
+
+/* ─── Extended Dark Mode overrides ─────────────────────────────────────────── */
+
+/* Backgrounds */
+.dark .bg-blue-50,
+.dark .bg-indigo-50,
+.dark .bg-purple-50,
+.dark .bg-green-50,
+.dark .bg-yellow-50,
+.dark .bg-red-50,
+.dark .bg-amber-50,
+.dark .bg-orange-50,
+.dark .bg-teal-50,
+.dark .bg-cyan-50 {
+  background-color: #1e293b !important;
+}
+
+.dark .bg-blue-100,
+.dark .bg-indigo-100,
+.dark .bg-purple-100 {
+  background-color: #1e3a5f !important;
+}
+
+.dark .bg-green-100 {
+  background-color: #14532d !important;
+}
+
+.dark .bg-yellow-100,
+.dark .bg-amber-100 {
+  background-color: #451a03 !important;
+}
+
+.dark .bg-red-100 {
+  background-color: #450a0a !important;
+}
+
+/* Text corrections in dark mode */
+.dark .text-blue-600,
+.dark .text-blue-700,
+.dark .text-indigo-600,
+.dark .text-indigo-700 {
+  color: #93c5fd !important;
+}
+
+.dark .text-green-600,
+.dark .text-green-700,
+.dark .text-green-800 {
+  color: #86efac !important;
+}
+
+.dark .text-red-600,
+.dark .text-red-700,
+.dark .text-red-800 {
+  color: #fca5a5 !important;
+}
+
+.dark .text-yellow-600,
+.dark .text-yellow-700,
+.dark .text-yellow-800,
+.dark .text-amber-600,
+.dark .text-amber-700,
+.dark .text-amber-800 {
+  color: #fde68a !important;
+}
+
+.dark .text-purple-600,
+.dark .text-purple-700,
+.dark .text-purple-800 {
+  color: #c4b5fd !important;
+}
+
+/* Borders */
+.dark .border-blue-200,
+.dark .border-indigo-200 {
+  border-color: #1e3a5f !important;
+}
+
+.dark .border-green-200 {
+  border-color: #14532d !important;
+}
+
+.dark .border-red-200 {
+  border-color: #450a0a !important;
+}
+
+/* Table rows in dark mode */
+.dark table thead {
+  background-color: #0f172a !important;
+}
+
+.dark table thead th {
+  color: var(--muted-foreground) !important;
+  border-color: var(--border) !important;
+}
+
+.dark table tbody tr {
+  border-color: var(--border) !important;
+}
+
+.dark table tbody tr:hover {
+  background-color: #111827 !important;
+}
+
+.dark table tbody td {
+  color: var(--foreground) !important;
+}
+
+/* Badges & tags in dark mode */
+.dark .rounded-full.bg-blue-100 { background-color: #1e3a5f !important; }
+.dark .rounded-full.bg-green-100 { background-color: #14532d !important; }
+.dark .rounded-full.bg-red-100 { background-color: #450a0a !important; }
+.dark .rounded-full.bg-yellow-100 { background-color: #451a03 !important; }
+.dark .rounded-full.bg-purple-100 { background-color: #2e1065 !important; }
+
+/* Dropdowns & Modals in dark mode */
+.dark [role="dialog"],
+.dark .modal-overlay > div {
+  background-color: var(--card) !important;
+  border-color: var(--border) !important;
+}
+
+/* Buttons */
+.dark button.bg-white {
+  background-color: var(--card) !important;
+  color: var(--foreground) !important;
+  border-color: var(--border) !important;
+}
+
+/* DIN-template print layer – always light */
+@media print {
+  :root, .dark {
+    --background: #ffffff;
+    --foreground: #000000;
+    --card: #ffffff;
+    --border: #cccccc;
+    --muted: #555555;
+  }
+  header, aside, nav, footer, .no-print { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+}
+
+/* Smooth theme transition */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.1s ease;
+}
