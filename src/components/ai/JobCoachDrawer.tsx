@@ -347,6 +347,8 @@ export default function JobCoachDrawer() {
           <div className="flex items-end gap-2 bg-(--surface) border border-(--border) rounded-xl px-3 py-2 focus-within:border-violet-400 transition-colors">
             <textarea
               ref={inputRef}
+              id="job-coach-input"
+              name="job-coach-message"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
