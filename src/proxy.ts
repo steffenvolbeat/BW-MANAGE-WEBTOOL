@@ -2,36 +2,32 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyToken, COOKIE_NAME } from "@/lib/auth/jwt";
 
-const devCsp = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.readyplayer.me",
-  "font-src 'self' data:",
-  // drei-Assets-CDN + Ready Player Me für Avatar-Creator
-  "connect-src 'self' ws://localhost:* ws://127.0.0.1:* https://raw.githack.com https://market-assets.fra1.cdn.digitaloceanspaces.com https://*.readyplayer.me",
-  "media-src 'self' blob:",
-  "frame-src https://*.readyplayer.me",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-].join("; ");
+function buildCsp(isDev: boolean): string {
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:"
+    : "script-src 'self' 'unsafe-inline' https://vercel.live";
 
-const prodCsp = [
-  "default-src 'self'",
-  "script-src 'self'",
-  "style-src 'self'",
-  "img-src 'self' data: blob:",
-  "font-src 'self' data:",
-  "connect-src 'self'",
-  "media-src 'self' blob:",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "upgrade-insecure-requests",
-].join("; ");
+  const connectSrc = isDev
+    ? "connect-src 'self' ws://localhost:* ws://127.0.0.1:* https://raw.githack.com https://market-assets.fra1.cdn.digitaloceanspaces.com https://*.readyplayer.me"
+    : "connect-src 'self' https://vercel.live wss://ws-us3.pusher.com";
+
+  const parts = [
+    "default-src 'self'",
+    scriptSrc,
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob:${isDev ? " https://*.readyplayer.me" : ""}`,
+    "font-src 'self' data:",
+    connectSrc,
+    "media-src 'self' blob:",
+    ...(isDev ? ["frame-src https://*.readyplayer.me"] : ["frame-src https://vercel.live"]),
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    ...(!isDev ? ["upgrade-insecure-requests"] : []),
+  ];
+  return parts.join("; ");
+}
 
 // Öffentliche Pfade ohne Login
 const PUBLIC_PATHS = [
@@ -111,8 +107,8 @@ export async function proxy(req: NextRequest) {
 }
 
 function addSecurityHeaders(res: NextResponse): NextResponse {
-  const csp = process.env.NODE_ENV === "production" ? prodCsp : devCsp;
-  res.headers.set("Content-Security-Policy", csp);
+  const isDev = process.env.NODE_ENV !== "production";
+  res.headers.set("Content-Security-Policy", buildCsp(isDev));
   res.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=()");
   res.headers.set("Referrer-Policy", "no-referrer");
   res.headers.set("X-Content-Type-Options", "nosniff");
