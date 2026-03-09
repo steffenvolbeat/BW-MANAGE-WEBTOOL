@@ -252,10 +252,11 @@ export default function AgentDashboard() {
 
       try {
         // 1. Chat-Anfrage an Agent KI
+        const apiMessages = [...messages, userMsg].map(({ role, content }) => ({ role, content }));
         const chatRes = await fetch("/api/agents/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text.trim() }),
+          body: JSON.stringify({ messages: apiMessages }),
         });
 
         if (!chatRes.ok) {
