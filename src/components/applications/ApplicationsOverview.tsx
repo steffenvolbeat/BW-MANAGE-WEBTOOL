@@ -1159,17 +1159,22 @@ export default function ApplicationsOverview() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
+                      <td className="px-6 py-4">
+                        <div className="flex items-start">
                           {application.isInland ? (
-                            <HomeIcon className="w-4 h-4 text-blue-500 mr-2" />
+                            <HomeIcon className="w-4 h-4 text-blue-500 mr-2 mt-0.5 shrink-0" />
                           ) : (
-                            <GlobeEuropeAfricaIcon className="w-4 h-4 text-purple-500 mr-2" />
+                            <GlobeEuropeAfricaIcon className="w-4 h-4 text-purple-500 mr-2 mt-0.5 shrink-0" />
                           )}
                           <div>
                             <div className="text-sm text-gray-900">
-                              {application.location}{application.zip ? ` ${application.zip}` : ""}
+                              {application.location}
                             </div>
+                            {application.zip && (
+                              <div className="text-xs text-gray-500">
+                                {application.zip}
+                              </div>
+                            )}
                             {application.state && (
                               <div className="text-xs text-gray-500">
                                 {application.state}
