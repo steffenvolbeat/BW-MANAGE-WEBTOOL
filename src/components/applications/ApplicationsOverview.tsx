@@ -323,7 +323,7 @@ export default function ApplicationsOverview() {
       }
 
       const updated = await res.json();
-      setApplications((prev) => prev.map((a) => (a.id === editingId ? { ...a, ...updated } : a)));
+      await loadApplications();
       closeEdit();
       showToast("Bewerbung aktualisiert.");
     } catch (err) {
@@ -840,18 +840,21 @@ export default function ApplicationsOverview() {
       {/* Applications Table */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
         {showEdit && editingId && (
-          <div className="fixed inset-0 bg-black/40 z-30 flex items-center justify-center px-4">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl border border-gray-200 p-6 relative">
-              <button
-                className="absolute right-3 top-3 text-gray-500 hover:text-gray-700"
-                onClick={closeEdit}
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-              <h3 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-                <PencilSquareIcon className="w-5 h-5 mr-2 text-indigo-600" />
-                Bewerbung bearbeiten
-              </h3>
+          <div className="fixed inset-0 bg-black/40 z-30 flex items-center justify-center px-4 py-6">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl border border-gray-200 relative flex flex-col max-h-[90vh]">
+              <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center">
+                  <PencilSquareIcon className="w-5 h-5 mr-2 text-indigo-600" />
+                  Bewerbung bearbeiten
+                </h3>
+                <button
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={closeEdit}
+                >
+                  <XMarkIcon className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="overflow-y-auto p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Firma</label>
@@ -1074,7 +1077,8 @@ export default function ApplicationsOverview() {
                   />
                 </div>
               </div>
-              <div className="mt-6 flex justify-end gap-3">
+              </div>
+              <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
                 <button
                   type="button"
                   className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
@@ -1188,9 +1192,14 @@ export default function ApplicationsOverview() {
                                 {application.street}
                               </div>
                             )}
-                            {(application.zip || application.state) && (
+                            {application.zip && (
                               <div className="text-xs text-gray-500">
-                                {[application.zip, application.state].filter(Boolean).join(" – ")}
+                                {application.zip}
+                              </div>
+                            )}
+                            {application.state && (
+                              <div className="text-xs text-gray-400">
+                                {application.state}
                               </div>
                             )}
                             <div className="text-xs text-gray-400">
