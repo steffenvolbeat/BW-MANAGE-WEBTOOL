@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { scopedPrisma } from "@/lib/security/scope";
 import {
   ApplicationStatus,
+  ActivityType,
+  ActivityStatus,
   JobType,
   Priority,
 } from "@prisma/client";
@@ -102,6 +104,22 @@ export async function POST(request: Request) {
         events: true,
       },
     });
+
+    // Aktivität automatisch erstellen
+    try {
+      await db.activity.create({
+        data: {
+          type: ActivityType.APPLICATION_SUBMITTED,
+          title: `Bewerbung bei ${companyName} eingereicht`,
+          description: `Position: ${position}`,
+          relatedEntity: "application",
+          relatedId: application.id,
+          applicationId: application.id,
+          status: ActivityStatus.COMPLETED,
+          metadata: { company: companyName, position },
+        },
+      });
+    } catch (_) { /* nicht-kritisch */ }
 
     return NextResponse.json(application, { status: 201 });
   } catch (error) {
@@ -207,6 +225,36 @@ export async function PUT(request: Request) {
         events: true,
       },
     });
+
+    // Aktivität bei Status-Änderung schreiben
+    if (updateData.status && existingApplication.status !== updateData.status) {
+      const statusLabels: Record<string, string> = {
+        APPLIED: "Beworben", INITIATIVE: "Initiativbewerbung",
+        REVIEWED: "Geprüft", INTERVIEW_SCHEDULED: "Interview geplant",
+        INTERVIEWED: "Interview geführt", OFFER_RECEIVED: "Angebot erhalten",
+        ACCEPTED: "Angenommen", REJECTED: "Abgelehnt",
+        WITHDRAWN: "Zurückgezogen", OTHER: "Sonstiges",
+      };
+      try {
+        await db.activity.create({
+          data: {
+            type: ActivityType.STATUS_CHANGED,
+            title: `Status geändert: ${existingApplication.companyName}`,
+            description: `${statusLabels[existingApplication.status] ?? existingApplication.status} → ${statusLabels[updateData.status] ?? updateData.status}`,
+            relatedEntity: "application",
+            relatedId: id,
+            applicationId: id,
+            status: ActivityStatus.COMPLETED,
+            metadata: {
+              company: existingApplication.companyName,
+              position: existingApplication.position,
+              oldStatus: existingApplication.status,
+              newStatus: updateData.status,
+            },
+          },
+        });
+      } catch (_) { /* nicht-kritisch */ }
+    }
 
     return NextResponse.json(updatedApplication);
   } catch (error) {

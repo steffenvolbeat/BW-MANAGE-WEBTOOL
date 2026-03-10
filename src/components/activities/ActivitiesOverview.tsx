@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAppUser } from "@/hooks/useAppUser";
 import {
   ClockIcon,
   BriefcaseIcon,
@@ -44,15 +45,45 @@ interface Activity {
     oldStatus?: string;
     newStatus?: string;
     reminderDate?: string;
+    [key: string]: unknown;
   };
+  application?: { companyName: string; position: string } | null;
+  contact?: { name: string } | null;
 }
 
 export default function ActivitiesOverview() {
-  // Echte Aktivitätsdaten werden aus der API geladen
-  const [activities] = useState<Activity[]>([]);
+  const { id: userId } = useAppUser();
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+
+  useEffect(() => {
+    if (!userId) return;
+    setLoading(true);
+    setError(null);
+    fetch(`/api/activities?userId=${userId}`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        // Normalisiere Status-Werte (COMPLETED → completed)
+        const normalized = data.map((a: any) => ({
+          ...a,
+          status: (a.status as string).toLowerCase() as Activity["status"],
+          metadata: {
+            ...(a.metadata ?? {}),
+            company: a.application?.companyName ?? (a.metadata as any)?.company,
+            position: a.application?.position ?? (a.metadata as any)?.position,
+            contactName: a.contact?.name ?? (a.metadata as any)?.contactName,
+          },
+        }));
+        setActivities(normalized);
+      })
+      .catch((err) => setError(err.message ?? "Fehler beim Laden"))
+      .finally(() => setLoading(false));
+  }, [userId]);
 
   const activityTypes = {
     APPLICATION_SUBMITTED: {
@@ -209,6 +240,8 @@ export default function ActivitiesOverview() {
           <p className="mt-2 text-gray-600">
             Übersicht über alle Ihre Bewerbungsaktivitäten und Aktionen.
           </p>
+          {loading && <p className="text-sm text-gray-500 mt-1">Wird geladen…</p>}
+          {error && <p className="text-sm text-red-600 mt-1">Fehler: {error}</p>}
         </div>
         <div className="flex items-center space-x-3">
           <div className="text-right">
