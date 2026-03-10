@@ -37,3 +37,42 @@ export async function GET(_req: NextRequest) {
     return handleGuardError(err);
   }
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const user = await requireActiveUser();
+    const { name } = await req.json();
+    if (!name?.trim()) {
+      return NextResponse.json({ error: "Name erforderlich" }, { status: 400 });
+    }
+
+    const DEFAULT_COLUMNS = [
+      "Offen",
+      "In Bearbeitung",
+      "Warte auf Antwort",
+      "Interview",
+      "Angebot",
+      "Abgeschlossen",
+    ];
+
+    const board = await prisma.board.create({
+      data: {
+        name: name.trim(),
+        ownerId: user.id,
+        columns: {
+          create: DEFAULT_COLUMNS.map((title, position) => ({ title, position })),
+        },
+      },
+      include: {
+        columns: {
+          orderBy: { position: "asc" },
+          include: { cards: true },
+        },
+      },
+    });
+
+    return NextResponse.json({ board }, { status: 201 });
+  } catch (err) {
+    return handleGuardError(err);
+  }
+}
