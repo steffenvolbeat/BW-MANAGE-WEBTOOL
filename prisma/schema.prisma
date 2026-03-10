@@ -63,6 +63,7 @@ model Application {
   position        String
   location        String
   country         String
+  state           String?
   isInland        Boolean     @default(true)
   status          ApplicationStatus @default(APPLIED)
   priority        Priority    @default(MEDIUM)

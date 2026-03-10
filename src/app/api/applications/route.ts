@@ -84,6 +84,7 @@ export async function POST(request: Request) {
         position,
         location: location || "Unbekannt",
         country: data.country || "Deutschland",
+        state: data.state || null,
         isInland: data.isInland !== undefined ? data.isInland : true,
         salary,
         jobUrl,

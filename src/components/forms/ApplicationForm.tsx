@@ -18,6 +18,7 @@ interface ApplicationFormData {
   position: string;
   location: string;
   country: string;
+  state: string;
   isInland: boolean;
   jobType: string;
   salary: string;
@@ -42,6 +43,7 @@ export default function ApplicationForm() {
     position: "",
     location: "",
     country: "Deutschland",
+    state: "",
     isInland: true,
     jobType: "FULLTIME",
     salary: "",
@@ -127,6 +129,30 @@ export default function ApplicationForm() {
     "Sonstiges",
   ];
 
+  const statesByCountry: Record<string, string[]> = {
+    Deutschland: [
+      "Baden-Württemberg", "Bayern", "Berlin", "Brandenburg", "Bremen",
+      "Hamburg", "Hessen", "Mecklenburg-Vorpommern", "Niedersachsen",
+      "Nordrhein-Westfalen", "Rheinland-Pfalz", "Saarland", "Sachsen",
+      "Sachsen-Anhalt", "Schleswig-Holstein", "Thüringen",
+    ],
+    "Österreich": [
+      "Burgenland", "Kärnten", "Niederösterreich", "Oberösterreich",
+      "Salzburg", "Steiermark", "Tirol", "Vorarlberg", "Wien",
+    ],
+    Schweiz: [
+      "Aargau", "Appenzell Ausserrhoden", "Appenzell Innerrhoden", "Basel-Landschaft",
+      "Basel-Stadt", "Bern", "Freiburg", "Genève", "Glarus", "Graubünden",
+      "Jura", "Luzern", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz",
+      "Solothurn", "St. Gallen", "Thurgau", "Ticino", "Uri", "Valais",
+      "Vaud", "Zug", "Zürich",
+    ],
+    Luxemburg: ["Capellen", "Clervaux", "Diekirch", "Echternach", "Esch-sur-Alzette",
+      "Grevenmacher", "Luxemburg", "Mersch", "Redange", "Remich", "Vianden", "Wiltz"],
+  };
+
+  const availableStates = statesByCountry[formData.country] ?? [];
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
@@ -176,7 +202,10 @@ export default function ApplicationForm() {
         ...prev,
         [name]: checked,
         country: checked ? "Deutschland" : prev.country,
+        state: "",
       }));
+    } else if (name === "country") {
+      setFormData((prev) => ({ ...prev, country: value, state: "" }));
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -213,6 +242,7 @@ export default function ApplicationForm() {
         userId: userId,
         ...formData,
         country: formData.country || "Deutschland",
+        state: formData.state || null,
         appliedAt: formData.appliedAt || new Date().toISOString().slice(0, 10),
       };
 
@@ -418,6 +448,32 @@ export default function ApplicationForm() {
                 ))}
               </select>
             </div>
+
+            {/* Bundesland / Kanton */}
+            {availableStates.length > 0 && (
+              <div>
+                <label
+                  htmlFor="state"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  {formData.country === "Schweiz" ? "Kanton" : "Bundesland"}
+                </label>
+                <select
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">
+                    {formData.country === "Schweiz" ? "Kanton wählen…" : "Bundesland wählen…"}
+                  </option>
+                  {availableStates.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
         </div>
 

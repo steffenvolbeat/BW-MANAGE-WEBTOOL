@@ -23,6 +23,7 @@ interface Application {
   position: string;
   location: string;
   country: string;
+  state?: string;
   isInland: boolean;
   status: string;
   priority: string;
@@ -217,6 +218,7 @@ export default function ApplicationsOverview() {
       status: app.status === "PLANNED" ? "INTERVIEW_SCHEDULED" : app.status,
       jobUrl: (app as any).jobUrl || "",
       salary: app.salary || "",
+      state: app.state || "",
       appliedAt: app.appliedAt ? new Date(app.appliedAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
     });
     setShowEdit(true);
@@ -882,6 +884,34 @@ export default function ApplicationsOverview() {
                     ].map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </div>
+                {(() => {
+                  const statesByCountry: Record<string, string[]> = {
+                    Deutschland: ["Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg","Hessen","Mecklenburg-Vorpommern","Niedersachsen","Nordrhein-Westfalen","Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein","Thüringen"],
+                    Österreich: ["Burgenland","Kärnten","Niederösterreich","Oberösterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien"],
+                    Schweiz: ["Aargau","Appenzell Ausserrhoden","Appenzell Innerrhoden","Basel-Landschaft","Basel-Stadt","Bern","Freiburg","Genève","Glarus","Graubünden","Jura","Luzern","Nidwalden","Obwalden","Schaffhausen","Schwyz","Solothurn","St. Gallen","Thurgau","Ticino","Uri","Valais","Vaud","Zug","Zürich"],
+                    Luxemburg: ["Capellen","Clervaux","Diekirch","Echternach","Esch-sur-Alzette","Grevenmacher","Luxemburg","Mersch","Redange","Remich","Vianden","Wiltz"],
+                  };
+                  const states = statesByCountry[editForm.country || ""] ?? [];
+                  if (states.length === 0) return null;
+                  return (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {editForm.country === "Schweiz" ? "Kanton" : "Bundesland"}
+                      </label>
+                      <select
+                        name="state"
+                        value={(editForm as any).state || ""}
+                        onChange={handleEditChange}
+                        className="w-full px-3 py-2 border text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">
+                          {editForm.country === "Schweiz" ? "Kanton wählen…" : "Bundesland wählen…"}
+                        </option>
+                        {states.map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                    </div>
+                  );
+                })()}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                   <select
