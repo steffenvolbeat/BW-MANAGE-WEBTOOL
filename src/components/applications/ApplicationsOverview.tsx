@@ -16,6 +16,8 @@ import {
   ArrowPathIcon,
   XMarkIcon,
   CloudArrowUpIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
 } from "@heroicons/react/24/outline";
 interface Application {
   id: string;
@@ -122,22 +124,30 @@ export default function ApplicationsOverview() {
     INTERNSHIP: "Praktikum",
   };
 
-  const filteredApplications = applications.filter((app) => {
-    const matchesSearch =
-      app.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      app.location.toLowerCase().includes(searchTerm.toLowerCase());
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
-    const matchesFilter =
-      selectedFilter === "all" ||
-      (selectedFilter === "inland" && app.isInland) ||
-      (selectedFilter === "international" && !app.isInland);
+  const filteredApplications = applications
+    .filter((app) => {
+      const matchesSearch =
+        app.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.location.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus =
-      selectedStatus === "all" || app.status === selectedStatus;
+      const matchesFilter =
+        selectedFilter === "all" ||
+        (selectedFilter === "inland" && app.isInland) ||
+        (selectedFilter === "international" && !app.isInland);
 
-    return matchesSearch && matchesFilter && matchesStatus;
-  });
+      const matchesStatus =
+        selectedStatus === "all" || app.status === selectedStatus;
+
+      return matchesSearch && matchesFilter && matchesStatus;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.appliedAt).getTime();
+      const dateB = new Date(b.appliedAt).getTime();
+      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+    });
 
   const loadApplications = async () => {
     if (!userId) return;
@@ -1072,8 +1082,18 @@ export default function ApplicationsOverview() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Priorität
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Beworben am
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700"
+                  onClick={() => setSortOrder((o) => (o === "desc" ? "asc" : "desc"))}
+                >
+                  <span className="flex items-center gap-1">
+                    Beworben am
+                    {sortOrder === "desc" ? (
+                      <ChevronDownIcon className="w-3 h-3" />
+                    ) : (
+                      <ChevronUpIcon className="w-3 h-3" />
+                    )}
+                  </span>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Gehalt
@@ -1135,7 +1155,12 @@ export default function ApplicationsOverview() {
                             <div className="text-sm text-gray-900">
                               {application.location}
                             </div>
-                            <div className="text-xs text-gray-500">
+                            {application.state && (
+                              <div className="text-xs text-gray-500">
+                                {application.state}
+                              </div>
+                            )}
+                            <div className="text-xs text-gray-400">
                               {application.country}
                             </div>
                           </div>
