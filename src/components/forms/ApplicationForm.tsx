@@ -17,6 +17,7 @@ interface ApplicationFormData {
   companyName: string;
   position: string;
   location: string;
+  zip: string;
   country: string;
   state: string;
   isInland: boolean;
@@ -42,6 +43,7 @@ export default function ApplicationForm() {
     companyName: "",
     position: "",
     location: "",
+    zip: "",
     country: "Deutschland",
     state: "",
     isInland: true,
@@ -242,6 +244,7 @@ export default function ApplicationForm() {
         userId: userId,
         ...formData,
         country: formData.country || "Deutschland",
+        zip: formData.zip || null,
         state: formData.state || null,
         appliedAt: formData.appliedAt || new Date().toISOString().slice(0, 10),
       };
@@ -425,7 +428,25 @@ export default function ApplicationForm() {
               )}
             </div>
 
-            {/* Land */}
+            {/* PLZ */}
+            <div>
+              <label
+                htmlFor="zip"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                PLZ
+              </label>
+              <input
+                type="text"
+                id="zip"
+                name="zip"
+                value={formData.zip}
+                onChange={handleInputChange}
+                maxLength={10}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="z.B. 07743"
+              />
+            </div>
             <div>
               <label
                 htmlFor="country"

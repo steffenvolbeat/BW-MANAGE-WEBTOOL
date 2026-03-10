@@ -24,6 +24,7 @@ interface Application {
   companyName: string;
   position: string;
   location: string;
+  zip?: string;
   country: string;
   state?: string;
   isInland: boolean;
@@ -229,6 +230,7 @@ export default function ApplicationsOverview() {
       jobUrl: (app as any).jobUrl || "",
       salary: app.salary || "",
       state: app.state || "",
+      zip: app.zip || "",
       appliedAt: app.appliedAt ? new Date(app.appliedAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
     });
     setShowEdit(true);
@@ -284,7 +286,9 @@ export default function ApplicationsOverview() {
         companyName: editForm.companyName,
         position: editForm.position,
         location: editForm.location,
+        zip: (editForm as any).zip || null,
         country: editForm.country,
+        state: (editForm as any).state || null,
         isInland: editForm.isInland,
         status: editForm.status,
         priority: editForm.priority,
@@ -874,6 +878,17 @@ export default function ApplicationsOverview() {
                   />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">PLZ</label>
+                  <input
+                    name="zip"
+                    value={(editForm as any).zip || ""}
+                    onChange={handleEditChange}
+                    maxLength={10}
+                    placeholder="z.B. 07743"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Land</label>
                   <select
                     name="country"
@@ -1153,7 +1168,7 @@ export default function ApplicationsOverview() {
                           )}
                           <div>
                             <div className="text-sm text-gray-900">
-                              {application.location}
+                              {application.location}{application.zip ? ` ${application.zip}` : ""}
                             </div>
                             {application.state && (
                               <div className="text-xs text-gray-500">

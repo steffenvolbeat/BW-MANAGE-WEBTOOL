@@ -85,6 +85,7 @@ export async function POST(request: Request) {
         companyName,
         position,
         location: location || "Unbekannt",
+        zip: data.zip || null,
         country: data.country || "Deutschland",
         state: data.state || null,
         isInland: data.isInland !== undefined ? data.isInland : true,
