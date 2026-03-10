@@ -44,6 +44,15 @@ model User {
   assignedCards     Card[]        @relation("CardAssignee")
   interviewSessions InterviewSession[]
   legalContracts    LegalContract[]
+  achievements      Achievement[]
+  moodEntries       MoodEntry[]
+  mentorProfile     MentorProfile?
+  mentoringSessions MentoringSession[] @relation("MenteeSession")
+  mentoringAsmentor MentoringSession[] @relation("MentorSession")
+  peerReviews       PeerReview[]       @relation("ReviewAuthor")
+  peerReviewsReceived PeerReview[]     @relation("ReviewTarget")
+  followUps         FollowUp[]
+  portfolioProfile  PortfolioProfile?
 
   @@map("users")
 }
@@ -523,4 +532,146 @@ enum ContractType {
   OTHER
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE: GAMIFICATION & ACHIEVEMENTS
+// ─────────────────────────────────────────────────────────────────────────────
 
+model Achievement {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        String   // "FIRST_APPLICATION", "TEN_APPLICATIONS", "STREAK_7", etc.
+  title       String
+  description String
+  icon        String   @default("🏆")
+  xp          Int      @default(10)
+  unlockedAt  DateTime @default(now())
+
+  @@unique([userId, type])
+  @@map("achievements")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE: STIMMUNGS-BAROMETER
+// ─────────────────────────────────────────────────────────────────────────────
+
+model MoodEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mood      Int      // 1-5 (1=sehr schlecht, 5=sehr gut)
+  energy    Int      // 1-5
+  stress    Int      // 1-5
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@map("mood_entries")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE: MENTORING-MARKTPLATZ
+// ─────────────────────────────────────────────────────────────────────────────
+
+model MentorProfile {
+  id           String             @id @default(cuid())
+  userId       String             @unique
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline     String
+  bio          String
+  skills       String[]
+  industries   String[]
+  hourlyRate   Float?
+  isAvailable  Boolean            @default(true)
+  sessionCount Int                @default(0)
+  rating       Float              @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  sessions     MentoringSession[] @relation("MentorSessions")
+
+  @@map("mentor_profiles")
+}
+
+model MentoringSession {
+  id            String        @id @default(cuid())
+  menteeId      String
+  mentee        User          @relation("MenteeSession", fields: [menteeId], references: [id], onDelete: Cascade)
+  mentorId      String
+  mentor        User          @relation("MentorSession", fields: [mentorId], references: [id], onDelete: Cascade)
+  mentorProfile MentorProfile @relation("MentorSessions", fields: [mentorProfileId], references: [id])
+  mentorProfileId String
+  topic         String
+  scheduledAt   DateTime?
+  status        String        @default("REQUESTED") // REQUESTED, ACCEPTED, COMPLETED, CANCELLED
+  notes         String?
+  rating        Int?          // 1-5
+  feedback      String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("mentoring_sessions")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE: PEER-REVIEW-NETZWERK (anonym)
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PeerReview {
+  id          String   @id @default(cuid())
+  authorId    String
+  author      User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  targetId    String
+  target      User     @relation("ReviewTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  documentType String  // "CV", "COVER_LETTER", "PORTFOLIO"
+  documentText String  // Eingereichte Textversion (anonymisiert)
+  feedback    String
+  rating      Int      // 1-5
+  isAnonymous Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@map("peer_reviews")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE: SMART FOLLOW-UP TIMELINE
+// ─────────────────────────────────────────────────────────────────────────────
+
+model FollowUp {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String?
+  contactId     String?
+  dueAt         DateTime
+  type          String   @default("EMAIL") // EMAIL, PHONE, LINKEDIN, OTHER
+  subject       String
+  aiDraft       String?
+  isDone        Boolean  @default(false)
+  sentAt        DateTime?
+  createdAt     DateTime @default(now())
+
+  @@map("follow_ups")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE: PORTFOLIO-PROFIL
+// ─────────────────────────────────────────────────────────────────────────────
+
+model PortfolioProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug        String   @unique
+  headline    String
+  bio         String
+  skills      String[]
+  githubUrl   String?
+  linkedinUrl String?
+  websiteUrl  String?
+  theme       String   @default("modern")
+  isPublic    Boolean  @default(false)
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("portfolio_profiles")
+}
