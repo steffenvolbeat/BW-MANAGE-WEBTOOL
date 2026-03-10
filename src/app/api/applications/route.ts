@@ -85,6 +85,7 @@ export async function POST(request: Request) {
         companyName,
         position,
         location: location || "Unbekannt",
+        street: data.street || null,
         zip: data.zip || null,
         country: data.country || "Deutschland",
         state: data.state || null,

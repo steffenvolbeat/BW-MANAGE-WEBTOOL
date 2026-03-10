@@ -62,6 +62,7 @@ model Application {
   companyName     String
   position        String
   location        String
+  street          String?
   zip             String?
   country         String
   state           String?

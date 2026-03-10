@@ -24,6 +24,7 @@ interface Application {
   companyName: string;
   position: string;
   location: string;
+  street?: string;
   zip?: string;
   country: string;
   state?: string;
@@ -230,6 +231,7 @@ export default function ApplicationsOverview() {
       jobUrl: (app as any).jobUrl || "",
       salary: app.salary || "",
       state: app.state || "",
+      street: app.street || "",
       zip: app.zip || "",
       appliedAt: app.appliedAt ? new Date(app.appliedAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
     });
@@ -286,6 +288,7 @@ export default function ApplicationsOverview() {
         companyName: editForm.companyName,
         position: editForm.position,
         location: editForm.location,
+        street: (editForm as any).street || null,
         zip: (editForm as any).zip || null,
         country: editForm.country,
         state: (editForm as any).state || null,
@@ -877,8 +880,18 @@ export default function ApplicationsOverview() {
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Straße &amp; Hausnummer</label>
+                  <input
+                    name="street"
+                    value={(editForm as any).street || ""}
+                    onChange={handleEditChange}
+                    placeholder="z.B. Musterstraße 42"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">PLZ</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Postleitzahl (PLZ)</label>
                   <input
                     name="zip"
                     value={(editForm as any).zip || ""}
@@ -1170,14 +1183,14 @@ export default function ApplicationsOverview() {
                             <div className="text-sm text-gray-900">
                               {application.location}
                             </div>
-                            {application.zip && (
+                            {application.street && (
                               <div className="text-xs text-gray-500">
-                                {application.zip}
+                                {application.street}
                               </div>
                             )}
-                            {application.state && (
+                            {(application.zip || application.state) && (
                               <div className="text-xs text-gray-500">
-                                {application.state}
+                                {[application.zip, application.state].filter(Boolean).join(" – ")}
                               </div>
                             )}
                             <div className="text-xs text-gray-400">
