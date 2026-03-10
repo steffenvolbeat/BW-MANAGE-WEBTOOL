@@ -451,9 +451,7 @@ export default function NotesManagement() {
 
                   <div className="prose max-w-none text-gray-700 mb-3">
                     <div className="whitespace-pre-line text-sm">
-                      {note.content.length > 200
-                        ? `${note.content.substring(0, 200)}...`
-                        : note.content}
+                      {note.content}
                     </div>
                   </div>
 
