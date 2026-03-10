@@ -84,12 +84,15 @@ export async function POST(request: Request) {
         position,
         location: location || "Unbekannt",
         country: data.country || "Deutschland",
+        isInland: data.isInland !== undefined ? data.isInland : true,
         salary,
         jobUrl,
+        companyUrl: data.companyUrl || null,
         status,
         jobType,
         priority,
-        notesText: description || "",
+        appliedAt: data.appliedAt ? new Date(data.appliedAt) : new Date(),
+        notesText: description || data.notesText || "",
         requirements: requirementsInput || "",
       },
       include: {
@@ -150,6 +153,9 @@ export async function PUT(request: Request) {
     // Convert date strings to Date objects if provided
     if (updateData.applicationDeadline) {
       updateData.applicationDeadline = new Date(updateData.applicationDeadline);
+    }
+    if (updateData.appliedAt) {
+      updateData.appliedAt = new Date(updateData.appliedAt);
     }
 
     // Validate enum fields to avoid 500 from invalid values

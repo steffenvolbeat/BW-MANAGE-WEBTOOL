@@ -94,51 +94,16 @@ export default function ApplicationsOverview() {
   const [rowDocsError, setRowDocsError] = useState<string | null>(null);
 
   const statusConfig = {
-    APPLIED: {
-      label: "Beworben",
-      color: "bg-blue-100 text-blue-800",
-      icon: ClockIcon,
-    },
-    REVIEWED: {
-      label: "Geprüft",
-      color: "bg-purple-100 text-purple-800",
-      icon: EyeIcon,
-    },
-    INTERVIEW_SCHEDULED: {
-      label: "Interview geplant",
-      color: "bg-yellow-100 text-yellow-800",
-      icon: CalendarDaysIcon,
-    },
-    INTERVIEWED: {
-      label: "Interview geführt",
-      color: "bg-indigo-100 text-indigo-800",
-      icon: CalendarDaysIcon,
-    },
-    OFFER_RECEIVED: {
-      label: "Angebot erhalten",
-      color: "bg-green-100 text-green-800",
-      icon: CalendarDaysIcon,
-    },
-    ACCEPTED: {
-      label: "Angenommen",
-      color: "bg-emerald-100 text-emerald-800",
-      icon: CalendarDaysIcon,
-    },
-    REJECTED: {
-      label: "Abgelehnt",
-      color: "bg-red-100 text-red-800",
-      icon: CalendarDaysIcon,
-    },
-    WITHDRAWN: {
-      label: "Zurückgezogen",
-      color: "bg-gray-100 text-gray-800",
-      icon: CalendarDaysIcon,
-    },
-    OTHER: {
-      label: "Sonstiges",
-      color: "bg-slate-100 text-slate-800",
-      icon: CalendarDaysIcon,
-    },
+    APPLIED: { label: "Beworben", color: "bg-blue-100 text-blue-800", icon: ClockIcon },
+    INITIATIVE: { label: "Initiativbewerbung", color: "bg-teal-100 text-teal-800", icon: GlobeEuropeAfricaIcon },
+    REVIEWED: { label: "Geprüft", color: "bg-purple-100 text-purple-800", icon: EyeIcon },
+    INTERVIEW_SCHEDULED: { label: "Interview geplant", color: "bg-yellow-100 text-yellow-800", icon: CalendarDaysIcon },
+    INTERVIEWED: { label: "Interview geführt", color: "bg-indigo-100 text-indigo-800", icon: CalendarDaysIcon },
+    OFFER_RECEIVED: { label: "Angebot erhalten", color: "bg-green-100 text-green-800", icon: CalendarDaysIcon },
+    ACCEPTED: { label: "Angenommen", color: "bg-emerald-100 text-emerald-800", icon: CalendarDaysIcon },
+    REJECTED: { label: "Abgelehnt", color: "bg-red-100 text-red-800", icon: CalendarDaysIcon },
+    WITHDRAWN: { label: "Zurückgezogen", color: "bg-gray-100 text-gray-800", icon: CalendarDaysIcon },
+    OTHER: { label: "Sonstiges", color: "bg-slate-100 text-slate-800", icon: CalendarDaysIcon },
   };
 
   const priorityConfig = {
@@ -203,6 +168,7 @@ export default function ApplicationsOverview() {
 
   const statusFlow = [
     "APPLIED",
+    "INITIATIVE",
     "REVIEWED",
     "INTERVIEW_SCHEDULED",
     "INTERVIEWED",
@@ -251,6 +217,7 @@ export default function ApplicationsOverview() {
       status: app.status === "PLANNED" ? "INTERVIEW_SCHEDULED" : app.status,
       jobUrl: (app as any).jobUrl || "",
       salary: app.salary || "",
+      appliedAt: app.appliedAt ? new Date(app.appliedAt).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10),
     });
     setShowEdit(true);
     setError(null);
@@ -315,6 +282,7 @@ export default function ApplicationsOverview() {
         companyUrl: (editForm as any).companyUrl,
         notesText: editForm.notesText,
         requirements: editForm.requirements,
+        appliedAt: (editForm as any).appliedAt,
       };
 
       const payload = Object.fromEntries(
@@ -836,6 +804,7 @@ export default function ApplicationsOverview() {
             >
               <option value="all">Alle Status</option>
               <option value="APPLIED">Beworben</option>
+              <option value="INITIATIVE">Initiativbewerbung</option>
               <option value="REVIEWED">Geprüft</option>
               <option value="INTERVIEW_SCHEDULED">Interview geplant</option>
               <option value="INTERVIEWED">Interview geführt</option>
@@ -894,12 +863,24 @@ export default function ApplicationsOverview() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Land</label>
-                  <input
+                  <select
                     name="country"
-                    value={editForm.country || ""}
+                    value={editForm.country || "Deutschland"}
                     onChange={handleEditChange}
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  />
+                    className="w-full px-3 py-2 border text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    {[
+                      "Deutschland", "Österreich", "Schweiz", "Luxemburg",
+                      "Niederlande", "Belgien", "Frankreich", "Italien", "Spanien", "Portugal",
+                      "Polen", "Tschechien", "Ungarn", "Rumänien",
+                      "Schweden", "Norwegen", "Dänemark", "Finnland",
+                      "Irland", "Vereinigtes Königreich",
+                      "Griechenland", "Kroatien", "Slowenien", "Slowakei",
+                      "Estland", "Lettland", "Litauen",
+                      "USA", "Kanada", "Australien", "Neuseeland",
+                      "Singapur", "Vereinigte Arabische Emirate", "Sonstiges",
+                    ].map((c) => <option key={c} value={c}>{c}</option>)}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
@@ -911,6 +892,7 @@ export default function ApplicationsOverview() {
                   >
                     <option value="PLANNED">Geplant</option>
                     <option value="APPLIED">Beworben</option>
+                    <option value="INITIATIVE">Initiativbewerbung</option>
                     <option value="REVIEWED">Geprüft</option>
                     <option value="INTERVIEW_SCHEDULED">Interview geplant</option>
                     <option value="INTERVIEWED">Interview geführt</option>
@@ -969,6 +951,26 @@ export default function ApplicationsOverview() {
                     placeholder="https://..."
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Beworben am</label>
+                  <input
+                    type="date"
+                    name="appliedAt"
+                    value={(editForm as any).appliedAt || ""}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Firmen-URL</label>
+                  <input
+                    name="companyUrl"
+                    value={(editForm as any).companyUrl || ""}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="https://..."
+                  />
+                </div>
                 <div className="flex items-center gap-2 mt-2">
                   <input
                     type="checkbox"
@@ -978,6 +980,30 @@ export default function ApplicationsOverview() {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                   <span className="text-sm text-gray-700">Inland</span>
+                </div>
+              </div>
+              <div className="mt-4 grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Stellenbeschreibung / Notizen</label>
+                  <textarea
+                    name="notesText"
+                    value={editForm.notesText || ""}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, notesText: e.target.value }))}
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Beschreibung der Position..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Anforderungen</label>
+                  <textarea
+                    name="requirements"
+                    value={editForm.requirements || ""}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, requirements: e.target.value }))}
+                    rows={3}
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Erforderliche Qualifikationen..."
+                  />
                 </div>
               </div>
               <div className="mt-6 flex justify-end gap-3">
