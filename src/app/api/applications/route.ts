@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { scopedPrisma } from "@/lib/security/scope";
+import { prisma } from "@/lib/database";
 import {
   ApplicationStatus,
   ActivityType,
@@ -8,6 +9,20 @@ import {
   Priority,
 } from "@prisma/client";
 import { requireActiveUser, assertSameUser } from "@/lib/security/guard";
+
+// Mapping: ApplicationStatus → Kanban-Spaltenname
+const STATUS_TO_COLUMN: Record<string, string> = {
+  APPLIED: "Offen",
+  INITIATIVE: "Offen",
+  OTHER: "Offen",
+  REVIEWED: "In Bearbeitung",
+  INTERVIEW_SCHEDULED: "Interview",
+  INTERVIEWED: "Interview",
+  OFFER_RECEIVED: "Angebot",
+  ACCEPTED: "Abgeschlossen",
+  REJECTED: "Abgeschlossen",
+  WITHDRAWN: "Abgeschlossen",
+};
 
 function handleGuardError(error: unknown) {
   if ((error as any)?.code === "FORBIDDEN") {
@@ -123,6 +138,30 @@ export async function POST(request: Request) {
       });
     } catch (_) { /* nicht-kritisch */ }
 
+    // Kanban-Sync: Karte im ersten Board des Users erstellen
+    try {
+      const firstBoard = await prisma.board.findFirst({
+        where: { ownerId: user.id },
+        include: { columns: { orderBy: { position: "asc" } } },
+      });
+      if (firstBoard) {
+        const targetTitle = STATUS_TO_COLUMN[status] ?? "Offen";
+        const col = firstBoard.columns.find((c) => c.title === targetTitle) ?? firstBoard.columns[0];
+        if (col) {
+          await prisma.card.create({
+            data: {
+              boardId: firstBoard.id,
+              columnId: col.id,
+              title: `${companyName} – ${position}`,
+              description: location || null,
+              status: "open",
+              metadata: { applicationId: application.id },
+            },
+          });
+        }
+      }
+    } catch (_) { /* nicht-kritisch */ }
+
     return NextResponse.json(application, { status: 201 });
   } catch (error) {
     const guardResponse = handleGuardError(error);
@@ -227,6 +266,29 @@ export async function PUT(request: Request) {
         events: true,
       },
     });
+
+    // Kanban-Sync: Karte verschieben wenn Status geändert
+    if (updateData.status && existingApplication.status !== updateData.status) {
+      try {
+        const linkedCard = await prisma.card.findFirst({
+          where: {
+            board: { ownerId: user.id },
+            metadata: { path: ["applicationId"], equals: id },
+          },
+          include: { board: { include: { columns: { orderBy: { position: "asc" } } } } },
+        });
+        if (linkedCard) {
+          const targetTitle = STATUS_TO_COLUMN[updateData.status] ?? "Offen";
+          const targetCol = linkedCard.board.columns.find((c) => c.title === targetTitle);
+          if (targetCol && targetCol.id !== linkedCard.columnId) {
+            await prisma.card.update({
+              where: { id: linkedCard.id },
+              data: { columnId: targetCol.id },
+            });
+          }
+        }
+      } catch (_) { /* nicht-kritisch */ }
+    }
 
     // Aktivität bei Status-Änderung schreiben
     if (updateData.status && existingApplication.status !== updateData.status) {

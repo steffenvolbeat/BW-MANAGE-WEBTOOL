@@ -76,3 +76,24 @@ export async function POST(req: NextRequest) {
     return handleGuardError(err);
   }
 }
+
+// DELETE /api/kanban/boards?id=xxx — Board löschen (nur Owner)
+export async function DELETE(req: NextRequest) {
+  try {
+    const user = await requireActiveUser();
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "id erforderlich" }, { status: 400 });
+
+    const board = await prisma.board.findFirst({
+      where: { id, ownerId: user.id },
+    });
+    if (!board) return NextResponse.json({ error: "Board nicht gefunden oder kein Zugriff" }, { status: 404 });
+
+    // Cascade löscht Columns + Cards automatisch (via Prisma schema onDelete: Cascade)
+    await prisma.board.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return handleGuardError(err);
+  }
+}

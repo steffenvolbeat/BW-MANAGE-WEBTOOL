@@ -29,6 +29,7 @@ interface Card {
   description?: string | null;
   status: string;
   columnId: string;
+  metadata?: { applicationId?: string } | null;
   assignee?: { id: string; name?: string | null; email?: string | null } | null;
 }
 
@@ -49,6 +50,9 @@ export function TrustedKanban() {
   const [newCardTitle, setNewCardTitle] = useState("");
   const [newCardDesc, setNewCardDesc] = useState("");
   const [savingCard, setSavingCard] = useState(false);
+
+  // Board löschen
+  const [deletingBoard, setDeletingBoard] = useState(false);
 
   // Karte bearbeiten/verschieben
   const [editCard, setEditCard] = useState<Card | null>(null);
@@ -177,6 +181,22 @@ export function TrustedKanban() {
     }
   }
 
+  async function handleDeleteBoard() {
+    if (!selectedBoardId) return;
+    if (!confirm(`Board "${selectedBoard?.name}" und alle darin enthaltenen Karten wirklich löschen?`)) return;
+    setDeletingBoard(true);
+    try {
+      const res = await fetch(`/api/kanban/boards?id=${selectedBoardId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Löschen fehlgeschlagen");
+      setSelectedBoardId(null);
+      await fetchBoards();
+    } catch (err) {
+      setError((err as Error).message);
+    } finally {
+      setDeletingBoard(false);
+    }
+  }
+
   async function moveCard(card: Card, direction: "left" | "right") {
     if (!selectedBoard) return;
     const cols = [...selectedBoard.columns].sort((a, b) => a.position - b.position);
@@ -218,7 +238,18 @@ export function TrustedKanban() {
             </select>
           )}
           {boards.length === 1 && (
-            <span className="text-sm text-gray-500">{boards[0].name}</span>
+            <span className="text-sm font-medium text-gray-700 bg-gray-100 px-3 py-1 rounded-lg">{boards[0].name}</span>
+          )}
+          {selectedBoard && (
+            <button
+              title="Board löschen"
+              onClick={handleDeleteBoard}
+              disabled={deletingBoard}
+              className="flex items-center gap-1 rounded-lg border border-red-200 px-2.5 py-1.5 text-xs text-red-500 hover:bg-red-50 hover:border-red-400 disabled:opacity-50"
+            >
+              <TrashIcon className="w-3.5 h-3.5" />
+              {deletingBoard ? "Wird gelöscht…" : "Board löschen"}
+            </button>
           )}
         </div>
         <button
@@ -300,6 +331,15 @@ export function TrustedKanban() {
                       </div>
                       {card.description && (
                         <p className="mt-1 text-xs text-gray-500 line-clamp-2">{card.description}</p>
+                      )}
+                      {card.metadata?.applicationId && (
+                        <a
+                          href="/applications"
+                          className="mt-1 inline-flex items-center gap-1 text-[10px] text-blue-600 hover:underline"
+                          title="Zur verknüpften Bewerbung"
+                        >
+                          🔗 Bewerbung verknüpft
+                        </a>
                       )}
                       {/* Verschieben-Pfeile */}
                       <div className="mt-2 flex gap-1">

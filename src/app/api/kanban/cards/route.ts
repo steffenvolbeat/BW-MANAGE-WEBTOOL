@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
 import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { ApplicationStatus } from "@prisma/client";
 
 export const revalidate = 0;
+
+// Spaltenname → ApplicationStatus
+const COLUMN_TO_STATUS: Record<string, ApplicationStatus> = {
+  "Offen": ApplicationStatus.APPLIED,
+  "In Bearbeitung": ApplicationStatus.REVIEWED,
+  "Warte auf Antwort": ApplicationStatus.REVIEWED,
+  "Interview": ApplicationStatus.INTERVIEW_SCHEDULED,
+  "Angebot": ApplicationStatus.OFFER_RECEIVED,
+  "Abgeschlossen": ApplicationStatus.ACCEPTED,
+};
 
 // POST /api/kanban/cards — Karte erstellen
 export async function POST(req: NextRequest) {
@@ -65,6 +76,31 @@ export async function PUT(req: NextRequest) {
         assignee: { select: { id: true, name: true, email: true } },
       },
     });
+
+    // Sync: Wenn Spalte geändert → Application-Status anpassen
+    if (columnId !== undefined && existing.columnId !== columnId) {
+      const meta = existing.metadata as { applicationId?: string } | null;
+      const applicationId = meta?.applicationId;
+      if (applicationId) {
+        try {
+          const newCol = await prisma.boardColumn.findUnique({ where: { id: columnId } });
+          if (newCol) {
+            const newStatus = COLUMN_TO_STATUS[newCol.title];
+            if (newStatus) {
+              const app = await prisma.application.findFirst({
+                where: { id: applicationId, userId: user.id },
+              });
+              if (app) {
+                await prisma.application.update({
+                  where: { id: applicationId },
+                  data: { status: newStatus },
+                });
+              }
+            }
+          }
+        } catch (_) { /* nicht-kritisch */ }
+      }
+    }
 
     return NextResponse.json({ card });
   } catch (err) {
