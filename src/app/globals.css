@@ -67,6 +67,20 @@
   background-color: #111827 !important;
 }
 
+.dark .bg-gray-100,
+.dark .bg-slate-100,
+.dark .bg-gray-200,
+.dark .bg-slate-200,
+.dark .bg-gray-300,
+.dark .bg-slate-300 {
+  background-color: #1e293b !important;
+}
+
+.dark .text-gray-600,
+.dark .text-slate-600 {
+  color: var(--muted-foreground) !important;
+}
+
 /* Form controls in dark mode (inputs/selects/textareas) */
 .dark input:not([type="checkbox"]):not([type="radio"]),
 .dark select,
