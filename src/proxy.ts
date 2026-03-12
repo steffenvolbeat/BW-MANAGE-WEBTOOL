@@ -16,7 +16,7 @@ function buildCsp(isDev: boolean): string {
     scriptSrc,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob:${isDev ? " https://*.readyplayer.me" : ""}`,
-    "font-src 'self' data:",
+    "font-src 'self' data: https://vercel.live https://fonts.gstatic.com",
     connectSrc,
     "media-src 'self' blob:",
     ...(isDev ? ["frame-src https://*.readyplayer.me"] : ["frame-src https://vercel.live"]),

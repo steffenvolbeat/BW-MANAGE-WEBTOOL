@@ -81,12 +81,16 @@ export async function POST(request: Request) {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
+    // On Vercel (read-only filesystem) write to /tmp, otherwise to public/uploads
+    const isVercel = !!process.env.VERCEL;
+    const uploadDir = isVercel
+      ? path.join("/tmp", "uploads")
+      : path.join(process.cwd(), "public", "uploads");
     await fs.mkdir(uploadDir, { recursive: true });
     const safeName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
     const diskPath = path.join(uploadDir, safeName);
     await fs.writeFile(diskPath, buffer);
-    const persistedFilePath = `/uploads/${safeName}`;
+    const persistedFilePath = isVercel ? `/api/files/${safeName}` : `/uploads/${safeName}`;
 
     const document = await db.document.create({
       data: {
