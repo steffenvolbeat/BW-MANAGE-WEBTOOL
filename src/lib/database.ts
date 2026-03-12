@@ -13,7 +13,12 @@ if (!datasourceUrl) {
   throw new Error("DATABASE_URL is not set");
 }
 
-const pool = globalForPrisma.pool ?? new Pool({ connectionString: datasourceUrl });
+const pool = globalForPrisma.pool ?? new Pool({
+  connectionString: datasourceUrl,
+  ssl: datasourceUrl.includes("localhost") || datasourceUrl.includes("127.0.0.1")
+    ? false
+    : { rejectUnauthorized: true }, // equivalent to sslmode=verify-full
+});
 const adapter = globalForPrisma.adapter ?? new PrismaPg(pool);
 const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
