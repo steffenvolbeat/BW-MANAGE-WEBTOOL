@@ -51,10 +51,15 @@ export async function GET(request: Request) {
       orderBy: { appliedAt: "desc" },
     });
 
-    return NextResponse.json(applications);
+    return NextResponse.json({ applications });
   } catch (error) {
-    const guardResponse = handleGuardError(error);
-    if (guardResponse) return guardResponse;
+    const msg = error instanceof Error ? error.message : "";
+    if (msg === "UNAUTHORIZED" || msg === "INACTIVE") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if ((error as any)?.code === "FORBIDDEN" || msg === "FORBIDDEN") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     console.error("Error fetching applications:", error);
     return NextResponse.json(
       { error: "Internal server error" },
