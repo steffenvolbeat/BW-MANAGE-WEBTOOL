@@ -49,29 +49,53 @@ export default function CareerTwinPage() {
   const [twin, setTwin] = useState<TwinProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
+  const [aiUnavailable, setAiUnavailable] = useState(false);
+  const [aiError, setAiError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/career/twin")
-      .then((r) => r.json())
-      .then((d) => {
+      .then(async (r) => {
+        if (!r.ok) {
+          const d = await r.json().catch(() => ({}));
+          setLoadError(d.error ?? `Fehler ${r.status}`);
+          return;
+        }
+        const d = await r.json();
         setStats(d.stats ?? null);
         setEvents(d.timeline ?? []);
         setTwin(d.twin ?? null);
-        setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((e) => setLoadError(e.message ?? "Netzwerkfehler"))
+      .finally(() => setLoading(false));
   }, []);
 
   const generateTwin = async () => {
     setAnalyzing(true);
-    const res = await fetch("/api/career/twin", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ regenerate: true }),
-    });
-    const d = await res.json();
-    if (d.twin) setTwin(d.twin);
-    setAnalyzing(false);
+    setAiError(null);
+    try {
+      const res = await fetch("/api/career/twin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ regenerate: true }),
+      });
+      const d = await res.json();
+      if (res.status === 503) {
+        setAiUnavailable(true);
+        setAiError(d.error ?? "KI-Analyse nicht verfügbar");
+      } else if (!res.ok) {
+        setAiError(d.error ?? `Fehler ${res.status}`);
+      } else if (d.twin) {
+        setTwin(d.twin);
+        setAiUnavailable(false);
+      } else if (d.error) {
+        setAiError(d.error);
+      }
+    } catch (e: any) {
+      setAiError(e.message ?? "Netzwerkfehler");
+    } finally {
+      setAnalyzing(false);
+    }
   };
 
   if (loading) {
@@ -97,12 +121,39 @@ export default function CareerTwinPage() {
         </div>
         <button
           onClick={generateTwin}
-          disabled={analyzing}
+          disabled={analyzing || aiUnavailable}
+          title={aiUnavailable ? "ANTHROPIC_API_KEY nicht konfiguriert" : undefined}
           className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm font-medium disabled:opacity-50 flex-shrink-0"
         >
           {analyzing ? "🧠 Analysiere..." : "🔄 Twin regenerieren"}
         </button>
       </div>
+
+      {/* Ladefehler */}
+      {loadError && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          ⚠️ Fehler beim Laden: {loadError}
+        </div>
+      )}
+
+      {/* KI nicht verfügbar */}
+      {aiUnavailable && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+          <p className="text-sm font-semibold text-amber-800">🔑 KI-Analyse nicht verfügbar</p>
+          <p className="text-sm text-amber-700 mt-1">
+            Der <code className="font-mono bg-amber-100 px-1 rounded">ANTHROPIC_API_KEY</code> ist
+            nicht in den Vercel-Umgebungsvariablen konfiguriert. Bitte trage ihn unter
+            <strong> Vercel → Project → Settings → Environment Variables</strong> ein und deploye erneut.
+          </p>
+        </div>
+      )}
+
+      {/* Anderer KI-Fehler */}
+      {aiError && !aiUnavailable && (
+        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700">
+          ⚠️ {aiError}
+        </div>
+      )}
 
       {/* Stats */}
       {stats && (
