@@ -6,6 +6,7 @@ import {
   BookmarkIcon,
   EyeIcon,
   XMarkIcon,
+  ArrowTopRightOnSquareIcon,
 } from "@heroicons/react/24/outline";
 import { BookmarkIcon as BookmarkSolidIcon } from "@heroicons/react/24/solid";
 
@@ -39,10 +40,12 @@ export default function JobPortalIntegration({
   const [error, setError] = useState<string | null>(null);
 
   const portals = [
-    { id: "stepstone", name: "StepStone", color: "bg-red-500" },
-    { id: "xing", name: "Xing", color: "bg-green-600" },
-    { id: "linkedin", name: "LinkedIn", color: "bg-blue-600" },
-    { id: "indeed", name: "Indeed", color: "bg-blue-800" },
+    { id: "stepstone", name: "StepStone", color: "bg-red-500", url: "https://www.stepstone.de/" },
+    { id: "xing", name: "Xing Jobs", color: "bg-green-600", url: "https://www.xing.com/jobs" },
+    { id: "linkedin", name: "LinkedIn", color: "bg-blue-600", url: "https://www.linkedin.com/jobs/" },
+    { id: "indeed", name: "Indeed", color: "bg-blue-800", url: "https://de.indeed.com/" },
+    { id: "germantechjobs", name: "GermanTechJobs", color: "bg-violet-600", url: "https://germantechjobs.de/" },
+    { id: "getinit", name: "Get in IT", color: "bg-orange-500", url: "https://www.get-in-it.de/" },
   ];
 
   const searchJobs = async () => {
@@ -150,17 +153,31 @@ export default function JobPortalIntegration({
             </label>
             <div className="flex flex-wrap gap-2">
               {portals.map((portal) => (
-                <button
-                  key={portal.id}
-                  onClick={() => setSelectedPortal(portal.id)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium border transition-colors ${
-                    selectedPortal === portal.id
-                      ? `${portal.color} text-white border-transparent`
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  {portal.name}
-                </button>
+                <div key={portal.id} className="flex rounded-md overflow-hidden border border-gray-300">
+                  <button
+                    onClick={() => setSelectedPortal(portal.id)}
+                    className={`px-4 py-2 text-sm font-medium transition-colors ${
+                      selectedPortal === portal.id
+                        ? `${portal.color} text-white border-transparent`
+                        : "bg-white text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {portal.name}
+                  </button>
+                  <a
+                    href={portal.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={`${portal.name} direkt öffnen`}
+                    className={`flex items-center px-2 border-l transition-colors ${
+                      selectedPortal === portal.id
+                        ? `${portal.color} text-white border-white/30 hover:brightness-110`
+                        : "bg-white text-gray-400 border-gray-300 hover:text-blue-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    <ArrowTopRightOnSquareIcon className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               ))}
             </div>
           </div>
