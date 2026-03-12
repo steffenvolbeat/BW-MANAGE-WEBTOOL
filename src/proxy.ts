@@ -64,7 +64,7 @@ export async function proxy(req: NextRequest) {
   // Statische Assets: nur Security-Header setzen
   if (isAsset(pathname)) {
     const res = NextResponse.next();
-    return addSecurityHeaders(res);
+    return addSecurityHeaders(res, pathname);
   }
 
   // Öffentliche Auth-Seiten
@@ -79,7 +79,7 @@ export async function proxy(req: NextRequest) {
         }
       }
     }
-    return addSecurityHeaders(NextResponse.next());
+    return addSecurityHeaders(NextResponse.next(), pathname);
   }
 
   // Geschützte Routen: JWT prüfen
@@ -103,13 +103,17 @@ export async function proxy(req: NextRequest) {
   // (Rolle in DB geändert ohne Re-Login). Alle Admin-Routen prüfen via
   // requireAdmin() → getCurrentUser() → DB. Seiten prüfen via useAuth() → /api/auth/me → DB.
 
-  return addSecurityHeaders(NextResponse.next());
+  return addSecurityHeaders(NextResponse.next(), pathname);
 }
 
-function addSecurityHeaders(res: NextResponse): NextResponse {
+function addSecurityHeaders(res: NextResponse, pathname: string): NextResponse {
   const isDev = process.env.NODE_ENV !== "production";
+  // Kamera nur auf der Video-Coach-Seite erlauben
+  const cameraPolicy = pathname.startsWith("/ai/video-coach")
+    ? "camera=(self)"
+    : "camera=()";
   res.headers.set("Content-Security-Policy", buildCsp(isDev));
-  res.headers.set("Permissions-Policy", "geolocation=(), microphone=(), camera=(), payment=()");
+  res.headers.set("Permissions-Policy", `geolocation=(), microphone=(), ${cameraPolicy}, payment=()`);
   res.headers.set("Referrer-Policy", "no-referrer");
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("X-Frame-Options", "DENY");
