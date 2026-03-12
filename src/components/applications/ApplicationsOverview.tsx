@@ -98,6 +98,7 @@ export default function ApplicationsOverview() {
   const [rowDocs, setRowDocs] = useState<Record<string, DocumentPreview[]>>({});
   const [rowDocsLoading, setRowDocsLoading] = useState<string | null>(null);
   const [rowDocsError, setRowDocsError] = useState<string | null>(null);
+  const [undoDoc, setUndoDoc] = useState<{ doc: DocumentPreview; appId: string; timer: ReturnType<typeof setTimeout> } | null>(null);
 
   const statusConfig = {
     APPLIED: { label: "Beworben", color: "bg-blue-100 text-blue-800", icon: ClockIcon },
@@ -466,6 +467,48 @@ export default function ApplicationsOverview() {
     }
   };
 
+  const handleDeleteDoc = (doc: DocumentPreview, appId: string) => {
+    // Optimistic: sofort aus UI entfernen
+    setRowDocs((prev) => ({
+      ...prev,
+      [appId]: (prev[appId] ?? []).filter((d) => d.id !== doc.id),
+    }));
+    setApplications((prev) =>
+      prev.map((a) =>
+        a.id === appId
+          ? { ...a, documents: (a.documents ?? []).filter((d) => d.id !== doc.id) }
+          : a
+      )
+    );
+    // Vorherigen Undo-Timer abbrechen und sofort löschen
+    if (undoDoc) {
+      clearTimeout(undoDoc.timer);
+      fetch(`/api/documents?id=${undoDoc.doc.id}`, { method: "DELETE" });
+    }
+    const timer = setTimeout(async () => {
+      await fetch(`/api/documents?id=${doc.id}`, { method: "DELETE" });
+      setUndoDoc(null);
+    }, 5000);
+    setUndoDoc({ doc, appId, timer });
+  };
+
+  const handleUndoDeleteDoc = () => {
+    if (!undoDoc) return;
+    clearTimeout(undoDoc.timer);
+    setRowDocs((prev) => ({
+      ...prev,
+      [undoDoc.appId]: [...(prev[undoDoc.appId] ?? []), undoDoc.doc],
+    }));
+    setApplications((prev) =>
+      prev.map((a) =>
+        a.id === undoDoc.appId
+          ? { ...a, documents: [...(a.documents ?? []), { id: undoDoc.doc.id }] }
+          : a
+      )
+    );
+    setUndoDoc(null);
+  };
+
   const handleUploadDocument = async () => {
     if (!userId || !uploadForApp) {
       setUploadError("Bitte anmelden.");
@@ -618,6 +661,18 @@ export default function ApplicationsOverview() {
           Neue Bewerbung
         </button>
       </div>
+
+      {undoDoc && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white rounded-lg px-4 py-3 flex items-center gap-3 shadow-xl">
+          <span className="text-sm">Dokument „{undoDoc.doc.name}" gelöscht</span>
+          <button
+            onClick={handleUndoDeleteDoc}
+            className="text-blue-400 hover:text-blue-300 text-sm font-semibold underline"
+          >
+            Rückgängig
+          </button>
+        </div>
+      )}
 
       {toast && (
         <div
@@ -1317,6 +1372,14 @@ export default function ApplicationsOverview() {
                                           <span className="text-xs text-gray-400">Kein Direkt-Preview</span>
                                         )}
                                         <span className="text-xs text-gray-400">{doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString("de-DE") : ""}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleDeleteDoc(doc, application.id)}
+                                          title="Dokument löschen"
+                                          className="text-red-400 hover:text-red-600 transition-colors p-1"
+                                        >
+                                          <TrashIcon className="w-3.5 h-3.5" />
+                                        </button>
                                       </div>
                                     </div>
                                   );
