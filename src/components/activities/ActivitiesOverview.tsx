@@ -744,8 +744,10 @@ export default function ActivitiesOverview() {
 
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
+                <label htmlFor="edit-activity-title" className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
                 <input
+                  id="edit-activity-title"
+                  name="edit-activity-title"
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
@@ -753,8 +755,10 @@ export default function ActivitiesOverview() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+                <label htmlFor="edit-activity-description" className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
                 <textarea
+                  id="edit-activity-description"
+                  name="edit-activity-description"
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   rows={3}
@@ -762,8 +766,10 @@ export default function ActivitiesOverview() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label htmlFor="edit-activity-status" className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
+                  id="edit-activity-status"
+                  name="edit-activity-status"
                   value={editStatus}
                   onChange={(e) => setEditStatus(e.target.value as Activity["status"])}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
