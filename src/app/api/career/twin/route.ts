@@ -43,7 +43,11 @@ export async function GET() {
 
     return NextResponse.json({ stats, timeline, twin: null });
   } catch (error) {
-    if (error === "UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg === "UNAUTHORIZED" || msg === "INACTIVE") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    console.error("Career Twin GET error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -103,8 +107,14 @@ Antworte NUR mit validem JSON (kein Markdown):
 
     return NextResponse.json({ twin, stats });
   } catch (error) {
-    if (error === "UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    console.error("Career Twin error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg === "UNAUTHORIZED" || msg === "INACTIVE") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (msg.includes("ANTHROPIC_API_KEY")) {
+      return NextResponse.json({ error: "KI-Analyse nicht verfügbar (API-Key fehlt)" }, { status: 503 });
+    }
+    console.error("Career Twin POST error:", error);
     return NextResponse.json({ error: "Analyse fehlgeschlagen" }, { status: 500 });
   }
 }

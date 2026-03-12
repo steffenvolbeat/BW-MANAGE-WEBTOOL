@@ -75,7 +75,8 @@ Antworte NUR mit validem JSON (kein Markdown):
 
     return NextResponse.json({ analysis });
   } catch (error) {
-    if (error === "UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg === "UNAUTHORIZED" || msg === "INACTIVE") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Video coach error:", error);
     // Fallback bei JSON-Parse-Fehler
     return NextResponse.json({

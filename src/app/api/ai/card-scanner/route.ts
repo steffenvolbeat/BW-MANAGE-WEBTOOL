@@ -56,7 +56,8 @@ Antworte NUR mit validem JSON (kein Markdown), mit diesen Feldern (null wenn nic
 
     return NextResponse.json({ contact });
   } catch (error) {
-    if (error === "UNAUTHORIZED") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg === "UNAUTHORIZED" || msg === "INACTIVE") return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     console.error("Card scanner error:", error);
     return NextResponse.json({ error: "Scan fehlgeschlagen" }, { status: 500 });
   }
