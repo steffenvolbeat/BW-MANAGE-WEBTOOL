@@ -158,7 +158,8 @@ export default function ApplicationsOverview() {
     try {
       const res = await fetch(`/api/applications?userId=${userId}`);
       if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
-      const data = (await res.json()) as Application[];
+      const json = await res.json();
+      const data = (Array.isArray(json) ? json : (json.applications ?? [])) as Application[];
       const normalized = data.map((app) =>
         app.status === "PLANNED"
           ? { ...app, status: "INTERVIEW_SCHEDULED" }
