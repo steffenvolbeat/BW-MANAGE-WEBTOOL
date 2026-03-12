@@ -82,7 +82,7 @@ const DEFAULT_LETTER: LetterData = {
     country: "",
   },
   place: "",
-  date: new Date().toLocaleDateString("de-DE"),
+  date: "",
   reference: "",
   subject: "",
   salutation: "Sehr geehrte Damen und Herren,",
@@ -731,6 +731,13 @@ export default function AnschreibenStudio() {
   const [importPreview, setImportPreview] = useState<Partial<LetterData> | null>(null);
   const importFileRef = useRef<HTMLInputElement>(null);
   const printRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setLetter((prev) => ({
+      ...prev,
+      date: prev.date || new Date().toLocaleDateString("de-DE"),
+    }));
+  }, []);
 
   const compliance = checkDINCompliance(letter);
   const errors = compliance.filter((c) => c.level === "error");

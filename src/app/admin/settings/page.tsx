@@ -15,6 +15,11 @@ export default function AdminSettingsPage() {
   const router = useRouter();
 
   const [saved, setSaved] = useState(false);
+  const [buildDate, setBuildDate] = useState("");
+
+  useEffect(() => {
+    setBuildDate(new Date().toLocaleDateString("de-DE"));
+  }, []);
 
   useEffect(() => {
     if (!loading && user?.role !== "ADMIN") {
@@ -77,7 +82,7 @@ export default function AdminSettingsPage() {
             <InfoRow label="App" value="BW-Manage Webtool" />
             <InfoRow label="Framework" value="Next.js 15 (App Router)" />
             <InfoRow label="Hosting" value="Vercel (bw-manage-webtool.vercel.app)" />
-            <InfoRow label="Build" value={`${new Date().toLocaleDateString("de-DE")}`} />
+            <InfoRow label="Build" value={buildDate} />
           </div>
         </section>
 

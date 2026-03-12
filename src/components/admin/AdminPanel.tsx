@@ -622,7 +622,7 @@ export default function AdminPanel() {
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-sm text-gray-600">System Online</span>
           </div>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500" suppressHydrationWarning>
             {formatDate(new Date().toISOString())}
           </span>
         </div>

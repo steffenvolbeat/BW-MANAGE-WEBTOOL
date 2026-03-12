@@ -379,7 +379,7 @@ function LoginPageContent() {
           )}
         </div>
 
-        <p className="text-center text-xs text-slate-500 mt-6">
+        <p className="text-center text-xs text-slate-500 mt-6" suppressHydrationWarning>
           © {new Date().getFullYear()} BW-Manage · Alle Daten bleiben auf deinem Server.
         </p>
       </div>
