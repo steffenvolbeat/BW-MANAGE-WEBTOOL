@@ -39,6 +39,7 @@ interface Application {
   companyUrl?: string;
   notesText?: string; // Beschreibung
   requirements?: string;
+  documents?: { id: string }[];
 }
 
 type UploadDocType = "CV" | "COVER_LETTER" | "CERTIFICATE" | "REFERENCE" | "OTHER";
@@ -1231,7 +1232,7 @@ export default function ApplicationsOverview() {
                             <EyeIcon className="w-4 h-4" />
                           </button>
                           <button
-                            className="text-gray-600 hover:text-gray-900 p-1"
+                            className="text-gray-600 hover:text-gray-900 p-1 flex items-center gap-0.5"
                             title="Dokumente ansehen"
                             onClick={() => {
                               const isOpen = rowDocsExpanded === application.id;
@@ -1242,6 +1243,18 @@ export default function ApplicationsOverview() {
                             }}
                           >
                             <span className="text-xs font-semibold">Docs</span>
+                            {(() => {
+                              const count =
+                                rowDocs[application.id]?.length ??
+                                application.documents?.length;
+                              return count !== undefined ? (
+                                <span className={`text-xs font-bold rounded-full px-1 leading-none ${
+                                  count > 0
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-gray-100 text-gray-400"
+                                }`}>{count}</span>
+                              ) : null;
+                            })()}
                           </button>
                           <button
                             className="text-green-600 hover:text-green-800 p-1"
