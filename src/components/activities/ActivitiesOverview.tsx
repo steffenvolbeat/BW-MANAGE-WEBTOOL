@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { useAppUser } from "@/hooks/useAppUser";
 import {
   ClockIcon,
@@ -8,7 +9,6 @@ import {
   CalendarDaysIcon,
   DocumentTextIcon,
   UserIcon,
-  PhoneIcon,
   EnvelopeIcon,
   CheckCircleIcon,
   XCircleIcon,
@@ -18,6 +18,10 @@ import {
   PencilIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
+  ArrowPathIcon,
+  XMarkIcon,
+  TrashIcon,
+  ArrowsRightLeftIcon,
 } from "@heroicons/react/24/outline";
 
 interface Activity {
@@ -49,10 +53,13 @@ interface Activity {
   };
   application?: { companyName: string; position: string } | null;
   contact?: { name: string } | null;
+  applicationId?: string | null;
+  contactId?: string | null;
 }
 
 export default function ActivitiesOverview() {
   const { id: userId } = useAppUser();
+  const router = useRouter();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,30 +67,162 @@ export default function ActivitiesOverview() {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
+  // Detail-Modal
+  const [detailActivity, setDetailActivity] = useState<Activity | null>(null);
+
+  // Edit-Modal
+  const [editActivity, setEditActivity] = useState<Activity | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editStatus, setEditStatus] = useState<Activity["status"]>("completed");
+  const [saving, setSaving] = useState(false);
+
+  // Sync-Status
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState<string | null>(null);
+
+  const normalizeActivity = (a: any): Activity => ({
+    ...a,
+    status: (a.status as string).toLowerCase() as Activity["status"],
+    metadata: {
+      ...(a.metadata ?? {}),
+      company: a.application?.companyName ?? a.metadata?.company,
+      position: a.application?.position ?? a.metadata?.position,
+      contactName: a.contact?.name ?? a.metadata?.contactName,
+    },
+  });
+
+  const loadActivities = useCallback(async () => {
     if (!userId) return;
     setLoading(true);
     setError(null);
-    fetch(`/api/activities?userId=${userId}`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        // Normalisiere Status-Werte (COMPLETED → completed)
-        const normalized = data.map((a: any) => ({
-          ...a,
-          status: (a.status as string).toLowerCase() as Activity["status"],
-          metadata: {
-            ...(a.metadata ?? {}),
-            company: a.application?.companyName ?? (a.metadata as any)?.company,
-            position: a.application?.position ?? (a.metadata as any)?.position,
-            contactName: a.contact?.name ?? (a.metadata as any)?.contactName,
-          },
-        }));
-        setActivities(normalized);
-      })
-      .catch((err) => setError(err.message ?? "Fehler beim Laden"))
-      .finally(() => setLoading(false));
+    try {
+      const res = await fetch(`/api/activities?userId=${userId}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setActivities(data.map(normalizeActivity));
+    } catch (err: any) {
+      setError(err.message ?? "Fehler beim Laden");
+    } finally {
+      setLoading(false);
+    }
   }, [userId]);
+
+  useEffect(() => {
+    loadActivities();
+  }, [loadActivities]);
+
+  // ── Bearbeiten ─────────────────────────────────────────────────────────────
+  function openEdit(a: Activity) {
+    setEditActivity(a);
+    setEditTitle(a.title);
+    setEditDescription(a.description);
+    setEditStatus(a.status);
+  }
+
+  async function saveEdit() {
+    if (!editActivity) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/activities", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editActivity.id,
+          userId,
+          title: editTitle,
+          description: editDescription,
+          status: editStatus.toUpperCase(),
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const updated = await res.json();
+      setActivities((prev) =>
+        prev.map((a) => (a.id === updated.id ? normalizeActivity(updated) : a))
+      );
+      setEditActivity(null);
+    } catch (err: any) {
+      alert("Fehler beim Speichern: " + err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // ── Löschen ────────────────────────────────────────────────────────────────
+  async function deleteActivity(id: string) {
+    if (!confirm("Aktivität wirklich löschen?")) return;
+    try {
+      const res = await fetch(`/api/activities?id=${id}&userId=${userId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setActivities((prev) => prev.filter((a) => a.id !== id));
+    } catch (err: any) {
+      alert("Fehler beim Löschen: " + err.message);
+    }
+  }
+
+  // ── Sync aus Bewerbungen ───────────────────────────────────────────────────
+  async function syncFromApplications() {
+    if (!userId) return;
+    setSyncing(true);
+    setSyncMsg(null);
+    try {
+      // Alle Bewerbungen laden
+      const res = await fetch("/api/applications");
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const apps: { id: string; companyName: string; position: string; status: string }[] =
+        Array.isArray(json) ? json : (json.applications ?? []);
+
+      let created = 0;
+      for (const app of apps) {
+        // Prüfen ob bereits eine STATUS_CHANGED Aktivität für diesen Status existiert
+        const exists = activities.some(
+          (a) =>
+            a.applicationId === app.id &&
+            a.type === "STATUS_CHANGED" &&
+            (a.metadata as any)?.newStatus === app.status
+        );
+        if (!exists) {
+          await fetch("/api/activities", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              userId,
+              applicationId: app.id,
+              type: "STATUS_CHANGED",
+              title: `Status geändert: ${app.companyName}`,
+              description: `${app.position} – Aktueller Status: ${app.status}`,
+              status: "COMPLETED",
+              metadata: { company: app.companyName, position: app.position, newStatus: app.status },
+            }),
+          });
+          created++;
+        }
+      }
+      setSyncMsg(
+        created > 0
+          ? `${created} neue Aktivität(en) aus Bewerbungen erstellt.`
+          : "Alles aktuell – keine neuen Einträge."
+      );
+      await loadActivities();
+    } catch (err: any) {
+      setSyncMsg("Sync-Fehler: " + err.message);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  // ── Filter zurücksetzen ────────────────────────────────────────────────────
+  function resetFilters() {
+    setSearchTerm("");
+    setSelectedFilter("all");
+    setSelectedStatus("all");
+  }
+
+  const hasActiveFilters =
+    searchTerm !== "" || selectedFilter !== "all" || selectedStatus !== "all";
 
   const activityTypes = {
     APPLICATION_SUBMITTED: {
@@ -234,7 +373,7 @@ export default function ActivitiesOverview() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-wrap justify-between items-start gap-3">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Aktivitäten</h1>
           <p className="mt-2 text-gray-600">
@@ -242,41 +381,54 @@ export default function ActivitiesOverview() {
           </p>
           {loading && <p className="text-sm text-gray-500 mt-1">Wird geladen…</p>}
           {error && <p className="text-sm text-red-600 mt-1">Fehler: {error}</p>}
+          {syncMsg && (
+            <p className={`text-sm mt-1 ${syncMsg.startsWith("Sync-Fehler") ? "text-red-600" : "text-green-600"}`}>
+              {syncMsg}
+            </p>
+          )}
         </div>
-        <div className="flex items-center space-x-3">
-          <div className="text-right">
-            <div className="text-sm text-gray-700">Heute</div>
-            <div className="text-lg font-bold text-gray-900">
-              {getTodaysActivities()}
-            </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Zähler */}
+          <div className="text-right mr-2">
+            <div className="text-xs text-gray-500">Heute</div>
+            <div className="text-lg font-bold text-gray-900">{getTodaysActivities()}</div>
           </div>
-          <div className="text-right">
-            <div className="text-sm text-gray-700">Diese Woche</div>
-            <div className="text-lg font-bold text-gray-900">
-              {getThisWeeksActivities()}
-            </div>
+          <div className="text-right mr-4">
+            <div className="text-xs text-gray-500">Diese Woche</div>
+            <div className="text-lg font-bold text-gray-900">{getThisWeeksActivities()}</div>
           </div>
+          {/* Sync */}
+          <button
+            onClick={syncFromApplications}
+            disabled={syncing}
+            title="Aktivitäten aus Bewerbungen synchronisieren"
+            className="flex items-center gap-1.5 px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 disabled:opacity-50"
+          >
+            <ArrowsRightLeftIcon className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
+            Sync
+          </button>
+          {/* Aktualisieren */}
+          <button
+            onClick={loadActivities}
+            disabled={loading}
+            title="Liste neu laden"
+            className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50"
+          >
+            <ArrowPathIcon className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            Aktualisieren
+          </button>
         </div>
       </div>
 
       {/* Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         {Object.entries(activityTypes).map(([type, config]) => {
-          const count = activities.filter(
-            (activity) => activity.type === type
-          ).length;
+          const count = activities.filter((activity) => activity.type === type).length;
           const Icon = config.icon;
           return (
-            <div
-              key={type}
-              className="bg-white p-4 rounded-lg border border-gray-200"
-            >
+            <div key={type} className="bg-white p-4 rounded-lg border border-gray-200">
               <div className="flex items-center">
-                <div
-                  className={`p-2 rounded-lg ${config.color
-                    .replace("text-", "bg-")
-                    .replace("-800", "-100")}`}
-                >
+                <div className={`p-2 rounded-lg ${config.color.replace("text-", "bg-").replace("-800", "-100")}`}>
                   <Icon className="w-5 h-5" />
                 </div>
                 <div className="ml-3">
@@ -344,99 +496,123 @@ export default function ActivitiesOverview() {
               ))}
             </select>
           </div>
+
+          {/* Reset-Button */}
+          {hasActiveFilters && (
+            <button
+              onClick={resetFilters}
+              title="Filter zurücksetzen"
+              className="flex items-center gap-1.5 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50"
+            >
+              <XMarkIcon className="w-4 h-4" />
+              Reset
+            </button>
+          )}
         </div>
       </div>
 
       {/* Activity Feed */}
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Aktivitäts-Feed
-          </h3>
+        <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Aktivitäts-Feed</h3>
+          <span className="text-sm text-gray-500">
+            {filteredActivities.length} von {activities.length} Einträgen
+          </span>
         </div>
 
         <div className="divide-y divide-gray-200">
           {filteredActivities.map((activity) => (
-            <div key={activity.id} className="p-6 hover:bg-gray-50">
+            <div key={activity.id} className="p-5 hover:bg-gray-50 transition-colors">
               <div className="flex items-start space-x-4">
                 {/* Icon */}
-                <div
-                  className={`p-2 rounded-lg ${activityTypes[
-                    activity.type
-                  ]?.color
-                    .replace("text-", "bg-")
-                    .replace("-800", "-100")}`}
-                >
+                <div className={`p-2 rounded-lg flex-shrink-0 ${activityTypes[activity.type]?.color.replace("text-", "bg-").replace("-800", "-100")}`}>
                   {getActivityIcon(activity.type)}
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center space-x-2">
-                      <h4 className="text-sm font-medium text-gray-900">
-                        {activity.title}
-                      </h4>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-sm font-semibold text-gray-900">{activity.title}</h4>
                       {getTypeBadge(activity.type)}
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                       {getStatusIcon(activity.status)}
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs text-gray-400" title={formatDate(activity.timestamp)}>
                         {formatRelativeTime(activity.timestamp)}
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-2">
-                    {activity.description}
-                  </p>
+                  <p className="text-sm text-gray-600 mb-2">{activity.description}</p>
 
                   {/* Metadata */}
                   {activity.metadata && (
-                    <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-                      {activity.metadata.company && (
-                        <span>📢 {activity.metadata.company}</span>
+                    <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+                      {activity.metadata.company && <span>📢 {activity.metadata.company}</span>}
+                      {activity.metadata.position && <span>💼 {activity.metadata.position}</span>}
+                      {activity.metadata.contactName && <span>👤 {activity.metadata.contactName}</span>}
+                      {activity.metadata.documentType && <span>📄 {activity.metadata.documentType}</span>}
+                      {activity.metadata.oldStatus && activity.metadata.newStatus && (
+                        <span>🔄 {activity.metadata.oldStatus} → {activity.metadata.newStatus}</span>
                       )}
-                      {activity.metadata.position && (
-                        <span>💼 {activity.metadata.position}</span>
-                      )}
-                      {activity.metadata.contactName && (
-                        <span>👤 {activity.metadata.contactName}</span>
-                      )}
-                      {activity.metadata.documentType && (
-                        <span>📄 {activity.metadata.documentType}</span>
-                      )}
-                      {activity.metadata.oldStatus &&
-                        activity.metadata.newStatus && (
-                          <span>
-                            🔄 {activity.metadata.oldStatus} →{" "}
-                            {activity.metadata.newStatus}
-                          </span>
-                        )}
                       {activity.metadata.reminderDate && (
-                        <span>
-                          ⏰ {formatDate(activity.metadata.reminderDate)}
-                        </span>
+                        <span>⏰ {formatDate(activity.metadata.reminderDate as string)}</span>
                       )}
                     </div>
                   )}
                 </div>
 
                 {/* Actions */}
-                <div className="flex space-x-2">
-                  <button className="text-gray-400 hover:text-gray-600">
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  {/* Auge – Detail anzeigen */}
+                  <button
+                    onClick={() => setDetailActivity(activity)}
+                    title="Details anzeigen"
+                    className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                  >
                     <EyeIcon className="w-4 h-4" />
                   </button>
+
+                  {/* Aktentasche – zur verknüpften Bewerbung navigieren */}
                   {activity.relatedEntity === "application" && (
-                    <button className="text-blue-400 hover:text-blue-600">
+                    <button
+                      onClick={() => router.push("/applications")}
+                      title="Zur Bewerbung"
+                      className="p-1.5 text-blue-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
+                    >
                       <BriefcaseIcon className="w-4 h-4" />
                     </button>
                   )}
+
+                  {/* Kontakt-Icon */}
                   {activity.relatedEntity === "contact" && (
-                    <button className="text-green-400 hover:text-green-600">
+                    <button
+                      onClick={() => router.push("/contacts")}
+                      title="Zum Kontakt"
+                      className="p-1.5 text-green-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
+                    >
                       <UserIcon className="w-4 h-4" />
                     </button>
                   )}
+
+                  {/* Bearbeiten */}
+                  <button
+                    onClick={() => openEdit(activity)}
+                    title="Bearbeiten"
+                    className="p-1.5 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded transition-colors"
+                  >
+                    <PencilIcon className="w-4 h-4" />
+                  </button>
+
+                  {/* Löschen */}
+                  <button
+                    onClick={() => deleteActivity(activity.id)}
+                    title="Löschen"
+                    className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
             </div>
@@ -451,19 +627,171 @@ export default function ActivitiesOverview() {
                 Keine Aktivitäten gefunden
               </h3>
               <p>
-                Versuchen Sie andere Suchkriterien oder starten Sie eine neue
-                Aktion.
+                Versuchen Sie andere Suchkriterien oder klicken Sie auf
+                &bdquo;Sync&ldquo; um Aktivitäten aus Ihren Bewerbungen zu
+                laden.
               </p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Results Summary */}
-      {filteredActivities.length > 0 && (
-        <div className="text-sm text-gray-600 text-center">
-          {filteredActivities.length} von {activities.length} Aktivitäten
-          angezeigt
+      {/* ── Detail-Modal ─────────────────────────────────────────────────── */}
+      {detailActivity && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          onClick={() => setDetailActivity(null)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${activityTypes[detailActivity.type]?.color.replace("text-", "bg-").replace("-800", "-100")}`}>
+                  {getActivityIcon(detailActivity.type)}
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900">{detailActivity.title}</h2>
+                  {getTypeBadge(detailActivity.type)}
+                </div>
+              </div>
+              <button onClick={() => setDetailActivity(null)} className="text-gray-400 hover:text-gray-600">
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-700">{detailActivity.description}</p>
+
+            <dl className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <dt className="text-gray-500 text-xs">Status</dt>
+                <dd className="flex items-center gap-1 font-medium">
+                  {getStatusIcon(detailActivity.status)}
+                  {statusConfig[detailActivity.status]?.label ?? detailActivity.status}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-gray-500 text-xs">Zeitpunkt</dt>
+                <dd className="font-medium">{formatDate(detailActivity.timestamp)}</dd>
+              </div>
+              {detailActivity.metadata?.company && (
+                <div>
+                  <dt className="text-gray-500 text-xs">Unternehmen</dt>
+                  <dd className="font-medium">{detailActivity.metadata.company as string}</dd>
+                </div>
+              )}
+              {detailActivity.metadata?.position && (
+                <div>
+                  <dt className="text-gray-500 text-xs">Position</dt>
+                  <dd className="font-medium">{detailActivity.metadata.position as string}</dd>
+                </div>
+              )}
+              {detailActivity.metadata?.contactName && (
+                <div>
+                  <dt className="text-gray-500 text-xs">Kontakt</dt>
+                  <dd className="font-medium">{detailActivity.metadata.contactName as string}</dd>
+                </div>
+              )}
+              {detailActivity.metadata?.oldStatus && detailActivity.metadata?.newStatus && (
+                <div className="col-span-2">
+                  <dt className="text-gray-500 text-xs">Status-Änderung</dt>
+                  <dd className="font-medium">
+                    {detailActivity.metadata.oldStatus as string} → {detailActivity.metadata.newStatus as string}
+                  </dd>
+                </div>
+              )}
+              <div>
+                <dt className="text-gray-500 text-xs">Verknüpft mit</dt>
+                <dd className="font-medium capitalize">{detailActivity.relatedEntity}</dd>
+              </div>
+            </dl>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => { setDetailActivity(null); openEdit(detailActivity); }}
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+              >
+                <PencilIcon className="w-4 h-4" /> Bearbeiten
+              </button>
+              <button
+                onClick={() => setDetailActivity(null)}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+              >
+                Schließen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit-Modal ───────────────────────────────────────────────────── */}
+      {editActivity && (
+        <div
+          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+          onClick={() => setEditActivity(null)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-gray-900">Aktivität bearbeiten</h2>
+              <button onClick={() => setEditActivity(null)} className="text-gray-400 hover:text-gray-600">
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
+                <input
+                  type="text"
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
+                <textarea
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <select
+                  value={editStatus}
+                  onChange={(e) => setEditStatus(e.target.value as Activity["status"])}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="completed">Abgeschlossen</option>
+                  <option value="pending">Ausstehend</option>
+                  <option value="failed">Fehlgeschlagen</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setEditActivity(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={saveEdit}
+                disabled={saving || !editTitle.trim()}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {saving && <ArrowPathIcon className="w-4 h-4 animate-spin" />}
+                Speichern
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
