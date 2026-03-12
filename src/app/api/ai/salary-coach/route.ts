@@ -79,9 +79,14 @@ Erstelle einen detaillierten Verhandlungsplan. Antworte NUR mit validem JSON:
 
     return NextResponse.json({ userId: user.id, analysis, generatedAt: new Date().toISOString() });
   } catch (e: unknown) {
-    if (e instanceof Error && e.message === "UNAUTHORIZED") {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg === "UNAUTHORIZED" || msg === "INACTIVE") {
       return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
     }
+    if (msg.includes("ANTHROPIC_API_KEY")) {
+      return NextResponse.json({ error: "KI-Analyse nicht verfügbar (API-Key fehlt)" }, { status: 503 });
+    }
+    console.error("Salary-coach Fehler:", e);
     return NextResponse.json({ error: "Fehler" }, { status: 500 });
   }
 }

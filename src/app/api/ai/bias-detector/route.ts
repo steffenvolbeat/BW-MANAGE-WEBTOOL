@@ -90,8 +90,12 @@ Antworte NUR mit validem JSON:
       type,
     });
   } catch (e: unknown) {
-    if (e instanceof Error && e.message === "UNAUTHORIZED") {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (msg === "UNAUTHORIZED" || msg === "INACTIVE") {
       return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
+    }
+    if (msg.includes("ANTHROPIC_API_KEY")) {
+      return NextResponse.json({ error: "KI-Analyse nicht verfügbar (API-Key fehlt)" }, { status: 503 });
     }
     console.error("Bias-Detektor Fehler:", e);
     return NextResponse.json({ error: "Analyse fehlgeschlagen" }, { status: 500 });
