@@ -26,6 +26,7 @@ import {
   ArchiveBoxIcon,
   ArrowsRightLeftIcon,
   EyeIcon,
+  ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 
 interface FileFolder {
@@ -425,11 +426,16 @@ export default function FileBrowser() {
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{file.name}</p>
                             <p className="text-xs text-gray-400 dark:text-slate-500">{formatBytes(file.fileSize)} · {new Date(file.uploadedAt).toLocaleDateString("de-DE")}</p>
+                            {!file.filePath && (
+                              <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] text-amber-600 font-medium"><ExclamationTriangleIcon className="h-3 w-3" /> Datei fehlt – neu hochladen</span>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center justify-end gap-1 mt-2 opacity-0 group-hover:opacity-100 transition">
-                          {file.filePath && (
+                          {file.filePath ? (
                             <button title="Vorschau" onClick={() => window.open(file.filePath!, "_blank", "noopener")} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition"><EyeIcon className="h-4 w-4" /></button>
+                          ) : (
+                            <span title="Datei auf dem Server nicht vorhanden" className="p-1.5 text-amber-400"><ExclamationTriangleIcon className="h-4 w-4" /></span>
                           )}
                           <button title="Verschieben" onClick={() => void openMoveModal(file)} className="p-1.5 rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition"><ArrowsRightLeftIcon className="h-4 w-4" /></button>
                           <button title="Löschen" onClick={() => void deleteFile(file)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition"><TrashIcon className="h-4 w-4" /></button>
@@ -494,10 +500,15 @@ export default function FileBrowser() {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 dark:text-white truncate">{file.name}</p>
                 <p className="text-xs text-gray-400 dark:text-slate-500">{formatBytes(file.fileSize)} · {new Date(file.uploadedAt).toLocaleDateString("de-DE")}</p>
+                {!file.filePath && (
+                  <span className="inline-flex items-center gap-1 mt-0.5 text-[10px] text-amber-600 font-medium"><ExclamationTriangleIcon className="h-3 w-3" /> Datei fehlt</span>
+                )}
               </div>
               <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition flex-shrink-0">
-                {file.filePath && (
+                {file.filePath ? (
                   <button title="Vorschau" onClick={() => window.open(file.filePath!, "_blank", "noopener")} className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 transition"><EyeIcon className="h-4 w-4" /></button>
+                ) : (
+                  <span title="Datei auf Server nicht vorhanden" className="p-1.5 text-amber-400"><ExclamationTriangleIcon className="h-4 w-4" /></span>
                 )}
                 <button title="Verschieben" onClick={() => void openMoveModal(file)} className="p-1.5 rounded-lg text-gray-400 hover:text-teal-600 hover:bg-teal-50 dark:hover:bg-teal-900/30 transition"><ArrowsRightLeftIcon className="h-4 w-4" /></button>
                 <button title="Löschen" onClick={() => void deleteFile(file)} className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition"><TrashIcon className="h-4 w-4" /></button>

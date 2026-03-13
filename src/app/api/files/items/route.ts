@@ -1,6 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireActiveUser } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
+import { promises as fs } from "fs";
+import path from "path";
+
+async function fileExistsOnDisk(filePath: string | null): Promise<boolean> {
+  if (!filePath) return false;
+  // /uploads/filename → public/uploads/filename (lokal)
+  // /api/files/filename → /tmp/uploads/filename (Vercel)
+  let diskPath: string;
+  if (filePath.startsWith("/uploads/")) {
+    diskPath = path.join(process.cwd(), "public", filePath);
+  } else if (filePath.startsWith("/api/files/")) {
+    diskPath = path.join("/tmp", "uploads", path.basename(filePath));
+  } else {
+    return true; // externe URL — annehmen dass ok
+  }
+  try {
+    await fs.access(diskPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 // GET /api/files/items?folderId=xxx  (folderId absent or empty = root)
 export async function GET(req: NextRequest) {
@@ -10,7 +32,7 @@ export async function GET(req: NextRequest) {
   const folderId = req.nextUrl.searchParams.get("folderId") || null;
   const db = scopedPrisma(user.id);
 
-  const files = await db.document.findMany({
+  const rawFiles = await db.document.findMany({
     where: { fileBrowserFolderId: folderId },
     orderBy: { uploadedAt: "desc" },
     select: {
@@ -25,6 +47,14 @@ export async function GET(req: NextRequest) {
       fileBrowserFolderId: true,
     },
   });
+
+  // Prüfe für jede Datei ob sie wirklich auf der Festplatte vorhanden ist
+  const files = await Promise.all(
+    rawFiles.map(async (f: typeof rawFiles[number]) => ({
+      ...f,
+      filePath: (await fileExistsOnDisk(f.filePath)) ? f.filePath : null,
+    }))
+  );
 
   return NextResponse.json({ files });
 }
