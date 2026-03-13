@@ -283,7 +283,7 @@ export default function FileBrowser() {
       onDragLeave={() => setDragOverRoot(false)}
       onDrop={(e) => void handleRootDrop(e)}
     >
-      <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileInputChange} />
+      <input ref={fileInputRef} id="file-browser-upload" name="file-browser-upload" type="file" multiple className="hidden" onChange={handleFileInputChange} aria-label="Dateien hochladen" />
 
       {notification && (
         <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl text-white text-sm font-medium shadow-lg ${notification.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
@@ -338,7 +338,7 @@ export default function FileBrowser() {
       {/* Search */}
       <div className="relative mb-6">
         <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <input type="text" placeholder="Suchen…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 transition" />
+        <input id="file-browser-search" name="file-browser-search" type="text" placeholder="Suchen…" value={search} onChange={(e) => setSearch(e.target.value)} className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm text-gray-700 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-teal-500 transition" aria-label="Inhalte suchen" />
       </div>
 
       {currentParent && (
@@ -391,7 +391,7 @@ export default function FileBrowser() {
                       </div>
                       {renaming === folder.id ? (
                         <div onClick={(e) => e.stopPropagation()}>
-                          <input autoFocus type="text" value={renameValue} onChange={(e) => setRenameValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void renameFolder(folder.id); if (e.key === "Escape") setRenaming(null); }} className="w-full text-xs text-center border border-teal-400 rounded px-1 py-0.5 focus:outline-none" />
+                          <input autoFocus id={`rename-folder-grid-${folder.id}`} name={`rename-folder-grid-${folder.id}`} type="text" value={renameValue} onChange={(e) => setRenameValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void renameFolder(folder.id); if (e.key === "Escape") setRenaming(null); }} className="w-full text-xs text-center border border-teal-400 rounded px-1 py-0.5 focus:outline-none" aria-label="Ordner umbenennen" />
                         </div>
                       ) : (
                         <p className="text-xs font-medium text-center text-gray-800 dark:text-white truncate">{folder.name}</p>
@@ -466,7 +466,7 @@ export default function FileBrowser() {
               </div>
               <div className="flex-1 min-w-0" onClick={() => navigateTo(folder.id)}>
                 {renaming === folder.id ? (
-                  <input autoFocus type="text" value={renameValue} onChange={(e) => setRenameValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void renameFolder(folder.id); if (e.key === "Escape") setRenaming(null); }} className="text-sm border border-teal-400 rounded px-1 py-0.5 focus:outline-none w-40" onClick={(e) => e.stopPropagation()} />
+                  <input autoFocus id={`rename-folder-list-${folder.id}`} name={`rename-folder-list-${folder.id}`} type="text" value={renameValue} onChange={(e) => setRenameValue(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void renameFolder(folder.id); if (e.key === "Escape") setRenaming(null); }} className="text-sm border border-teal-400 rounded px-1 py-0.5 focus:outline-none w-40" onClick={(e) => e.stopPropagation()} aria-label="Ordner umbenennen" />
                 ) : (
                   <p className="text-sm font-medium text-gray-800 dark:text-white truncate">
                     {folder.name}
@@ -527,11 +527,11 @@ export default function FileBrowser() {
             </h2>
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Name</label>
-                <input autoFocus type="text" value={newName} onChange={(e) => setNewName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void createFolder(); }} placeholder="Ordnername…" className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500" />
+                <label htmlFor="new-folder-name" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Name</label>
+                <input autoFocus id="new-folder-name" name="new-folder-name" type="text" value={newName} onChange={(e) => setNewName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") void createFolder(); }} placeholder="Ordnername…" className="w-full border border-gray-300 dark:border-slate-600 rounded-lg px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500" />
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">Farbe</label>
+                <p className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5" role="group" aria-label="Farbe wählen">Farbe</p>
                 <div className="flex flex-wrap gap-2">
                   {FOLDER_COLORS.map((c) => (
                     <button key={c} onClick={() => setNewColor(c)} className="w-7 h-7 rounded-full transition-transform hover:scale-110" style={{ backgroundColor: c, outline: newColor === c ? `3px solid ${c}` : "none", outlineOffset: "2px" }} />
@@ -539,7 +539,7 @@ export default function FileBrowser() {
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">Symbol</label>
+                <p className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5" role="group" aria-label="Symbol wählen">Symbol</p>
                 <div className="flex flex-wrap gap-2">
                   {FOLDER_ICONS.map((ic) => {
                     const Icon = (ICON_MAP[ic] ?? FolderIcon) as React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
