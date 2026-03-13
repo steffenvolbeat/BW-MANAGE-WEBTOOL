@@ -63,6 +63,7 @@ export async function POST(request: Request) {
     const description = form.get("description")?.toString() || undefined;
     const tagsRaw = form.get("tags")?.toString();
     const tags = tagsRaw ? JSON.parse(tagsRaw) : [];
+    const fileBrowserFolderId = form.get("fileBrowserFolderId")?.toString() || null;
 
     if (!name) {
       return NextResponse.json({ error: "Name ist erforderlich" }, { status: 400 });
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
         type,
         description,
         tags,
+        fileBrowserFolderId: fileBrowserFolderId ?? null,
         applications: applicationId ? { create: { applicationId } } : undefined,
       },
       include: {

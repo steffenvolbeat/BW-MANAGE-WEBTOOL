@@ -44,7 +44,13 @@ export async function GET(req: NextRequest) {
   if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const parentId = req.nextUrl.searchParams.get("parentId") ?? null;
+  const returnAll = req.nextUrl.searchParams.get("all") === "true";
   const all = getUserFolders(user.id);
+
+  if (returnAll) {
+    // Return all folders flat (used by move-file modal)
+    return NextResponse.json({ folders: all.map((f) => ({ ...f, childCount: all.filter((c) => c.parentId === f.id).length })), breadcrumb: [] });
+  }
 
   // Attach child/file counts
   const enriched = all
