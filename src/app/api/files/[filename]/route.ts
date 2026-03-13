@@ -25,7 +25,14 @@ export async function GET(
   const filePath = path.join("/tmp", "uploads", safeName);
 
   try {
-    const buffer = await fs.readFile(filePath);
+    let buffer: Buffer;
+    try {
+      buffer = await fs.readFile(filePath);
+    } catch {
+      // Fallback: lokale Entwicklung speichert in public/uploads (kein Vercel)
+      const localPath = path.join(process.cwd(), "public", "uploads", safeName);
+      buffer = await fs.readFile(localPath);
+    }
     // Derive content type from extension
     const ext = safeName.split(".").pop()?.toLowerCase() ?? "";
     const contentTypeMap: Record<string, string> = {
@@ -42,7 +49,7 @@ export async function GET(
     };
     const contentType = contentTypeMap[ext] ?? "application/octet-stream";
 
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         "Content-Type": contentType,

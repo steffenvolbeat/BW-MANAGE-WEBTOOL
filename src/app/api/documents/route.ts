@@ -88,7 +88,14 @@ export async function POST(request: Request) {
       ? path.join("/tmp", "uploads")
       : path.join(process.cwd(), "public", "uploads");
     await fs.mkdir(uploadDir, { recursive: true });
-    const safeName = `${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
+    // Sanitize: spaces → underscore, alle Sonderzeichen außer Punkt/Bindestrich/Unterstrich entfernen
+    const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+    const baseName = file.name
+      .replace(/\.[^.]+$/, "")
+      .replace(/\s+/g, "_")
+      .replace(/[^a-zA-Z0-9_\-]/g, "")
+      .slice(0, 80);
+    const safeName = `${Date.now()}_${baseName || "file"}.${ext}`;
     const diskPath = path.join(uploadDir, safeName);
     await fs.writeFile(diskPath, buffer);
     const persistedFilePath = isVercel ? `/api/files/${safeName}` : `/uploads/${safeName}`;
