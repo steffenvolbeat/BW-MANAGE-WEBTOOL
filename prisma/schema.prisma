@@ -53,6 +53,7 @@ model User {
   peerReviewsReceived PeerReview[]     @relation("ReviewTarget")
   followUps         FollowUp[]
   portfolioProfile  PortfolioProfile?
+  fileFolders       FileFolder[]
 
   @@map("users")
 }
@@ -104,8 +105,9 @@ model Document {
   uploadedAt      DateTime    @default(now())
   lastModified    DateTime    @updatedAt
 
-  // File Browser folder assignment (in-memory folder ID)
+  // File Browser folder assignment
   fileBrowserFolderId String?
+  fileBrowserFolder   FileFolder? @relation(fields: [fileBrowserFolderId], references: [id], onDelete: SetNull)
 
   // Relations
   userId          String
@@ -681,4 +683,26 @@ model PortfolioProfile {
   updatedAt   DateTime @updatedAt
 
   @@map("portfolio_profiles")
+}
+
+model FileFolder {
+  id        String       @id @default(cuid())
+  name      String
+  color     String       @default("#6b7280")
+  icon      String       @default("folder")
+  createdAt DateTime     @default(now())
+
+  // Self-relation for nested folders
+  parentId  String?
+  parent    FileFolder?  @relation("FolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  FileFolder[] @relation("FolderChildren")
+
+  // Owner
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Documents in this folder
+  documents Document[]
+
+  @@map("file_folders")
 }

@@ -3,18 +3,21 @@ import { requireActiveUser } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
 import { promises as fs } from "fs";
 import path from "path";
+import { del } from "@vercel/blob";
 
 async function fileExistsOnDisk(filePath: string | null): Promise<boolean> {
   if (!filePath) return false;
+  // Blob-URL → immer verfügbar
+  if (filePath.startsWith("https://")) return true;
   // /uploads/filename → public/uploads/filename (lokal)
-  // /api/files/filename → /tmp/uploads/filename (Vercel)
   let diskPath: string;
   if (filePath.startsWith("/uploads/")) {
     diskPath = path.join(process.cwd(), "public", filePath);
   } else if (filePath.startsWith("/api/files/")) {
+    // Altes Schema: Vercel /tmp — wird nicht mehr genutzt, aber für bestehende Einträge
     diskPath = path.join("/tmp", "uploads", path.basename(filePath));
   } else {
-    return true; // externe URL — annehmen dass ok
+    return true;
   }
   try {
     await fs.access(diskPath);
@@ -93,6 +96,13 @@ export async function DELETE(req: NextRequest) {
   const db = scopedPrisma(user.id);
   const existing = await db.document.findFirst({ where: { id } });
   if (!existing) return NextResponse.json({ error: "Dokument nicht gefunden" }, { status: 404 });
+
+  // Datei aus Blob oder Disk löschen
+  if (existing.filePath?.startsWith("https://")) {
+    try { await del(existing.filePath); } catch { /* ignorieren falls bereits weg */ }
+  } else if (existing.filePath?.startsWith("/uploads/")) {
+    try { await fs.unlink(path.join(process.cwd(), "public", existing.filePath)); } catch { /* ignorieren */ }
+  }
 
   await db.document.delete({ where: { id } });
   return NextResponse.json({ success: true });

@@ -4,6 +4,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { DocumentType } from "@prisma/client";
 import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { put } from "@vercel/blob"; // Vercel Blob Storage SDK
 
 // GET
 export async function GET(request: Request) {
@@ -82,13 +83,8 @@ export async function POST(request: Request) {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    // On Vercel (read-only filesystem) write to /tmp, otherwise to public/uploads
-    const isVercel = !!process.env.VERCEL;
-    const uploadDir = isVercel
-      ? path.join("/tmp", "uploads")
-      : path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
-    // Sanitize: spaces → underscore, alle Sonderzeichen außer Punkt/Bindestrich/Unterstrich entfernen
+
+    // Sanitize filename
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
     const baseName = file.name
       .replace(/\.[^.]+$/, "")
@@ -96,9 +92,23 @@ export async function POST(request: Request) {
       .replace(/[^a-zA-Z0-9_\-]/g, "")
       .slice(0, 80);
     const safeName = `${Date.now()}_${baseName || "file"}.${ext}`;
-    const diskPath = path.join(uploadDir, safeName);
-    await fs.writeFile(diskPath, buffer);
-    const persistedFilePath = isVercel ? `/api/files/${safeName}` : `/uploads/${safeName}`;
+
+    let persistedFilePath: string;
+
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      // Vercel Blob Storage (lokal mit vercel dev oder auf Vercel)
+      const blob = await put(`uploads/${safeName}`, buffer, {
+        access: "public",
+        contentType: file.type || "application/octet-stream",
+      });
+      persistedFilePath = blob.url;
+    } else {
+      // Lokale Entwicklung ohne Blob-Token → public/uploads/
+      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      await fs.mkdir(uploadDir, { recursive: true });
+      await fs.writeFile(path.join(uploadDir, safeName), buffer);
+      persistedFilePath = `/uploads/${safeName}`;
+    }
 
     const document = await db.document.create({
       data: {

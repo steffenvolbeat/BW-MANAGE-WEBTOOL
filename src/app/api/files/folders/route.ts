@@ -1,148 +1,150 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/currentUser";
-import { prisma } from "@/lib/database";
-import path from "path";
-import fs from "fs";
+import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { scopedPrisma } from "@/lib/security/scope";
 
-// ─── In-memory folder store (replace with Prisma model in production) ──────────
+const DEFAULT_FOLDERS = [
+  { name: "Bewerbungen",             color: "#3b82f6", icon: "briefcase" },
+  { name: "Zeugnisse & Zertifikate", color: "#10b981", icon: "academic-cap" },
+  { name: "Anschreiben",             color: "#f59e0b", icon: "document-text" },
+  { name: "Lebenslauf",              color: "#8b5cf6", icon: "user" },
+  { name: "Verträge",                color: "#ef4444", icon: "clipboard-document" },
+];
 
-export interface FileFolder {
-  id: string;
-  name: string;
-  parentId: string | null;
-  userId: string;
-  color: string;
-  icon: string;
-  createdAt: string;
-  childCount?: number;
-  fileCount?: number;
-}
-
-const folderStore = new Map<string, FileFolder[]>();
-
-function getUserFolders(userId: string): FileFolder[] {
-  if (!folderStore.has(userId)) {
-    // Create default folders for new users
-    const defaults: FileFolder[] = [
-      { id: `${userId}-f1`, name: "Bewerbungen", parentId: null, userId, color: "#3b82f6", icon: "briefcase", createdAt: new Date().toISOString() },
-      { id: `${userId}-f2`, name: "Zeugnisse & Zertifikate", parentId: null, userId, color: "#10b981", icon: "academic-cap", createdAt: new Date().toISOString() },
-      { id: `${userId}-f3`, name: "Anschreiben", parentId: null, userId, color: "#f59e0b", icon: "document-text", createdAt: new Date().toISOString() },
-      { id: `${userId}-f4`, name: "Lebenslauf", parentId: null, userId, color: "#8b5cf6", icon: "user", createdAt: new Date().toISOString() },
-      { id: `${userId}-f5`, name: "Verträge", parentId: null, userId, color: "#ef4444", icon: "clipboard-document", createdAt: new Date().toISOString() },
-      { id: `${userId}-f1-1`, name: "2025", parentId: `${userId}-f1`, userId, color: "#3b82f6", icon: "folder", createdAt: new Date().toISOString() },
-      { id: `${userId}-f1-2`, name: "Abgelehnt", parentId: `${userId}-f1`, userId, color: "#6b7280", icon: "folder", createdAt: new Date().toISOString() },
-    ];
-    folderStore.set(userId, defaults);
+async function seedDefaultFolders(userId: string) {
+  const db = scopedPrisma(userId);
+  for (const f of DEFAULT_FOLDERS) {
+    await db.fileFolder.create({ data: { name: f.name, color: f.color, icon: f.icon, userId } });
   }
-  return folderStore.get(userId)!;
 }
 
-// ─── GET /api/files/folders ────────────────────────────────────────────────────
-
+// ─── GET /api/files/folders ──────────────────────────────────────────────────
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const user = await requireActiveUser();
+    const db = scopedPrisma(user.id);
 
-  const parentId = req.nextUrl.searchParams.get("parentId") ?? null;
-  const returnAll = req.nextUrl.searchParams.get("all") === "true";
-  const all = getUserFolders(user.id);
+    const total = await db.fileFolder.count({ where: { userId: user.id } });
+    if (total === 0) await seedDefaultFolders(user.id);
 
-  if (returnAll) {
-    // Return all folders flat (used by move-file modal)
-    return NextResponse.json({ folders: all.map((f) => ({ ...f, childCount: all.filter((c) => c.parentId === f.id).length })), breadcrumb: [] });
+    const returnAll = req.nextUrl.searchParams.get("all") === "true";
+    const parentId  = req.nextUrl.searchParams.get("parentId") ?? null;
+
+    if (returnAll) {
+      const all = await db.fileFolder.findMany({
+        where: { userId: user.id },
+        include: { _count: { select: { children: true, documents: true } } },
+        orderBy: { createdAt: "asc" },
+      });
+      return NextResponse.json({
+        folders: all.map((f: any) => ({ ...f, childCount: f._count.children, fileCount: f._count.documents })),
+        breadcrumb: [],
+      });
+    }
+
+    const folders = await db.fileFolder.findMany({
+      where: { userId: user.id, parentId: parentId ?? null },
+      include: { _count: { select: { children: true, documents: true } } },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const breadcrumb: { id: string | null; name: string }[] = [{ id: null, name: "Alle Ordner" }];
+    if (parentId) {
+      const buildPath = async (id: string): Promise<void> => {
+        const folder = await db.fileFolder.findFirst({ where: { id } });
+        if (!folder) return;
+        if (folder.parentId) await buildPath(folder.parentId);
+        breadcrumb.push({ id: folder.id, name: folder.name });
+      };
+      await buildPath(parentId);
+    }
+
+    return NextResponse.json({
+      folders: folders.map((f: any) => ({ ...f, childCount: f._count.children, fileCount: f._count.documents })),
+      breadcrumb,
+    });
+  } catch (error) {
+    const guardResponse = handleGuardError(error);
+    if (guardResponse.status !== 500) return guardResponse;
+    console.error("GET /api/files/folders:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-
-  // Attach child/file counts
-  const enriched = all
-    .filter((f) => f.parentId === parentId)
-    .map((f) => ({
-      ...f,
-      childCount: all.filter((c) => c.parentId === f.id).length,
-    }));
-
-  // Breadcrumb path
-  const breadcrumb: { id: string | null; name: string }[] = [{ id: null, name: "Alle Ordner" }];
-  if (parentId) {
-    const buildPath = (id: string): void => {
-      const folder = all.find((f) => f.id === id);
-      if (!folder) return;
-      if (folder.parentId) buildPath(folder.parentId);
-      breadcrumb.push({ id: folder.id, name: folder.name });
-    };
-    buildPath(parentId);
-  }
-
-  return NextResponse.json({ folders: enriched, breadcrumb });
 }
 
-// ─── POST /api/files/folders ───────────────────────────────────────────────────
-
+// ─── POST /api/files/folders ─────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const user = await requireActiveUser();
+    const db = scopedPrisma(user.id);
+    const body = await req.json() as { name?: string; parentId?: string | null; color?: string; icon?: string };
+    if (!body.name?.trim()) return NextResponse.json({ error: "Name fehlt" }, { status: 400 });
 
-  const body = await req.json() as { name?: string; parentId?: string | null; color?: string; icon?: string };
-  if (!body.name?.trim()) return NextResponse.json({ error: "Name fehlt" }, { status: 400 });
+    const count = await db.fileFolder.count({ where: { userId: user.id } });
+    if (count >= 200) return NextResponse.json({ error: "Maximale Ordneranzahl erreicht" }, { status: 429 });
 
-  const all = getUserFolders(user.id);
-  if (all.length >= 200) return NextResponse.json({ error: "Maximale Ordneranzahl erreicht" }, { status: 429 });
+    if (body.parentId) {
+      const parent = await db.fileFolder.findFirst({ where: { id: body.parentId, userId: user.id } });
+      if (!parent) return NextResponse.json({ error: "Überordner nicht gefunden" }, { status: 404 });
+    }
 
-  const folder: FileFolder = {
-    id: crypto.randomUUID(),
-    name: body.name.trim().slice(0, 80),
-    parentId: body.parentId ?? null,
-    userId: user.id,
-    color: body.color ?? "#6b7280",
-    icon: body.icon ?? "folder",
-    createdAt: new Date().toISOString(),
-  };
-
-  folderStore.set(user.id, [...all, folder]);
-
-  return NextResponse.json(folder, { status: 201 });
+    const folder = await db.fileFolder.create({
+      data: { name: body.name.trim().slice(0, 80), parentId: body.parentId ?? null, color: body.color ?? "#6b7280", icon: body.icon ?? "folder", userId: user.id },
+    });
+    return NextResponse.json(folder, { status: 201 });
+  } catch (error) {
+    const guardResponse = handleGuardError(error);
+    if (guardResponse.status !== 500) return guardResponse;
+    console.error("POST /api/files/folders:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
-// ─── PATCH /api/files/folders?id=... ──────────────────────────────────────────
-
+// ─── PATCH /api/files/folders?id=... ─────────────────────────────────────────
 export async function PATCH(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const user = await requireActiveUser();
+    const id = req.nextUrl.searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
 
-  const id = req.nextUrl.searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
+    const db = scopedPrisma(user.id);
+    const existing = await db.fileFolder.findFirst({ where: { id, userId: user.id } });
+    if (!existing) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
 
-  const body = await req.json() as Partial<FileFolder>;
-  const all = getUserFolders(user.id);
-  const idx = all.findIndex((f) => f.id === id && f.userId === user.id);
-  if (idx === -1) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
-
-  all[idx] = { ...all[idx], ...body, id, userId: user.id };
-  folderStore.set(user.id, all);
-
-  return NextResponse.json(all[idx]);
+    const body = await req.json() as { name?: string; color?: string; icon?: string; parentId?: string | null };
+    const folder = await db.fileFolder.update({
+      where: { id },
+      data: {
+        ...(body.name     !== undefined && { name:     body.name.trim().slice(0, 80) }),
+        ...(body.color    !== undefined && { color:    body.color }),
+        ...(body.icon     !== undefined && { icon:     body.icon }),
+        ...(body.parentId !== undefined && { parentId: body.parentId }),
+      },
+    });
+    return NextResponse.json(folder);
+  } catch (error) {
+    const guardResponse = handleGuardError(error);
+    if (guardResponse.status !== 500) return guardResponse;
+    console.error("PATCH /api/files/folders:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
-// ─── DELETE /api/files/folders?id=... ─────────────────────────────────────────
-
+// ─── DELETE /api/files/folders?id=... ────────────────────────────────────────
 export async function DELETE(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    const user = await requireActiveUser();
+    const id = req.nextUrl.searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
 
-  const id = req.nextUrl.searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
+    const db = scopedPrisma(user.id);
+    const existing = await db.fileFolder.findFirst({ where: { id, userId: user.id } });
+    if (!existing) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
 
-  const all = getUserFolders(user.id);
-  const folder = all.find((f) => f.id === id && f.userId === user.id);
-  if (!folder) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
-
-  // Recursively collect IDs to delete
-  const toDelete = new Set<string>();
-  const collectIds = (fid: string) => {
-    toDelete.add(fid);
-    all.filter((f) => f.parentId === fid).forEach((f) => collectIds(f.id));
-  };
-  collectIds(id);
-
-  folderStore.set(user.id, all.filter((f) => !toDelete.has(f.id)));
-  return NextResponse.json({ deleted: toDelete.size });
+    await db.fileFolder.delete({ where: { id } });
+    return NextResponse.json({ deleted: true });
+  } catch (error) {
+    const guardResponse = handleGuardError(error);
+    if (guardResponse.status !== 500) return guardResponse;
+    console.error("DELETE /api/files/folders:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
