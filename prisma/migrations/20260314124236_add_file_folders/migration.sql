@@ -11,6 +11,11 @@ CREATE TABLE "file_folders" (
     CONSTRAINT "file_folders_pkey" PRIMARY KEY ("id")
 );
 
+-- Clear stale in-memory folder IDs that don't exist in file_folders
+UPDATE "documents" SET "fileBrowserFolderId" = NULL
+WHERE "fileBrowserFolderId" IS NOT NULL
+  AND "fileBrowserFolderId" NOT IN (SELECT "id" FROM "file_folders");
+
 -- AddForeignKey
 ALTER TABLE "documents" ADD CONSTRAINT "documents_fileBrowserFolderId_fkey" FOREIGN KEY ("fileBrowserFolderId") REFERENCES "file_folders"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
