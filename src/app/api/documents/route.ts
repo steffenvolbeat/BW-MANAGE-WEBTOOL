@@ -43,7 +43,7 @@ export async function GET(request: Request) {
   } catch (error) {
     const guardResponse = handleGuardError(error);
     if (guardResponse.status !== 500) return guardResponse;
-    console.error("Error fetching documents:", error);
+    console.error("Error fetching documents:", error instanceof Error ? error.message : String(error));
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -96,14 +96,20 @@ export async function POST(request: Request) {
     let persistedFilePath: string;
 
     if (process.env.BLOB_READ_WRITE_TOKEN) {
-      // Vercel Blob Storage (lokal mit vercel dev oder auf Vercel)
+      // Vercel Blob Storage
       const blob = await put(`uploads/${safeName}`, buffer, {
         access: "public",
         contentType: file.type || "application/octet-stream",
       });
       persistedFilePath = blob.url;
+    } else if (process.env.VERCEL) {
+      // Vercel ohne Blob-Token – Filesystem ist read-only, Upload nicht möglich
+      return NextResponse.json(
+        { error: "Datei-Upload nicht verfügbar: Bitte Vercel Blob Storage einrichten (BLOB_READ_WRITE_TOKEN fehlt)." },
+        { status: 503 }
+      );
     } else {
-      // Lokale Entwicklung ohne Blob-Token → public/uploads/
+      // Lokale Entwicklung → public/uploads/
       const uploadDir = path.join(process.cwd(), "public", "uploads");
       await fs.mkdir(uploadDir, { recursive: true });
       await fs.writeFile(path.join(uploadDir, safeName), buffer);
