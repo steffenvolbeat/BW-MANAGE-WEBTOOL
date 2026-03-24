@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { scopedPrisma } from "@/lib/security/scope";
+import { prisma } from "@/lib/database";
 import { requireActiveUser } from "@/lib/security/guard";
 
 type Params = { params: Promise<{ id: string }> };
@@ -17,7 +18,7 @@ export async function GET(_req: Request, { params }: Params) {
     const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const coverLetters = await db.coverLetter.findMany({
+    const coverLetters = await prisma.coverLetter.findMany({
       where: { applicationId },
       orderBy: { createdAt: "asc" },
     });
@@ -46,7 +47,7 @@ export async function POST(req: Request, { params }: Params) {
       return NextResponse.json({ error: "content is required" }, { status: 400 });
     }
 
-    const coverLetter = await db.coverLetter.create({
+    const coverLetter = await prisma.coverLetter.create({
       data: {
         title: title?.trim() || "Anschreiben",
         itBereich: itBereich || null,
@@ -77,12 +78,12 @@ export async function PUT(req: Request, { params }: Params) {
     const { letterId, title, itBereich, content } = await req.json();
     if (!letterId) return NextResponse.json({ error: "letterId is required" }, { status: 400 });
 
-    const existing = await db.coverLetter.findFirst({
+    const existing = await prisma.coverLetter.findFirst({
       where: { id: letterId, applicationId },
     });
     if (!existing) return NextResponse.json({ error: "Cover letter not found" }, { status: 404 });
 
-    const updated = await db.coverLetter.update({
+    const updated = await prisma.coverLetter.update({
       where: { id: letterId },
       data: {
         ...(title !== undefined && { title: title.trim() || "Anschreiben" }),
@@ -114,12 +115,12 @@ export async function DELETE(req: Request, { params }: Params) {
     const letterId = searchParams.get("letterId");
     if (!letterId) return NextResponse.json({ error: "letterId is required" }, { status: 400 });
 
-    const existing = await db.coverLetter.findFirst({
+    const existing = await prisma.coverLetter.findFirst({
       where: { id: letterId, applicationId },
     });
     if (!existing) return NextResponse.json({ error: "Cover letter not found" }, { status: 404 });
 
-    await db.coverLetter.delete({ where: { id: letterId } });
+    await prisma.coverLetter.delete({ where: { id: letterId } });
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("DELETE cover-letters error:", e);
