@@ -60,6 +60,8 @@ interface CoverLetterEntry {
   id?: string;
   title: string;
   itBereich: string;
+  senderAddress?: string;
+  recipientAddress?: string;
   content: string;
   _new?: boolean;
   _dirty?: boolean;
@@ -132,10 +134,10 @@ export default function ApplicationsOverview() {
 
   // Cover Letters – row expand
   const [rowCLExpanded, setRowCLExpanded] = useState<string | null>(null);
-  const [rowCLData, setRowCLData] = useState<Record<string, { id: string; title: string; itBereich?: string; content?: string }[]>>({});
+  const [rowCLData, setRowCLData] = useState<Record<string, { id: string; title: string; itBereich?: string; senderAddress?: string; recipientAddress?: string; content?: string }[]>>({});
   const [rowCLLoading, setRowCLLoading] = useState<string | null>(null);
   const [rowCLError, setRowCLError] = useState<string | null>(null);
-  const [clPreview, setClPreview] = useState<{ appId: string; application: Application; cl: { id: string; title: string; itBereich?: string; content?: string } } | null>(null);
+  const [clPreview, setClPreview] = useState<{ appId: string; application: Application; cl: { id: string; title: string; itBereich?: string; senderAddress?: string; recipientAddress?: string; content?: string } } | null>(null);
   const [clPreviewSaving, setClPreviewSaving] = useState(false);
 
   // Cover Letters – edit modal
@@ -277,12 +279,14 @@ export default function ApplicationsOverview() {
     setCoverLettersLoading(true);
     fetch(`/api/applications/${app.id}/cover-letters`)
       .then((r) => r.json())
-      .then((data: { id: string; title: string; itBereich: string | null; content: string }[]) => {
+      .then((data: { id: string; title: string; itBereich: string | null; senderAddress: string | null; recipientAddress: string | null; content: string }[]) => {
         setEditCoverLetters(
           (Array.isArray(data) ? data : []).map((cl) => ({
             id: cl.id,
             title: cl.title,
             itBereich: cl.itBereich ?? "",
+            senderAddress: cl.senderAddress ?? "",
+            recipientAddress: cl.recipientAddress ?? "",
             content: cl.content,
           }))
         );
@@ -400,7 +404,7 @@ export default function ApplicationsOverview() {
             const r = await fetch(`/api/applications/${appId}/cover-letters`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, content: cl.content }),
+              body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content }),
             });
             if (!r.ok) throw new Error(`Neues Anschreiben speichern fehlgeschlagen (${r.status})`);
           }
@@ -408,7 +412,7 @@ export default function ApplicationsOverview() {
           const r = await fetch(`/api/applications/${appId}/cover-letters`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, content: cl.content }),
+            body: JSON.stringify({ letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content }),
           });
           if (!r.ok) throw new Error(`Anschreiben aktualisieren fehlgeschlagen (${r.status})`);
         }
@@ -540,8 +544,8 @@ export default function ApplicationsOverview() {
     try {
       const method = cl.id ? "PUT" : "POST";
       const body = cl.id
-        ? { letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, content: cl.content }
-        : { title: cl.title, itBereich: cl.itBereich || null, content: cl.content };
+        ? { letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content }
+        : { title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content };
       const res = await fetch(`/api/applications/${appId}/cover-letters`, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -553,7 +557,7 @@ export default function ApplicationsOverview() {
       setRowCLData((prev) => {
         const existing = prev[appId] ?? [];
         const idx = existing.findIndex((c) => c.id === cl.id);
-        const entry = { id: saved.id, title: saved.title, itBereich: saved.itBereich ?? undefined, content: saved.content };
+        const entry = { id: saved.id, title: saved.title, itBereich: saved.itBereich ?? undefined, senderAddress: saved.senderAddress ?? undefined, recipientAddress: saved.recipientAddress ?? undefined, content: saved.content };
         const newList = idx >= 0
           ? existing.map((c, i) => (i === idx ? entry : c))
           : [...existing, entry];
@@ -1385,6 +1389,28 @@ export default function ApplicationsOverview() {
                             </select>
                           </div>
                         </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Absender-Adresse</label>
+                            <textarea
+                              value={cl.senderAddress ?? ""}
+                              onChange={(e) => update({ senderAddress: e.target.value })}
+                              rows={4}
+                              className="w-full px-2 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Max Mustermann&#10;Musterstraße 1&#10;12345 Musterstadt"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Empfänger-Adresse</label>
+                            <textarea
+                              value={cl.recipientAddress ?? ""}
+                              onChange={(e) => update({ recipientAddress: e.target.value })}
+                              rows={4}
+                              className="w-full px-2 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="Muster GmbH&#10;z.Hd. Frau Muster&#10;Firmenstraße 2&#10;54321 Firmenstadt"
+                            />
+                          </div>
+                        </div>
                         <div>
                           <label className="block text-xs font-medium text-gray-700 mb-1">Anschreiben-Text</label>
                           <textarea
@@ -2129,15 +2155,40 @@ export default function ApplicationsOverview() {
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              <textarea
-                value={clPreview.cl.content ?? ""}
-                onChange={(e) => setClPreview((p) => p ? { ...p, cl: { ...p.cl, content: e.target.value } } : p)}
-                rows={16}
-                className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 font-sans leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Sehr geehrte Damen und Herren,"
-              />
-              <p className="text-xs text-gray-400 mt-1">{(clPreview.cl.content ?? "").length} Zeichen</p>
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Absender</label>
+                  <textarea
+                    value={clPreview.cl.senderAddress ?? ""}
+                    onChange={(e) => setClPreview((p) => p ? { ...p, cl: { ...p.cl, senderAddress: e.target.value } } : p)}
+                    rows={4}
+                    className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Max Mustermann&#10;Musterstraße 1&#10;12345 Musterstadt"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Empfänger</label>
+                  <textarea
+                    value={clPreview.cl.recipientAddress ?? ""}
+                    onChange={(e) => setClPreview((p) => p ? { ...p, cl: { ...p.cl, recipientAddress: e.target.value } } : p)}
+                    rows={4}
+                    className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="Muster GmbH&#10;z.Hd. Frau Muster&#10;Firmenstraße 2"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Inhalt</label>
+                <textarea
+                  value={clPreview.cl.content ?? ""}
+                  onChange={(e) => setClPreview((p) => p ? { ...p, cl: { ...p.cl, content: e.target.value } } : p)}
+                  rows={14}
+                  className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 font-sans leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Sehr geehrte Damen und Herren,"
+                />
+                <p className="text-xs text-gray-400 mt-1">{(clPreview.cl.content ?? "").length} Zeichen</p>
+              </div>
             </div>
             <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
               <button
