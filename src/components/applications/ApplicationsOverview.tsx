@@ -132,9 +132,10 @@ export default function ApplicationsOverview() {
 
   // Cover Letters – row expand
   const [rowCLExpanded, setRowCLExpanded] = useState<string | null>(null);
-  const [rowCLData, setRowCLData] = useState<Record<string, { id: string; title: string; itBereich?: string }[]>>({});
+  const [rowCLData, setRowCLData] = useState<Record<string, { id: string; title: string; itBereich?: string; content?: string }[]>>({});
   const [rowCLLoading, setRowCLLoading] = useState<string | null>(null);
   const [rowCLError, setRowCLError] = useState<string | null>(null);
+  const [clPreview, setClPreview] = useState<{ appId: string; application: Application; cl: { id: string; title: string; itBereich?: string; content?: string } } | null>(null);
 
   // Cover Letters – edit modal
   const [editCoverLetters, setEditCoverLetters] = useState<CoverLetterEntry[]>([]);
@@ -1621,7 +1622,12 @@ export default function ApplicationsOverview() {
                             rowCLData[application.id]?.length ? (
                               <div className="flex flex-wrap gap-2">
                                 {rowCLData[application.id].map((cl) => (
-                                  <div key={cl.id} className="flex items-center gap-1.5 bg-white border border-blue-200 rounded-lg px-3 py-1.5">
+                                  <div
+                                    key={cl.id}
+                                    className="group flex items-center gap-1.5 bg-white border border-blue-200 rounded-lg px-3 py-1.5 cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                                    onClick={() => setClPreview({ appId: application.id, application, cl })}
+                                    title="Vorschau öffnen"
+                                  >
                                     <DocumentTextIcon className="w-3.5 h-3.5 text-blue-400 shrink-0" />
                                     <span className="text-sm font-medium text-gray-800">{cl.title}</span>
                                     {cl.itBereich && (
@@ -1629,6 +1635,11 @@ export default function ApplicationsOverview() {
                                         {IT_BEREICHE_OPTIONS.find((b) => b.value === cl.itBereich)?.label ?? cl.itBereich}
                                       </span>
                                     )}
+                                    <PencilSquareIcon
+                                      className="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-500 shrink-0 ml-1"
+                                      onClick={(e) => { e.stopPropagation(); openEdit(application); }}
+                                      title="Anschreiben bearbeiten"
+                                    />
                                   </div>
                                 ))}
                               </div>
@@ -2039,6 +2050,55 @@ export default function ApplicationsOverview() {
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
               >
                 {uploadingDoc ? "Lädt..." : "Hochladen"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CL Preview Modal */}
+      {clPreview && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setClPreview(null)}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <DocumentTextIcon className="w-5 h-5 text-blue-500" />
+                  {clPreview.cl.title}
+                </h3>
+                {clPreview.cl.itBereich && (
+                  <span className="mt-1 inline-block text-xs text-blue-600 bg-blue-50 rounded px-2 py-0.5">
+                    {IT_BEREICHE_OPTIONS.find((b) => b.value === clPreview.cl.itBereich)?.label ?? clPreview.cl.itBereich}
+                  </span>
+                )}
+                <p className="text-xs text-gray-400 mt-1">
+                  {clPreview.application.companyName} · {clPreview.application.position}
+                </p>
+              </div>
+              <button onClick={() => setClPreview(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              {clPreview.cl.content ? (
+                <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans leading-relaxed">{clPreview.cl.content}</pre>
+              ) : (
+                <p className="text-gray-400 italic text-sm">Kein Inhalt vorhanden.</p>
+              )}
+            </div>
+            <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
+                onClick={() => setClPreview(null)}
+              >
+                Schließen
+              </button>
+              <button
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm flex items-center gap-2"
+                onClick={() => { setClPreview(null); openEdit(clPreview.application); }}
+              >
+                <PencilSquareIcon className="w-4 h-4" />
+                Bearbeiten
               </button>
             </div>
           </div>
