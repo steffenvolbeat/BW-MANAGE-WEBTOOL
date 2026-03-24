@@ -14,7 +14,7 @@ export async function GET(_req: Request, { params }: Params) {
     const db = scopedPrisma(user.id);
 
     // Verify ownership
-    const app = await db.application.findUnique({ where: { id: applicationId } });
+    const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const coverLetters = await db.coverLetter.findMany({
@@ -38,7 +38,7 @@ export async function POST(req: Request, { params }: Params) {
     const { id: applicationId } = await params;
     const db = scopedPrisma(user.id);
 
-    const app = await db.application.findUnique({ where: { id: applicationId } });
+    const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const { title, itBereich, content } = await req.json();
@@ -71,7 +71,7 @@ export async function PUT(req: Request, { params }: Params) {
     const { id: applicationId } = await params;
     const db = scopedPrisma(user.id);
 
-    const app = await db.application.findUnique({ where: { id: applicationId } });
+    const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const { letterId, title, itBereich, content } = await req.json();
@@ -107,7 +107,7 @@ export async function DELETE(req: Request, { params }: Params) {
     const { id: applicationId } = await params;
     const db = scopedPrisma(user.id);
 
-    const app = await db.application.findUnique({ where: { id: applicationId } });
+    const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     const { searchParams } = new URL(req.url);
