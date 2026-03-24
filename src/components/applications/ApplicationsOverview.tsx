@@ -136,6 +136,7 @@ export default function ApplicationsOverview() {
   const [rowCLLoading, setRowCLLoading] = useState<string | null>(null);
   const [rowCLError, setRowCLError] = useState<string | null>(null);
   const [clPreview, setClPreview] = useState<{ appId: string; application: Application; cl: { id: string; title: string; itBereich?: string; content?: string } } | null>(null);
+  const [clPreviewSaving, setClPreviewSaving] = useState(false);
 
   // Cover Letters – edit modal
   const [editCoverLetters, setEditCoverLetters] = useState<CoverLetterEntry[]>([]);
@@ -392,26 +393,31 @@ export default function ApplicationsOverview() {
       const appId = editingId;
       const saves = editCoverLetters.map(async (cl) => {
         if (cl._deleted && cl.id) {
-          await fetch(`/api/applications/${appId}/cover-letters?letterId=${cl.id}`, { method: "DELETE" });
+          const r = await fetch(`/api/applications/${appId}/cover-letters?letterId=${cl.id}`, { method: "DELETE" });
+          if (!r.ok) throw new Error(`Anschreiben löschen fehlgeschlagen (${r.status})`);
         } else if (cl._new || !cl.id) {
           if (cl.content.trim()) {
-            await fetch(`/api/applications/${appId}/cover-letters`, {
+            const r = await fetch(`/api/applications/${appId}/cover-letters`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, content: cl.content }),
             });
+            if (!r.ok) throw new Error(`Neues Anschreiben speichern fehlgeschlagen (${r.status})`);
           }
         } else if (cl._dirty && cl.id) {
-          await fetch(`/api/applications/${appId}/cover-letters`, {
+          const r = await fetch(`/api/applications/${appId}/cover-letters`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, content: cl.content }),
           });
+          if (!r.ok) throw new Error(`Anschreiben aktualisieren fehlgeschlagen (${r.status})`);
         }
       });
       await Promise.all(saves);
 
       await loadApplications();
+      // Expand-Row-Cache für diese Bewerbung leeren, damit beim nächsten Öffnen neu geladen wird
+      setRowCLData((prev) => { const n = { ...prev }; delete n[appId!]; return n; });
       closeEdit();
       showToast("Bewerbung aktualisiert.");
     } catch (err) {
@@ -524,6 +530,43 @@ export default function ApplicationsOverview() {
       setRowDocsError(message);
     } finally {
       setPreviewLoading(false);
+    }
+  };
+
+  const handleCLPreviewSave = async () => {
+    if (!clPreview) return;
+    setClPreviewSaving(true);
+    const { appId, cl } = clPreview;
+    try {
+      const method = cl.id ? "PUT" : "POST";
+      const body = cl.id
+        ? { letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, content: cl.content }
+        : { title: cl.title, itBereich: cl.itBereich || null, content: cl.content };
+      const res = await fetch(`/api/applications/${appId}/cover-letters`, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error(`Speichern fehlgeschlagen (${res.status})`);
+      const saved = await res.json();
+      // Expand-Row-Cache aktualisieren
+      setRowCLData((prev) => {
+        const existing = prev[appId] ?? [];
+        const idx = existing.findIndex((c) => c.id === cl.id);
+        const entry = { id: saved.id, title: saved.title, itBereich: saved.itBereich ?? undefined, content: saved.content };
+        const newList = idx >= 0
+          ? existing.map((c, i) => (i === idx ? entry : c))
+          : [...existing, entry];
+        return { ...prev, [appId]: newList };
+      });
+      // Anzeige in Preview aktualisieren (z.B. neu vergebene ID bei POST)
+      setClPreview((p) => p ? { ...p, cl: { ...p.cl, id: saved.id } } : p);
+      showToast("Anschreiben gespeichert.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Fehler beim Speichern.";
+      showToast(message, "error");
+    } finally {
+      setClPreviewSaving(false);
     }
   };
 
@@ -2056,49 +2099,60 @@ export default function ApplicationsOverview() {
         </div>
       )}
 
-      {/* CL Preview Modal */}
+      {/* CL Vorschau / Editor Modal */}
       {clPreview && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setClPreview(null)}>
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between px-6 py-4 border-b border-gray-100">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <DocumentTextIcon className="w-5 h-5 text-blue-500" />
-                  {clPreview.cl.title}
-                </h3>
-                {clPreview.cl.itBereich && (
-                  <span className="mt-1 inline-block text-xs text-blue-600 bg-blue-50 rounded px-2 py-0.5">
-                    {IT_BEREICHE_OPTIONS.find((b) => b.value === clPreview.cl.itBereich)?.label ?? clPreview.cl.itBereich}
-                  </span>
-                )}
-                <p className="text-xs text-gray-400 mt-1">
-                  {clPreview.application.companyName} · {clPreview.application.position}
-                </p>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start gap-3 px-6 py-4 border-b border-gray-100">
+              <DocumentTextIcon className="w-5 h-5 text-blue-500 mt-1 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <input
+                  className="w-full text-lg font-semibold text-gray-900 bg-transparent border-0 border-b border-transparent hover:border-gray-300 focus:border-blue-500 focus:outline-none px-0 leading-tight"
+                  value={clPreview.cl.title}
+                  onChange={(e) => setClPreview((p) => p ? { ...p, cl: { ...p.cl, title: e.target.value } } : p)}
+                  placeholder="Titel"
+                />
+                <div className="flex items-center gap-3 mt-1.5">
+                  <select
+                    value={clPreview.cl.itBereich ?? ""}
+                    onChange={(e) => setClPreview((p) => p ? { ...p, cl: { ...p.cl, itBereich: e.target.value } } : p)}
+                    className="text-xs border border-gray-200 rounded px-2 py-0.5 bg-white text-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    {IT_BEREICHE_OPTIONS.map((b) => (
+                      <option key={b.value} value={b.value}>{b.label}</option>
+                    ))}
+                  </select>
+                  <span className="text-xs text-gray-400">{clPreview.application.companyName} · {clPreview.application.position}</span>
+                </div>
               </div>
-              <button onClick={() => setClPreview(null)} className="text-gray-400 hover:text-gray-600 p-1">
+              <button onClick={() => setClPreview(null)} className="text-gray-400 hover:text-gray-600 p-1 shrink-0">
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto px-6 py-4">
-              {clPreview.cl.content ? (
-                <pre className="whitespace-pre-wrap text-sm text-gray-800 font-sans leading-relaxed">{clPreview.cl.content}</pre>
-              ) : (
-                <p className="text-gray-400 italic text-sm">Kein Inhalt vorhanden.</p>
-              )}
+              <textarea
+                value={clPreview.cl.content ?? ""}
+                onChange={(e) => setClPreview((p) => p ? { ...p, cl: { ...p.cl, content: e.target.value } } : p)}
+                rows={16}
+                className="w-full resize-none border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 font-sans leading-relaxed focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Sehr geehrte Damen und Herren,"
+              />
+              <p className="text-xs text-gray-400 mt-1">{(clPreview.cl.content ?? "").length} Zeichen</p>
             </div>
-            <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+            <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
               <button
-                className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm"
+                className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2"
                 onClick={() => setClPreview(null)}
               >
                 Schließen
               </button>
               <button
-                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm flex items-center gap-2"
-                onClick={() => { setClPreview(null); openEdit(clPreview.application); }}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm flex items-center gap-2 disabled:opacity-60"
+                disabled={clPreviewSaving}
+                onClick={handleCLPreviewSave}
               >
-                <PencilSquareIcon className="w-4 h-4" />
-                Bearbeiten
+                {clPreviewSaving && <ArrowPathIcon className="w-4 h-4 animate-spin" />}
+                Speichern
               </button>
             </div>
           </div>
