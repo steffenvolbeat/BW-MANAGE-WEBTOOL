@@ -28,8 +28,6 @@ interface ApplicationFormData {
   companyUrl: string;
   description: string;
   requirements: string;
-  coverLetter: string;
-  itBereich: string;
   priority: string;
   status: string;
   appliedAt: string;
@@ -57,8 +55,6 @@ export default function ApplicationForm() {
     companyUrl: "",
     description: "",
     requirements: "",
-    coverLetter: "",
-    itBereich: "",
     priority: "MEDIUM",
     status: "APPLIED",
     appliedAt: new Date().toISOString().slice(0, 10),
@@ -67,6 +63,28 @@ export default function ApplicationForm() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Multiple cover letters
+  interface CoverLetterDraft { title: string; itBereich: string; content: string; }
+  const [coverLetters, setCoverLetters] = useState<CoverLetterDraft[]>([]);
+  const [activeCLIdx, setActiveCLIdx] = useState<number | null>(null);
+
+  const addCoverLetter = () => {
+    const idx = coverLetters.length;
+    setCoverLetters((prev) => [
+      ...prev,
+      { title: `Anschreiben ${prev.length + 1}`, itBereich: "", content: "" },
+    ]);
+    setActiveCLIdx(idx);
+  };
+
+  const removeCoverLetter = (idx: number) => {
+    setCoverLetters((prev) => prev.filter((_, i) => i !== idx));
+    setActiveCLIdx((cur) => (cur === idx ? null : cur !== null && cur > idx ? cur - 1 : cur));
+  };
+
+  const updateCL = (idx: number, patch: Partial<CoverLetterDraft>) =>
+    setCoverLetters((prev) => prev.map((cl, i) => (i === idx ? { ...cl, ...patch } : cl)));
 
   const itBereiche = [
     { value: "", label: "— Bereich wählen (optional) —" },
@@ -254,13 +272,12 @@ Mit freundlichen Grüßen
 [IHR NAME]`,
   };
 
-  const handleBereichChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleBereichChange = (idx: number) => (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
+    updateCL(idx, {
       itBereich: val,
-      coverLetter: val ? coverLetterVorlagen[val] ?? prev.coverLetter : prev.coverLetter,
-    }));
+      content: val && coverLetterVorlagen[val] ? coverLetterVorlagen[val] : coverLetters[idx]?.content ?? "",
+    });
   };
 
   const jobTypes = [
@@ -449,8 +466,6 @@ Mit freundlichen Grüßen
         zip: formData.zip || null,
         state: formData.state || null,
         appliedAt: formData.appliedAt || new Date().toISOString().slice(0, 10),
-        coverLetter: formData.coverLetter || null,
-        itBereich: formData.itBereich || null,
       };
 
       const res = await fetch("/api/applications", {
@@ -463,6 +478,22 @@ Mit freundlichen Grüßen
         const body = await res.json().catch(() => null);
         const message = body?.error || "Fehler beim Speichern der Bewerbung.";
         throw new Error(message);
+      }
+
+      const newApp = await res.json();
+
+      // Save cover letters
+      const clsToSave = coverLetters.filter((cl) => cl.content.trim());
+      if (clsToSave.length > 0) {
+        await Promise.all(
+          clsToSave.map((cl) =>
+            fetch(`/api/applications/${newApp.id}/cover-letters`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, content: cl.content }),
+            })
+          )
+        );
       }
 
       router.push("/applications");
@@ -955,74 +986,122 @@ Mit freundlichen Grüßen
 
             {/* Cover Letter */}
             <div className="border-t border-gray-200 pt-6">
-              <h3 className="text-base font-semibold text-gray-900 mb-1 flex items-center gap-2">
-                <DocumentTextIcon className="h-5 w-5 text-blue-500" />
-                Bewerbungsanschreiben
-              </h3>
-              <p className="text-sm text-gray-500 mb-4">
-                Wählen Sie einen IT-Bereich, um eine passende Vorlage einzufügen – oder schreiben Sie direkt Ihr individuelles Anschreiben.
-              </p>
-
-              {/* IT-Bereich Selector */}
-              <div className="mb-4">
-                <label
-                  htmlFor="itBereich"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  IT-Bereich (Vorlage auswählen)
-                </label>
-                <select
-                  id="itBereich"
-                  name="itBereich"
-                  value={formData.itBereich}
-                  onChange={handleBereichChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {itBereiche.map((b) => (
-                    <option key={b.value} value={b.value}>
-                      {b.label}
-                    </option>
-                  ))}
-                </select>
-                {formData.itBereich && (
-                  <p className="mt-1 text-xs text-blue-600">
-                    ✓ Vorlage eingefügt – bitte [POSITION] und [UNTERNEHMEN] durch echte Werte ersetzen.
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <DocumentTextIcon className="h-5 w-5 text-blue-500" />
+                    Bewerbungsanschreiben
+                    <span className="text-sm font-normal text-gray-400">({coverLetters.length})</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Mehrere Versionen möglich – z.B. formell, kreativ, auf Englisch.
                   </p>
-                )}
-              </div>
-
-              {/* Cover Letter Textarea */}
-              <div>
-                <label
-                  htmlFor="coverLetter"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
-                  Anschreiben-Text
-                </label>
-                <textarea
-                  id="coverLetter"
-                  name="coverLetter"
-                  value={formData.coverLetter}
-                  onChange={handleInputChange}
-                  rows={14}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm leading-relaxed"
-                  placeholder="Sehr geehrte Damen und Herren,&#10;&#10;mit großem Interesse habe ich Ihre Stellenausschreibung gelesen..."
-                />
-                <div className="flex justify-between items-center mt-1">
-                  <p className="text-xs text-gray-400">
-                    {formData.coverLetter.length} Zeichen
-                  </p>
-                  {formData.coverLetter.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, coverLetter: "", itBereich: "" }))}
-                      className="text-xs text-red-500 hover:text-red-700 underline"
-                    >
-                      Anschreiben leeren
-                    </button>
-                  )}
                 </div>
+                <button
+                  type="button"
+                  onClick={addCoverLetter}
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                >
+                  <span className="text-lg leading-none">+</span> Neu
+                </button>
               </div>
+
+              {coverLetters.length === 0 ? (
+                <p className="text-sm text-gray-400 italic">
+                  Noch kein Anschreiben. Klicken Sie auf „Neu“, um eines hinzuzufügen.
+                </p>
+              ) : (
+                <div className="space-y-2 mb-4">
+                  {coverLetters.map((cl, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex items-center justify-between px-3 py-2 rounded-lg border cursor-pointer ${
+                        activeCLIdx === idx
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                      onClick={() => setActiveCLIdx(activeCLIdx === idx ? null : idx)}
+                    >
+                      <div className="min-w-0">
+                        <span className="text-sm font-medium text-gray-800 truncate block">{cl.title || "Anschreiben"}</span>
+                        {cl.itBereich && (
+                          <span className="text-xs text-blue-600">
+                            {itBereiche.find((b) => b.value === cl.itBereich)?.label ?? cl.itBereich}
+                          </span>
+                        )}
+                        {!cl.content && <span className="text-xs text-amber-500"> – leer</span>}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); removeCoverLetter(idx); }}
+                        className="ml-2 text-red-400 hover:text-red-600 shrink-0"
+                        title="Anschreiben entfernen"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Editor */}
+              {activeCLIdx !== null && coverLetters[activeCLIdx] && (() => {
+                const cl = coverLetters[activeCLIdx];
+                return (
+                  <div className="border border-blue-200 rounded-lg p-4 bg-blue-50/30 space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
+                        <input
+                          value={cl.title}
+                          onChange={(e) => updateCL(activeCLIdx, { title: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="z.B. Version 1 – formell"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">IT-Bereich (Vorlage)</label>
+                        <select
+                          value={cl.itBereich}
+                          onChange={handleBereichChange(activeCLIdx)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          {itBereiche.map((b) => (
+                            <option key={b.value} value={b.value}>{b.label}</option>
+                          ))}
+                        </select>
+                        {cl.itBereich && (
+                          <p className="mt-1 text-xs text-blue-600">
+                            ✓ Vorlage eingefügt – [POSITION] und [UNTERNEHMEN] ersetzen.
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Anschreiben-Text</label>
+                      <textarea
+                        value={cl.content}
+                        onChange={(e) => updateCL(activeCLIdx, { content: e.target.value })}
+                        rows={14}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm leading-relaxed"
+                        placeholder="Sehr geehrte Damen und Herren,"
+                      />
+                      <div className="flex justify-between items-center mt-1">
+                        <p className="text-xs text-gray-400">{cl.content.length} Zeichen</p>
+                        {cl.content.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => updateCL(activeCLIdx, { content: "", itBereich: "" })}
+                            className="text-xs text-red-500 hover:text-red-700 underline"
+                          >
+                            Leeren
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

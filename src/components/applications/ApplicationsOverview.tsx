@@ -18,6 +18,7 @@ import {
   CloudArrowUpIcon,
   ChevronUpIcon,
   ChevronDownIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 interface Application {
   id: string;
@@ -53,6 +54,34 @@ type DocumentPreview = {
   fileType?: string | null;
   fileName?: string | null;
 };
+
+interface CoverLetterEntry {
+  id?: string;
+  title: string;
+  itBereich: string;
+  content: string;
+  _new?: boolean;
+  _dirty?: boolean;
+  _deleted?: boolean;
+}
+
+const IT_BEREICHE_OPTIONS = [
+  { value: "", label: "— Bereich wählen —" },
+  { value: "frontend", label: "🖥️  Frontend-Entwicklung" },
+  { value: "backend", label: "⚙️  Backend-Entwicklung" },
+  { value: "fullstack", label: "🔀  Full-Stack-Entwicklung" },
+  { value: "devops", label: "☁️  DevOps / Cloud Engineering" },
+  { value: "datascience", label: "📊  Data Science / KI / ML" },
+  { value: "security", label: "🔒  Cybersecurity / IT-Security" },
+  { value: "projektmanagement", label: "📋  IT-Projektmanagement / Scrum" },
+  { value: "sysadmin", label: "🖧  Systemadministration" },
+  { value: "qa", label: "🧪  QA / Softwaretesting" },
+  { value: "mobile", label: "📱  Mobile Entwicklung" },
+  { value: "architektur", label: "🏛️  Software-Architektur" },
+  { value: "erp", label: "🗄️  ERP / SAP-Beratung" },
+  { value: "embedded", label: "🔧  Embedded Systems / IoT" },
+  { value: "ux", label: "🎨  UX Engineering" },
+];
 
 
 export default function ApplicationsOverview() {
@@ -99,6 +128,11 @@ export default function ApplicationsOverview() {
   const [rowDocsLoading, setRowDocsLoading] = useState<string | null>(null);
   const [rowDocsError, setRowDocsError] = useState<string | null>(null);
   const [undoDoc, setUndoDoc] = useState<{ doc: DocumentPreview; appId: string; timer: ReturnType<typeof setTimeout> } | null>(null);
+
+  // Cover Letters
+  const [editCoverLetters, setEditCoverLetters] = useState<CoverLetterEntry[]>([]);
+  const [coverLettersLoading, setCoverLettersLoading] = useState(false);
+  const [activeCoverIdx, setActiveCoverIdx] = useState<number | null>(null);
 
   const statusConfig = {
     APPLIED: { label: "Beworben", color: "bg-blue-100 text-blue-800", icon: ClockIcon },
@@ -228,6 +262,24 @@ export default function ApplicationsOverview() {
 
   const openEdit = (app: Application) => {
     setEditingId(app.id);
+    setEditCoverLetters([]);
+    setActiveCoverIdx(null);
+    // Load cover letters async
+    setCoverLettersLoading(true);
+    fetch(`/api/applications/${app.id}/cover-letters`)
+      .then((r) => r.json())
+      .then((data: { id: string; title: string; itBereich: string | null; content: string }[]) => {
+        setEditCoverLetters(
+          (Array.isArray(data) ? data : []).map((cl) => ({
+            id: cl.id,
+            title: cl.title,
+            itBereich: cl.itBereich ?? "",
+            content: cl.content,
+          }))
+        );
+      })
+      .catch(console.error)
+      .finally(() => setCoverLettersLoading(false));
     setEditForm({
       ...app,
       status: app.status === "PLANNED" ? "INTERVIEW_SCHEDULED" : app.status,
@@ -265,6 +317,8 @@ export default function ApplicationsOverview() {
     setShowEdit(false);
     setEditingId(null);
     setEditForm({});
+    setEditCoverLetters([]);
+    setActiveCoverIdx(null);
   };
 
   const handleEditChange = (
@@ -326,6 +380,29 @@ export default function ApplicationsOverview() {
       }
 
       const updated = await res.json();
+      // Save cover letters
+      const appId = editingId;
+      const saves = editCoverLetters.map(async (cl) => {
+        if (cl._deleted && cl.id) {
+          await fetch(`/api/applications/${appId}/cover-letters?letterId=${cl.id}`, { method: "DELETE" });
+        } else if (cl._new || !cl.id) {
+          if (cl.content.trim()) {
+            await fetch(`/api/applications/${appId}/cover-letters`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, content: cl.content }),
+            });
+          }
+        } else if (cl._dirty && cl.id) {
+          await fetch(`/api/applications/${appId}/cover-letters`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, content: cl.content }),
+          });
+        }
+      });
+      await Promise.all(saves);
+
       await loadApplications();
       closeEdit();
       showToast("Bewerbung aktualisiert.");
@@ -1132,6 +1209,126 @@ export default function ApplicationsOverview() {
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Erforderliche Qualifikationen..."
                   />
+                </div>
+
+                {/* ─── Bewerbungsanschreiben ─── */}
+                <div className="border-t border-gray-200 pt-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                      <DocumentTextIcon className="h-5 w-5 text-blue-500" />
+                      Bewerbungsanschreiben
+                      <span className="ml-1 text-xs font-normal text-gray-400">
+                        ({editCoverLetters.filter((cl) => !cl._deleted).length})
+                      </span>
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const idx = editCoverLetters.length;
+                        setEditCoverLetters((prev) => [
+                          ...prev,
+                          { title: `Anschreiben ${prev.filter(c => !c._deleted).length + 1}`, itBereich: "", content: "", _new: true },
+                        ]);
+                        setActiveCoverIdx(idx);
+                      }}
+                      className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                      <PlusIcon className="h-3.5 w-3.5" /> Neu
+                    </button>
+                  </div>
+
+                  {coverLettersLoading ? (
+                    <p className="text-xs text-gray-400">Lade Anschreiben...</p>
+                  ) : editCoverLetters.filter((cl) => !cl._deleted).length === 0 ? (
+                    <p className="text-xs text-gray-400 italic">Noch keine Anschreiben gespeichert.</p>
+                  ) : (
+                    <div className="space-y-2 mb-3">
+                      {editCoverLetters.map((cl, idx) =>
+                        cl._deleted ? null : (
+                          <div
+                            key={idx}
+                            className={`flex items-center justify-between px-3 py-2 rounded-lg border cursor-pointer ${
+                              activeCoverIdx === idx
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            onClick={() => setActiveCoverIdx(activeCoverIdx === idx ? null : idx)}
+                          >
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium text-gray-800 truncate block">{cl.title || "Anschreiben"}</span>
+                              {cl.itBereich && (
+                                <span className="text-xs text-blue-600">
+                                  {IT_BEREICHE_OPTIONS.find((b) => b.value === cl.itBereich)?.label ?? cl.itBereich}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditCoverLetters((prev) =>
+                                  prev.map((c, i) => (i === idx ? { ...c, _deleted: true } : c))
+                                );
+                                if (activeCoverIdx === idx) setActiveCoverIdx(null);
+                              }}
+                              className="ml-2 text-red-400 hover:text-red-600 shrink-0"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </button>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  )}
+
+                  {/* Editor für ausgewähltes Anschreiben */}
+                  {activeCoverIdx !== null && editCoverLetters[activeCoverIdx] && !editCoverLetters[activeCoverIdx]._deleted && (() => {
+                    const cl = editCoverLetters[activeCoverIdx];
+                    const update = (patch: Partial<CoverLetterEntry>) =>
+                      setEditCoverLetters((prev) =>
+                        prev.map((c, i) =>
+                          i === activeCoverIdx ? { ...c, ...patch, _dirty: true } : c
+                        )
+                      );
+                    return (
+                      <div className="border border-blue-200 rounded-lg p-4 bg-blue-50/30 space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Titel</label>
+                            <input
+                              value={cl.title}
+                              onChange={(e) => update({ title: e.target.value })}
+                              className="w-full px-2 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              placeholder="z.B. Version 1 – formell"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">IT-Bereich</label>
+                            <select
+                              value={cl.itBereich}
+                              onChange={(e) => update({ itBereich: e.target.value })}
+                              className="w-full px-2 py-1.5 text-sm border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                              {IT_BEREICHE_OPTIONS.map((b) => (
+                                <option key={b.value} value={b.value}>{b.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Anschreiben-Text</label>
+                          <textarea
+                            value={cl.content}
+                            onChange={(e) => update({ content: e.target.value })}
+                            rows={12}
+                            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono leading-relaxed"
+                            placeholder="Sehr geehrte Damen und Herren,"
+                          />
+                          <p className="text-xs text-gray-400 mt-0.5">{cl.content.length} Zeichen</p>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
               </div>
