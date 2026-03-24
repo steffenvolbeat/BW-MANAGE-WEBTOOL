@@ -41,6 +41,7 @@ interface Application {
   notesText?: string; // Beschreibung
   requirements?: string;
   documents?: { id: string }[];
+  _clCount?: number;
 }
 
 type UploadDocType = "CV" | "COVER_LETTER" | "CERTIFICATE" | "REFERENCE" | "OTHER";
@@ -129,7 +130,13 @@ export default function ApplicationsOverview() {
   const [rowDocsError, setRowDocsError] = useState<string | null>(null);
   const [undoDoc, setUndoDoc] = useState<{ doc: DocumentPreview; appId: string; timer: ReturnType<typeof setTimeout> } | null>(null);
 
-  // Cover Letters
+  // Cover Letters – row expand
+  const [rowCLExpanded, setRowCLExpanded] = useState<string | null>(null);
+  const [rowCLData, setRowCLData] = useState<Record<string, { id: string; title: string; itBereich?: string }[]>>({});
+  const [rowCLLoading, setRowCLLoading] = useState<string | null>(null);
+  const [rowCLError, setRowCLError] = useState<string | null>(null);
+
+  // Cover Letters – edit modal
   const [editCoverLetters, setEditCoverLetters] = useState<CoverLetterEntry[]>([]);
   const [coverLettersLoading, setCoverLettersLoading] = useState(false);
   const [activeCoverIdx, setActiveCoverIdx] = useState<number | null>(null);
@@ -516,6 +523,25 @@ export default function ApplicationsOverview() {
       setRowDocsError(message);
     } finally {
       setPreviewLoading(false);
+    }
+  };
+
+  const loadCLForRow = async (applicationId: string) => {
+    setRowCLLoading(applicationId);
+    setRowCLError(null);
+    try {
+      const res = await fetch(`/api/applications/${applicationId}/cover-letters`);
+      if (!res.ok) throw new Error(`Anschreiben laden fehlgeschlagen (${res.status})`);
+      const data = await res.json();
+      setRowCLData((prev) => ({ ...prev, [applicationId]: data }));
+      setApplications((prev) =>
+        prev.map((a) => (a.id === applicationId ? { ...a, _clCount: data.length } : a))
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Anschreiben konnten nicht geladen werden.";
+      setRowCLError(message);
+    } finally {
+      setRowCLLoading(null);
     }
   };
 
@@ -1384,6 +1410,9 @@ export default function ApplicationsOverview() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Gehalt
                 </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Anschreiben
+                </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Aktionen
                 </th>
@@ -1474,6 +1503,31 @@ export default function ApplicationsOverview() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {application.salary || "-"}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <button
+                          className="flex items-center gap-1 text-blue-600 hover:text-blue-900"
+                          title="Anschreiben anzeigen"
+                          onClick={() => {
+                            const isOpen = rowCLExpanded === application.id;
+                            setRowCLExpanded(isOpen ? null : application.id);
+                            if (!isOpen && !rowCLData[application.id]) {
+                              loadCLForRow(application.id);
+                            }
+                          }}
+                        >
+                          <DocumentTextIcon className="w-4 h-4" />
+                          {(() => {
+                            const count = rowCLData[application.id]?.length ?? application._clCount;
+                            return count !== undefined ? (
+                              <span className={`text-xs font-bold rounded-full px-1 leading-none ${
+                                count > 0 ? "bg-blue-100 text-blue-700" : "bg-gray-100 text-gray-400"
+                              }`}>{count}</span>
+                            ) : (
+                              <span className="text-xs text-gray-400">–</span>
+                            );
+                          })()}
+                        </button>
+                      </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
                           <button
@@ -1482,6 +1536,19 @@ export default function ApplicationsOverview() {
                             onClick={() => openDetail(application)}
                           >
                             <EyeIcon className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="text-purple-600 hover:text-purple-900 p-1"
+                            title="Anschreiben (Panel)"
+                            onClick={() => {
+                              const isOpen = rowCLExpanded === application.id;
+                              setRowCLExpanded(isOpen ? null : application.id);
+                              if (!isOpen && !rowCLData[application.id]) {
+                                loadCLForRow(application.id);
+                              }
+                            }}
+                          >
+                            <DocumentTextIcon className="w-4 h-4" />
                           </button>
                           <button
                             className="text-gray-600 hover:text-gray-900 p-1 flex items-center gap-0.5"
@@ -1541,9 +1608,40 @@ export default function ApplicationsOverview() {
                         </div>
                       </td>
                     </tr>
+                    {rowCLExpanded === application.id && (
+                      <tr>
+                        <td colSpan={8} className="bg-blue-50 px-6 py-4 text-sm">
+                          <div className="flex items-center gap-2 mb-2">
+                            <DocumentTextIcon className="w-4 h-4 text-blue-500" />
+                            <span className="font-semibold text-blue-800">Bewerbungsanschreiben</span>
+                          </div>
+                          {rowCLLoading === application.id && <p className="text-gray-500">Lade…</p>}
+                          {rowCLError && <p className="text-red-600">{rowCLError}</p>}
+                          {rowCLLoading !== application.id && !rowCLError && (
+                            rowCLData[application.id]?.length ? (
+                              <div className="flex flex-wrap gap-2">
+                                {rowCLData[application.id].map((cl) => (
+                                  <div key={cl.id} className="flex items-center gap-1.5 bg-white border border-blue-200 rounded-lg px-3 py-1.5">
+                                    <DocumentTextIcon className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                                    <span className="text-sm font-medium text-gray-800">{cl.title}</span>
+                                    {cl.itBereich && (
+                                      <span className="text-xs text-blue-500 bg-blue-50 rounded px-1">
+                                        {IT_BEREICHE_OPTIONS.find((b) => b.value === cl.itBereich)?.label ?? cl.itBereich}
+                                      </span>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="text-gray-500 italic">Keine Anschreiben für diese Bewerbung.</p>
+                            )
+                          )}
+                        </td>
+                      </tr>
+                    )}
                     {rowDocsExpanded === application.id && (
                       <tr>
-                        <td colSpan={7} className="bg-gray-50 px-6 py-4 text-sm text-gray-800">
+                        <td colSpan={8} className="bg-gray-50 px-6 py-4 text-sm text-gray-800">
                           {rowDocsLoading === application.id && <p>Lade Dokumente…</p>}
                           {rowDocsError && <p className="text-red-600">{rowDocsError}</p>}
                           {!rowDocsLoading && !rowDocsError && (
