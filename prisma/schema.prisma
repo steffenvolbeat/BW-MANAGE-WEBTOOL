@@ -78,6 +78,8 @@ model Application {
   responseAt      DateTime?
   notesText       String?    @map("notes")
   requirements    String?
+  coverLetter     String?
+  itBereich       String?
   
   // Relations
   userId          String

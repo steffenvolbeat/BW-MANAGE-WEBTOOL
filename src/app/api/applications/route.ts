@@ -119,6 +119,8 @@ export async function POST(request: Request) {
         appliedAt: data.appliedAt ? new Date(data.appliedAt) : new Date(),
         notesText: description || data.notesText || "",
         requirements: requirementsInput || "",
+        coverLetter: data.coverLetter || null,
+        itBereich: data.itBereich || null,
       },
       include: {
         documents: true,
