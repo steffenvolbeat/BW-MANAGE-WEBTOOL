@@ -409,7 +409,8 @@ export default function ApplicationsOverview() {
             });
             if (!r.ok) throw new Error(`Neues Anschreiben speichern fehlgeschlagen (${r.status})`);
           }
-        } else if (cl._dirty && cl.id) {
+        } else if (cl.id) {
+          // Bestehende CLs immer aktualisieren (inkl. Adressfelder), unabhängig vom _dirty-Flag
           const r = await fetch(`/api/applications/${appId}/cover-letters`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
