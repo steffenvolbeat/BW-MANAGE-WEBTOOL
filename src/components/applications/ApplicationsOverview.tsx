@@ -207,11 +207,12 @@ export default function ApplicationsOverview() {
       if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
       const json = await res.json();
       const data = (Array.isArray(json) ? json : (json.applications ?? [])) as Application[];
-      const normalized = data.map((app) =>
-        app.status === "PLANNED"
+      const normalized = data.map((app) => {
+        const base = app.status === "PLANNED"
           ? { ...app, status: "INTERVIEW_SCHEDULED" }
-          : app
-      );
+          : app;
+        return { ...base, _clCount: (app as any)._count?.coverLetters ?? app._clCount };
+      });
       setApplications(normalized);
     } catch (err) {
       console.error("Applications fetch failed", err);

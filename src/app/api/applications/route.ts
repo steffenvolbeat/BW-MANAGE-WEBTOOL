@@ -47,6 +47,7 @@ export async function GET(request: Request) {
       include: {
         documents: true,
         activities: true,
+        _count: { select: { coverLetters: true } },
       },
       orderBy: { appliedAt: "desc" },
     });
