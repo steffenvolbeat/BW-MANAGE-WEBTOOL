@@ -401,14 +401,12 @@ export default function ApplicationsOverview() {
           const r = await fetch(`/api/applications/${appId}/cover-letters?letterId=${cl.id}`, { method: "DELETE" });
           if (!r.ok) throw new Error(`Anschreiben löschen fehlgeschlagen (${r.status})`);
         } else if (cl._new || !cl.id) {
-          if (cl.content.trim()) {
-            const r = await fetch(`/api/applications/${appId}/cover-letters`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content }),
-            });
-            if (!r.ok) throw new Error(`Neues Anschreiben speichern fehlgeschlagen (${r.status})`);
-          }
+          const r = await fetch(`/api/applications/${appId}/cover-letters`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content }),
+          });
+          if (!r.ok) throw new Error(`Neues Anschreiben speichern fehlgeschlagen (${r.status})`);
         } else if (cl.id) {
           // Bestehende CLs immer aktualisieren (inkl. Adressfelder), unabhängig vom _dirty-Flag
           const r = await fetch(`/api/applications/${appId}/cover-letters`, {
@@ -1370,8 +1368,11 @@ export default function ApplicationsOverview() {
                       <div className="border border-blue-200 rounded-lg p-4 bg-blue-50/30 space-y-3">
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Titel</label>
+                            <label htmlFor={`cl-title-${activeCoverIdx}`} className="block text-xs font-medium text-gray-700 mb-1">Titel</label>
                             <input
+                              id={`cl-title-${activeCoverIdx}`}
+                              name="cl-title"
+                              autoComplete="off"
                               value={cl.title}
                               onChange={(e) => update({ title: e.target.value })}
                               className="w-full px-2 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1379,8 +1380,10 @@ export default function ApplicationsOverview() {
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">IT-Bereich</label>
+                            <label htmlFor={`cl-it-bereich-${activeCoverIdx}`} className="block text-xs font-medium text-gray-700 mb-1">IT-Bereich</label>
                             <select
+                              id={`cl-it-bereich-${activeCoverIdx}`}
+                              name="cl-it-bereich"
                               value={cl.itBereich}
                               onChange={(e) => update({ itBereich: e.target.value })}
                               className="w-full px-2 py-1.5 text-sm border rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1393,8 +1396,11 @@ export default function ApplicationsOverview() {
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Absender-Adresse</label>
+                            <label htmlFor={`cl-sender-${activeCoverIdx}`} className="block text-xs font-medium text-gray-700 mb-1">Absender-Adresse</label>
                             <textarea
+                              id={`cl-sender-${activeCoverIdx}`}
+                              name="cl-sender-address"
+                              autoComplete="street-address"
                               value={cl.senderAddress ?? ""}
                               onChange={(e) => update({ senderAddress: e.target.value })}
                               rows={4}
@@ -1403,8 +1409,11 @@ export default function ApplicationsOverview() {
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Empfänger-Adresse</label>
+                            <label htmlFor={`cl-recipient-${activeCoverIdx}`} className="block text-xs font-medium text-gray-700 mb-1">Empfänger-Adresse</label>
                             <textarea
+                              id={`cl-recipient-${activeCoverIdx}`}
+                              name="cl-recipient-address"
+                              autoComplete="off"
                               value={cl.recipientAddress ?? ""}
                               onChange={(e) => update({ recipientAddress: e.target.value })}
                               rows={4}
@@ -1414,8 +1423,11 @@ export default function ApplicationsOverview() {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-700 mb-1">Anschreiben-Text</label>
+                          <label htmlFor={`cl-content-${activeCoverIdx}`} className="block text-xs font-medium text-gray-700 mb-1">Anschreiben-Text</label>
                           <textarea
+                            id={`cl-content-${activeCoverIdx}`}
+                            name="cl-content"
+                            autoComplete="off"
                             value={cl.content}
                             onChange={(e) => update({ content: e.target.value })}
                             rows={12}
