@@ -14,7 +14,7 @@ export async function GET(_req: Request, { params }: Params) {
     const { id: applicationId } = await params;
     const db = scopedPrisma(user.id);
 
-    // Verify ownership
+    // Verify ownership via scoped application (adds userId filter automatically)
     const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
@@ -94,9 +94,11 @@ export async function PUT(req: Request, { params }: Params) {
     const updated = await prisma.coverLetter.update({
       where: { id: letterId },
       data: {
-        ...(title !== undefined && { title: title.trim() || "Anschreiben" }),
+        ...(title !== undefined && { title: (typeof title === "string" && title.trim()) || "Anschreiben" }),
         ...(itBereich !== undefined && { itBereich: itBereich || null }),
-        ...(content !== undefined && { content }),
+        ...(senderAddress !== undefined && { senderAddress: (typeof senderAddress === "string" && senderAddress.trim()) || null }),
+        ...(recipientAddress !== undefined && { recipientAddress: (typeof recipientAddress === "string" && recipientAddress.trim()) || null }),
+        ...(content !== undefined && content !== null && { content: typeof content === "string" ? content : "" }),
       },
     });
 

@@ -554,8 +554,8 @@ export default function ApplicationsOverview() {
     try {
       const method = cl.id ? "PUT" : "POST";
       const body = cl.id
-        ? { letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content }
-        : { title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content };
+        ? { letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content ?? "" }
+        : { title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content ?? "" };
       const res = await fetch(`/api/applications/${appId}/cover-letters`, {
         method,
         headers: { "Content-Type": "application/json" },
