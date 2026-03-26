@@ -139,6 +139,7 @@ export default function ApplicationsOverview() {
   const [rowCLError, setRowCLError] = useState<string | null>(null);
   const [clPreview, setClPreview] = useState<{ appId: string; application: Application; cl: { id: string; title: string; itBereich?: string; senderAddress?: string; recipientAddress?: string; content?: string } } | null>(null);
   const [clPreviewSaving, setClPreviewSaving] = useState(false);
+  const [clDeleting, setClDeleting] = useState<string | null>(null);
 
   // Cover Letters – edit modal
   const [editCoverLetters, setEditCoverLetters] = useState<CoverLetterEntry[]>([]);
@@ -580,6 +581,30 @@ export default function ApplicationsOverview() {
       showToast(message, "error");
     } finally {
       setClPreviewSaving(false);
+    }
+  };
+
+  const handleDeleteCL = async (appId: string, letterId: string) => {
+    if (!window.confirm("Anschreiben wirklich löschen?")) return;
+    setClDeleting(letterId);
+    try {
+      const r = await fetch(`/api/applications/${appId}/cover-letters?letterId=${letterId}`, { method: "DELETE" });
+      if (!r.ok) throw new Error(`Löschen fehlgeschlagen (${r.status})`);
+      setRowCLData((prev) => ({
+        ...prev,
+        [appId]: (prev[appId] ?? []).filter((c) => c.id !== letterId),
+      }));
+      setApplications((prev) =>
+        prev.map((a) =>
+          a.id === appId ? { ...a, _clCount: Math.max(0, (a._clCount ?? 1) - 1) } : a
+        )
+      );
+      setClPreview((p) => (p?.cl.id === letterId ? null : p));
+      showToast("Anschreiben gelöscht.");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Fehler beim Löschen.", "error");
+    } finally {
+      setClDeleting(null);
     }
   };
 
@@ -1729,8 +1754,13 @@ export default function ApplicationsOverview() {
                                     )}
                                     <PencilSquareIcon
                                       className="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-500 shrink-0 ml-1"
-                                      onClick={(e) => { e.stopPropagation(); openEdit(application); }}
+                                      onClick={(e) => { e.stopPropagation(); setClPreview({ appId: application.id, application, cl }); }}
                                       title="Anschreiben bearbeiten"
+                                    />
+                                    <TrashIcon
+                                      className="w-3.5 h-3.5 text-gray-300 group-hover:text-red-400 shrink-0"
+                                      onClick={(e) => { e.stopPropagation(); handleDeleteCL(application.id, cl.id); }}
+                                      title="Anschreiben löschen"
                                     />
                                   </div>
                                 ))}
@@ -2214,12 +2244,26 @@ export default function ApplicationsOverview() {
               </div>
             </div>
             <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex justify-between items-center">
-              <button
-                className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2"
-                onClick={() => setClPreview(null)}
-              >
-                Schließen
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  className="text-sm text-gray-500 hover:text-gray-700 px-3 py-2"
+                  onClick={() => setClPreview(null)}
+                >
+                  Schließen
+                </button>
+                {clPreview.cl.id && (
+                  <button
+                    className="text-sm text-red-500 hover:text-red-700 px-3 py-2 flex items-center gap-1 disabled:opacity-50"
+                    disabled={clDeleting === clPreview.cl.id}
+                    onClick={() => handleDeleteCL(clPreview.appId, clPreview.cl.id!)}
+                  >
+                    {clDeleting === clPreview.cl.id
+                      ? <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                      : <TrashIcon className="w-4 h-4" />}
+                    Löschen
+                  </button>
+                )}
+              </div>
               <button
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm flex items-center gap-2 disabled:opacity-60"
                 disabled={clPreviewSaving}
