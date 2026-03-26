@@ -31,6 +31,7 @@ interface ApplicationFormData {
   priority: string;
   status: string;
   appliedAt: string;
+  itBereich: string;
 }
 
 interface FormErrors {
@@ -58,6 +59,7 @@ export default function ApplicationForm() {
     priority: "MEDIUM",
     status: "APPLIED",
     appliedAt: new Date().toISOString().slice(0, 10),
+    itBereich: "",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -601,6 +603,29 @@ Mit freundlichen Grüßen
                   {errors.position}
                 </p>
               )}
+            </div>
+
+            {/* IT-Bereich */}
+            <div>
+              <label
+                htmlFor="itBereich"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                IT-Bereich (optional)
+              </label>
+              <select
+                id="itBereich"
+                name="itBereich"
+                value={formData.itBereich}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              >
+                {itBereiche.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {b.label}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Beworben am */}
