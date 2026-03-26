@@ -175,7 +175,31 @@ export default function ApplicationsOverview() {
     INTERNSHIP: "Praktikum",
   };
 
+  const [sortBy, setSortBy] = useState<"appliedAt" | "status">("appliedAt");
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
+
+  const STATUS_ORDER: Record<string, number> = {
+    APPLIED: 1,
+    INITIATIVE: 2,
+    REVIEWED: 3,
+    INTERVIEW_SCHEDULED: 4,
+    INTERVIEWED: 5,
+    OFFER_RECEIVED: 6,
+    ACCEPTED: 7,
+    REJECTED: 8,
+    WITHDRAWN: 9,
+    OTHER: 10,
+    PLANNED: 4,
+  };
+
+  const handleSortClick = (field: "appliedAt" | "status") => {
+    if (sortBy === field) {
+      setSortOrder((o) => (o === "desc" ? "asc" : "desc"));
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
 
   const filteredApplications = applications
     .filter((app) => {
@@ -202,6 +226,11 @@ export default function ApplicationsOverview() {
       return matchesSearch && matchesFilter && matchesStatus;
     })
     .sort((a, b) => {
+      if (sortBy === "status") {
+        const sa = STATUS_ORDER[a.status] ?? 99;
+        const sb = STATUS_ORDER[b.status] ?? 99;
+        return sortOrder === "asc" ? sa - sb : sb - sa;
+      }
       const dateA = new Date(a.appliedAt).getTime();
       const dateB = new Date(b.appliedAt).getTime();
       return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
@@ -1534,22 +1563,32 @@ export default function ApplicationsOverview() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Standort
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                <th
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700"
+                  onClick={() => handleSortClick("status")}
+                >
+                  <span className="flex items-center gap-1">
+                    Status
+                    {sortBy === "status" ? (
+                      sortOrder === "asc" ? <ChevronUpIcon className="w-3 h-3" /> : <ChevronDownIcon className="w-3 h-3" />
+                    ) : (
+                      <ChevronUpIcon className="w-3 h-3 opacity-30" />
+                    )}
+                  </span>
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Priorität
                 </th>
                 <th
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-gray-700"
-                  onClick={() => setSortOrder((o) => (o === "desc" ? "asc" : "desc"))}
+                  onClick={() => handleSortClick("appliedAt")}
                 >
                   <span className="flex items-center gap-1">
                     Beworben am
-                    {sortOrder === "desc" ? (
-                      <ChevronDownIcon className="w-3 h-3" />
+                    {sortBy === "appliedAt" ? (
+                      sortOrder === "desc" ? <ChevronDownIcon className="w-3 h-3" /> : <ChevronUpIcon className="w-3 h-3" />
                     ) : (
-                      <ChevronUpIcon className="w-3 h-3" />
+                      <ChevronUpIcon className="w-3 h-3 opacity-30" />
                     )}
                   </span>
                 </th>
