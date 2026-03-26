@@ -65,7 +65,7 @@ export default function ApplicationForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Multiple cover letters
-  interface CoverLetterDraft { title: string; itBereich: string; content: string; }
+  interface CoverLetterDraft { title: string; itBereich: string; senderAddress: string; recipientAddress: string; content: string; }
   const [coverLetters, setCoverLetters] = useState<CoverLetterDraft[]>([]);
   const [activeCLIdx, setActiveCLIdx] = useState<number | null>(null);
 
@@ -73,7 +73,7 @@ export default function ApplicationForm() {
     const idx = coverLetters.length;
     setCoverLetters((prev) => [
       ...prev,
-      { title: `Anschreiben ${prev.length + 1}`, itBereich: "", content: "" },
+      { title: `Anschreiben ${prev.length + 1}`, itBereich: "", senderAddress: "", recipientAddress: "", content: "" },
     ]);
     setActiveCLIdx(idx);
   };
@@ -483,14 +483,19 @@ Mit freundlichen Grüßen
       const newApp = await res.json();
 
       // Save cover letters
-      const clsToSave = coverLetters.filter((cl) => cl.content.trim());
-      if (clsToSave.length > 0) {
+      if (coverLetters.length > 0) {
         await Promise.all(
-          clsToSave.map((cl) =>
+          coverLetters.map((cl) =>
             fetch(`/api/applications/${newApp.id}/cover-letters`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, content: cl.content }),
+              body: JSON.stringify({
+                title: cl.title,
+                itBereich: cl.itBereich || null,
+                senderAddress: cl.senderAddress || null,
+                recipientAddress: cl.recipientAddress || null,
+                content: cl.content,
+              }),
             })
           )
         );
@@ -1051,8 +1056,11 @@ Mit freundlichen Grüßen
                   <div className="border border-blue-200 rounded-lg p-4 bg-blue-50/30 space-y-3">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
+                        <label htmlFor={`cl-title-${activeCLIdx}`} className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
                         <input
+                          id={`cl-title-${activeCLIdx}`}
+                          name="cl-title"
+                          autoComplete="off"
                           value={cl.title}
                           onChange={(e) => updateCL(activeCLIdx, { title: e.target.value })}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1060,8 +1068,10 @@ Mit freundlichen Grüßen
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">IT-Bereich (Vorlage)</label>
+                        <label htmlFor={`cl-bereich-${activeCLIdx}`} className="block text-sm font-medium text-gray-700 mb-1">IT-Bereich (Vorlage)</label>
                         <select
+                          id={`cl-bereich-${activeCLIdx}`}
+                          name="cl-it-bereich"
                           value={cl.itBereich}
                           onChange={handleBereichChange(activeCLIdx)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1077,9 +1087,40 @@ Mit freundlichen Grüßen
                         )}
                       </div>
                     </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label htmlFor={`cl-sender-${activeCLIdx}`} className="block text-sm font-medium text-gray-700 mb-1">Absender-Adresse</label>
+                        <textarea
+                          id={`cl-sender-${activeCLIdx}`}
+                          name="cl-sender-address"
+                          autoComplete="off"
+                          value={cl.senderAddress}
+                          onChange={(e) => updateCL(activeCLIdx, { senderAddress: e.target.value })}
+                          rows={4}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          placeholder="Max Mustermann&#10;Musterstraße 1&#10;12345 Musterstadt"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={`cl-recipient-${activeCLIdx}`} className="block text-sm font-medium text-gray-700 mb-1">Empfänger-Adresse</label>
+                        <textarea
+                          id={`cl-recipient-${activeCLIdx}`}
+                          name="cl-recipient-address"
+                          autoComplete="off"
+                          value={cl.recipientAddress}
+                          onChange={(e) => updateCL(activeCLIdx, { recipientAddress: e.target.value })}
+                          rows={4}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          placeholder="Muster GmbH&#10;z.Hd. Frau Muster&#10;Firmenstraße 2&#10;54321 Firmenstadt"
+                        />
+                      </div>
+                    </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Anschreiben-Text</label>
+                      <label htmlFor={`cl-content-${activeCLIdx}`} className="block text-sm font-medium text-gray-700 mb-1">Anschreiben-Text</label>
                       <textarea
+                        id={`cl-content-${activeCLIdx}`}
+                        name="cl-content"
+                        autoComplete="off"
                         value={cl.content}
                         onChange={(e) => updateCL(activeCLIdx, { content: e.target.value })}
                         rows={14}
