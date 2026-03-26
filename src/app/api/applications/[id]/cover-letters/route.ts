@@ -42,16 +42,24 @@ export async function POST(req: Request, { params }: Params) {
     const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const { title, itBereich, content } = await req.json();
-    if (!content?.trim()) {
-      return NextResponse.json({ error: "content is required" }, { status: 400 });
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
+    const { title, itBereich, content, senderAddress, recipientAddress } = body as {
+      title?: string; itBereich?: string | null; content?: string;
+      senderAddress?: string | null; recipientAddress?: string | null;
+    };
 
     const coverLetter = await prisma.coverLetter.create({
       data: {
-        title: title?.trim() || "Anschreiben",
+        title: (typeof title === "string" && title.trim()) || "Anschreiben",
         itBereich: itBereich || null,
-        content,
+        senderAddress: (typeof senderAddress === "string" && senderAddress.trim()) || null,
+        recipientAddress: (typeof recipientAddress === "string" && recipientAddress.trim()) || null,
+        content: typeof content === "string" ? content : "",
         applicationId,
       },
     });
@@ -75,7 +83,7 @@ export async function PUT(req: Request, { params }: Params) {
     const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const { letterId, title, itBereich, content } = await req.json();
+    const { letterId, title, itBereich, content, senderAddress, recipientAddress } = await req.json();
     if (!letterId) return NextResponse.json({ error: "letterId is required" }, { status: 400 });
 
     const existing = await prisma.coverLetter.findFirst({
