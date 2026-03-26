@@ -408,17 +408,23 @@ export default function ApplicationsOverview() {
           const r = await fetch(`/api/applications/${appId}/cover-letters`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content }),
+            body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content ?? "" }),
           });
-          if (!r.ok) throw new Error(`Neues Anschreiben speichern fehlgeschlagen (${r.status})`);
+          if (!r.ok) {
+            const errBody = await r.json().catch(() => null);
+            throw new Error(errBody?.error ? `${errBody.error} (${r.status})` : `Neues Anschreiben speichern fehlgeschlagen (${r.status})`);
+          }
         } else if (cl.id) {
           // Bestehende CLs immer aktualisieren (inkl. Adressfelder), unabhängig vom _dirty-Flag
           const r = await fetch(`/api/applications/${appId}/cover-letters`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content }),
+            body: JSON.stringify({ letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content ?? "" }),
           });
-          if (!r.ok) throw new Error(`Anschreiben aktualisieren fehlgeschlagen (${r.status})`);
+          if (!r.ok) {
+            const errBody = await r.json().catch(() => null);
+            throw new Error(errBody?.error ? `${errBody.error} (${r.status})` : `Anschreiben aktualisieren fehlgeschlagen (${r.status})`);
+          }
         }
       });
       await Promise.all(saves);
