@@ -279,7 +279,7 @@ export default function ApplicationsOverview() {
     // Load cover letters async
     setCoverLettersLoading(true);
     fetch(`/api/applications/${app.id}/cover-letters`)
-      .then((r) => r.json())
+      .then((r) => { if (!r.ok) throw new Error(`Status ${r.status}`); return r.json(); })
       .then((data: { id: string; title: string; itBereich: string | null; senderAddress: string | null; recipientAddress: string | null; content: string }[]) => {
         setEditCoverLetters(
           (Array.isArray(data) ? data : []).map((cl) => ({
@@ -292,7 +292,10 @@ export default function ApplicationsOverview() {
           }))
         );
       })
-      .catch(console.error)
+      .catch((err) => {
+        console.error("CL-Laden fehlgeschlagen:", err);
+        showToast("Anschreiben konnten nicht geladen werden: " + (err?.message ?? ""), "error");
+      })
       .finally(() => setCoverLettersLoading(false));
     setEditForm({
       ...app,
@@ -551,20 +554,26 @@ export default function ApplicationsOverview() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      if (!res.ok) throw new Error(`Speichern fehlgeschlagen (${res.status})`);
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => null);
+        throw new Error(errBody?.error ? `${errBody.error} (${res.status})` : `Speichern fehlgeschlagen (${res.status})`);
+      }
       const saved = await res.json();
-      // Expand-Row-Cache aktualisieren
-      setRowCLData((prev) => {
-        const existing = prev[appId] ?? [];
-        const idx = existing.findIndex((c) => c.id === cl.id);
-        const entry = { id: saved.id, title: saved.title, itBereich: saved.itBereich ?? undefined, senderAddress: saved.senderAddress ?? undefined, recipientAddress: saved.recipientAddress ?? undefined, content: saved.content };
-        const newList = idx >= 0
-          ? existing.map((c, i) => (i === idx ? entry : c))
-          : [...existing, entry];
-        return { ...prev, [appId]: newList };
-      });
-      // Anzeige in Preview aktualisieren (z.B. neu vergebene ID bei POST)
-      setClPreview((p) => p ? { ...p, cl: { ...p.cl, id: saved.id } } : p);
+      // Expand-Row-Cache leeren → nächster Expand lädt frisch aus DB
+      setRowCLData((prev) => { const n = { ...prev }; delete n[appId]; return n; });
+      // Alle gespeicherten Felder in Preview aktualisieren
+      setClPreview((p) => p ? {
+        ...p,
+        cl: {
+          ...p.cl,
+          id: saved.id,
+          title: saved.title,
+          itBereich: saved.itBereich ?? "",
+          senderAddress: saved.senderAddress ?? "",
+          recipientAddress: saved.recipientAddress ?? "",
+          content: saved.content ?? "",
+        },
+      } : p);
       showToast("Anschreiben gespeichert.");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Fehler beim Speichern.";
@@ -1400,7 +1409,7 @@ export default function ApplicationsOverview() {
                             <textarea
                               id={`cl-sender-${activeCoverIdx}`}
                               name="cl-sender-address"
-                              autoComplete="street-address"
+                              autoComplete="off"
                               value={cl.senderAddress ?? ""}
                               onChange={(e) => update({ senderAddress: e.target.value })}
                               rows={4}
