@@ -40,6 +40,7 @@ interface Application {
   companyUrl?: string;
   notesText?: string; // Beschreibung
   requirements?: string;
+  itBereich?: string;
   documents?: { id: string }[];
   _clCount?: number;
 }
@@ -178,10 +179,17 @@ export default function ApplicationsOverview() {
 
   const filteredApplications = applications
     .filter((app) => {
+      const searchLower = searchTerm.toLowerCase();
+      const appliedAtStr = app.appliedAt ? new Date(app.appliedAt).toLocaleDateString("de-DE") : "";
       const matchesSearch =
-        app.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.location.toLowerCase().includes(searchTerm.toLowerCase());
+        app.companyName.toLowerCase().includes(searchLower) ||
+        app.position.toLowerCase().includes(searchLower) ||
+        app.location.toLowerCase().includes(searchLower) ||
+        (app.country || "").toLowerCase().includes(searchLower) ||
+        (app.state || "").toLowerCase().includes(searchLower) ||
+        (app.itBereich || "").toLowerCase().includes(searchLower) ||
+        (app.salary || "").toLowerCase().includes(searchLower) ||
+        appliedAtStr.includes(searchTerm);
 
       const matchesFilter =
         selectedFilter === "all" ||
@@ -376,6 +384,7 @@ export default function ApplicationsOverview() {
         companyUrl: (editForm as any).companyUrl,
         notesText: editForm.notesText,
         requirements: editForm.requirements,
+        itBereich: (editForm as any).itBereich || null,
         appliedAt: (editForm as any).appliedAt,
       };
 
@@ -1036,7 +1045,7 @@ export default function ApplicationsOverview() {
                 id="app-search"
                 name="search"
                 type="text"
-                placeholder="Nach Firma, Position oder Ort suchen..."
+                placeholder="Nach Firma, Position, Ort, Land, Bundesland, IT-Bereich, Gehalt, Datum suchen..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg placeholder-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1121,6 +1130,19 @@ export default function ApplicationsOverview() {
                     onChange={handleEditChange}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">IT-Bereich</label>
+                  <select
+                    name="itBereich"
+                    value={(editForm as any).itBereich || ""}
+                    onChange={handleEditChange}
+                    className="w-full px-3 py-2 border text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  >
+                    {IT_BEREICHE_OPTIONS.map((b) => (
+                      <option key={b.value} value={b.value}>{b.label}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Ort</label>
