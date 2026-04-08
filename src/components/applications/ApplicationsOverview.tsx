@@ -1052,6 +1052,10 @@ export default function ApplicationsOverview() {
                       <p className="font-semibold text-gray-900">{appA.position}</p>
                       <p className="text-sm text-gray-700">{appA.companyName}</p>
                       <p className="text-xs text-gray-500">{appA.location}</p>
+                      {appA.itBereich && <p className="text-xs text-indigo-500">{appA.itBereich}</p>}
+                      <p className="text-xs text-gray-400">
+                        {appA.appliedAt ? new Date(appA.appliedAt).toLocaleDateString("de-DE") : "–"}
+                      </p>
                       <button
                         type="button"
                         onClick={keepA}
@@ -1065,6 +1069,10 @@ export default function ApplicationsOverview() {
                       <p className="font-semibold text-gray-900">{appB.position}</p>
                       <p className="text-sm text-gray-700">{appB.companyName}</p>
                       <p className="text-xs text-gray-500">{appB.location}</p>
+                      {appB.itBereich && <p className="text-xs text-indigo-500">{appB.itBereich}</p>}
+                      <p className="text-xs text-gray-400">
+                        {appB.appliedAt ? new Date(appB.appliedAt).toLocaleDateString("de-DE") : "–"}
+                      </p>
                       <button
                         type="button"
                         onClick={keepB}

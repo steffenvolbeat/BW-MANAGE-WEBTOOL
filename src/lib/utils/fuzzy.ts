@@ -147,6 +147,15 @@ export function scoreApplicationDuplicates(
       target.itBereich.trim().toLowerCase() !== c.itBereich.trim().toLowerCase()
     ) continue;
 
+    // Wenn beide Bewerbungsdaten vorhanden und > 90 Tage auseinander → Neubewerbung, kein Duplikat
+    if (target.appliedAt && c.appliedAt) {
+      const diffDays = Math.abs(
+        (new Date(target.appliedAt).getTime() - new Date(c.appliedAt).getTime()) /
+        (1000 * 60 * 60 * 24)
+      );
+      if (diffDays > 90) continue;
+    }
+
     const reasons: string[] = [];
     let score = 0;
 
