@@ -1738,6 +1738,11 @@ export default function ApplicationsOverview() {
                               ]
                             }
                           </div>
+                          {application.itBereich && (
+                            <div className="text-xs text-indigo-500 mt-0.5">
+                              {application.itBereich}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
