@@ -104,6 +104,8 @@ export default function ApplicationsOverview() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [selectedCountry, setSelectedCountry] = useState("all");
+  const [selectedState, setSelectedState] = useState("all");
   const [coachInput, setCoachInput] = useState("");
   const [coachMode, setCoachMode] = useState<"local" | "anthropic">("local");
   const [coachLoading, setCoachLoading] = useState(false);
@@ -233,7 +235,13 @@ export default function ApplicationsOverview() {
       const matchesStatus =
         selectedStatus === "all" || app.status === selectedStatus;
 
-      return matchesSearch && matchesFilter && matchesStatus;
+      const matchesCountry =
+        selectedCountry === "all" || (app.country || "") === selectedCountry;
+
+      const matchesState =
+        selectedState === "all" || (app.state || "") === selectedState;
+
+      return matchesSearch && matchesFilter && matchesStatus && matchesCountry && matchesState;
     })
     .sort((a, b) => {
       if (sortBy === "status") {
@@ -1140,6 +1148,48 @@ export default function ApplicationsOverview() {
               <option value="OTHER">Sonstiges</option>
             </select>
           </div>
+
+          {/* Land Filter */}
+          {(() => {
+            const countries = [...new Set(applications.map((a) => a.country).filter(Boolean))].sort();
+            if (countries.length <= 1) return null;
+            return (
+              <div>
+                <select
+                  value={selectedCountry}
+                  onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState("all"); }}
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+                >
+                  <option value="all">Alle Länder</option>
+                  {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+            );
+          })()}
+
+          {/* Bundesland / Kanton Filter */}
+          {(() => {
+            const statesForCountry = [...new Set(
+              applications
+                .filter((a) => selectedCountry === "all" || a.country === selectedCountry)
+                .map((a) => a.state)
+                .filter((s): s is string => !!s)
+            )].sort();
+            if (statesForCountry.length === 0) return null;
+            const isSwiss = selectedCountry === "Schweiz";
+            return (
+              <div>
+                <select
+                  value={selectedState}
+                  onChange={(e) => setSelectedState(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+                >
+                  <option value="all">{isSwiss ? "Alle Kantone" : "Alle Bundesländer"}</option>
+                  {statesForCountry.map((s) => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
