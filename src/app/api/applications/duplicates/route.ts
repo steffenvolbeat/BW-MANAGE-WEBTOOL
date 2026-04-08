@@ -26,6 +26,7 @@ export async function GET(request: Request) {
         position: true,
         location: true,
         appliedAt: true,
+        itBereich: true,
       },
     });
 

@@ -118,6 +118,7 @@ interface ApplicationLike {
   position: string;
   location?: string | null;
   appliedAt?: Date | null;
+  itBereich?: string | null;
 }
 
 interface ContactLike {
@@ -138,6 +139,13 @@ export function scoreApplicationDuplicates(
 
   for (const c of candidates) {
     if (c.id === target.id) continue;
+
+    // Wenn beide einen IT-Bereich haben und dieser unterschiedlich ist,
+    // handelt es sich um eine andere Stellenausschreibung → kein Duplikat
+    if (
+      target.itBereich && c.itBereich &&
+      target.itBereich.trim().toLowerCase() !== c.itBereich.trim().toLowerCase()
+    ) continue;
 
     const reasons: string[] = [];
     let score = 0;
