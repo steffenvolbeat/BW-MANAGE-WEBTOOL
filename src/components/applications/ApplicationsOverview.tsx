@@ -1176,7 +1176,7 @@ export default function ApplicationsOverview() {
                 .filter((s): s is string => !!s)
             )].sort();
             if (statesForCountry.length === 0) return null;
-            const isSwiss = selectedCountry === "Schweiz";
+            const isSwiss = selectedCountry === "Schweiz" || selectedCountry === "Luxemburg";
             return (
               <div>
                 <select
@@ -1298,7 +1298,7 @@ export default function ApplicationsOverview() {
                   const statesByCountry: Record<string, string[]> = {
                     Deutschland: ["Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg","Hessen","Mecklenburg-Vorpommern","Niedersachsen","Nordrhein-Westfalen","Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein","Thüringen"],
                     Österreich: ["Burgenland","Kärnten","Niederösterreich","Oberösterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien"],
-                    Schweiz: ["Aargau","Appenzell Ausserrhoden","Appenzell Innerrhoden","Basel-Landschaft","Basel-Stadt","Bern","Freiburg","Genève","Glarus","Graubünden","Jura","Luzern","Nidwalden","Obwalden","Schaffhausen","Schwyz","Solothurn","St. Gallen","Thurgau","Ticino","Uri","Valais","Vaud","Zug","Zürich"],
+                    Schweiz: ["Aargau","Appenzell Ausserrhoden","Appenzell Innerrhoden","Basel-Landschaft","Basel-Stadt","Bern","Freiburg","Genf","Glarus","Graubünden","Jura","Luzern","Neuenburg","Nidwalden","Obwalden","Schaffhausen","Schwyz","Solothurn","St. Gallen","Tessin","Thurgau","Uri","Waadt","Wallis","Zug","Zürich"],
                     Luxemburg: ["Capellen","Clervaux","Diekirch","Echternach","Esch-sur-Alzette","Grevenmacher","Luxemburg","Mersch","Redange","Remich","Vianden","Wiltz"],
                   };
                   const states = statesByCountry[editForm.country || ""] ?? [];
@@ -1306,7 +1306,7 @@ export default function ApplicationsOverview() {
                   return (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {editForm.country === "Schweiz" ? "Kanton" : "Bundesland"}
+                        {editForm.country === "Schweiz" || editForm.country === "Luxemburg" ? "Kanton" : "Bundesland"}
                       </label>
                       <select
                         name="state"
@@ -1315,7 +1315,7 @@ export default function ApplicationsOverview() {
                         className="w-full px-3 py-2 border text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       >
                         <option value="">
-                          {editForm.country === "Schweiz" ? "Kanton wählen…" : "Bundesland wählen…"}
+                          {editForm.country === "Schweiz" || editForm.country === "Luxemburg" ? "Kanton wählen…" : "Bundesland wählen…"}
                         </option>
                         {states.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>

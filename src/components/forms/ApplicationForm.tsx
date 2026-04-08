@@ -369,10 +369,10 @@ Mit freundlichen Grüßen
     ],
     Schweiz: [
       "Aargau", "Appenzell Ausserrhoden", "Appenzell Innerrhoden", "Basel-Landschaft",
-      "Basel-Stadt", "Bern", "Freiburg", "Genève", "Glarus", "Graubünden",
-      "Jura", "Luzern", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz",
-      "Solothurn", "St. Gallen", "Thurgau", "Ticino", "Uri", "Valais",
-      "Vaud", "Zug", "Zürich",
+      "Basel-Stadt", "Bern", "Freiburg", "Genf", "Glarus", "Graubünden",
+      "Jura", "Luzern", "Neuenburg", "Nidwalden", "Obwalden", "Schaffhausen", "Schwyz",
+      "Solothurn", "St. Gallen", "Tessin", "Thurgau", "Uri", "Waadt",
+      "Wallis", "Zug", "Zürich",
     ],
     Luxemburg: ["Capellen", "Clervaux", "Diekirch", "Echternach", "Esch-sur-Alzette",
       "Grevenmacher", "Luxemburg", "Mersch", "Redange", "Remich", "Vianden", "Wiltz"],
@@ -766,7 +766,7 @@ Mit freundlichen Grüßen
                   htmlFor="state"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  {formData.country === "Schweiz" ? "Kanton" : "Bundesland"}
+                  {formData.country === "Schweiz" || formData.country === "Luxemburg" ? "Kanton" : "Bundesland"}
                 </label>
                 <select
                   id="state"
@@ -776,7 +776,7 @@ Mit freundlichen Grüßen
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
-                    {formData.country === "Schweiz" ? "Kanton wählen…" : "Bundesland wählen…"}
+                    {formData.country === "Schweiz" || formData.country === "Luxemburg" ? "Kanton wählen…" : "Bundesland wählen…"}
                   </option>
                   {availableStates.map((s) => (
                     <option key={s} value={s}>{s}</option>
