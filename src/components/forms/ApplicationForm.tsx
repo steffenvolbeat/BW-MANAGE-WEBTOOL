@@ -302,14 +302,19 @@ Mit freundlichen Grüßen
   ];
 
   const statuses = [
+    { value: "SAVED", label: "Gespeichert", color: "bg-gray-100 text-gray-600" },
     { value: "APPLIED", label: "Beworben", color: "bg-blue-100 text-blue-800" },
     { value: "INITIATIVE", label: "Initiativbewerbung", color: "bg-teal-100 text-teal-800" },
     { value: "REVIEWED", label: "Geprüft", color: "bg-purple-100 text-purple-800" },
+    { value: "TASK_RECEIVED", label: "Testaufgabe erhalten", color: "bg-orange-100 text-orange-800" },
+    { value: "TASK_SUBMITTED", label: "Testaufgabe eingereicht", color: "bg-amber-100 text-amber-800" },
     { value: "INTERVIEW_SCHEDULED", label: "Interview geplant", color: "bg-yellow-100 text-yellow-800" },
     { value: "INTERVIEWED", label: "Interview geführt", color: "bg-indigo-100 text-indigo-800" },
     { value: "OFFER_RECEIVED", label: "Angebot erhalten", color: "bg-green-100 text-green-800" },
+    { value: "NEGOTIATION", label: "Verhandlung", color: "bg-lime-100 text-lime-800" },
     { value: "ACCEPTED", label: "Angenommen", color: "bg-emerald-100 text-emerald-800" },
     { value: "REJECTED", label: "Abgelehnt", color: "bg-red-100 text-red-800" },
+    { value: "GHOSTING", label: "Ghosting", color: "bg-zinc-100 text-zinc-600" },
     { value: "WITHDRAWN", label: "Zurückgezogen", color: "bg-gray-100 text-gray-800" },
     { value: "OTHER", label: "Sonstiges", color: "bg-slate-100 text-slate-800" },
   ];

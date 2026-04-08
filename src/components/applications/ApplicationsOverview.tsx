@@ -147,15 +147,20 @@ export default function ApplicationsOverview() {
   const [coverLettersLoading, setCoverLettersLoading] = useState(false);
   const [activeCoverIdx, setActiveCoverIdx] = useState<number | null>(null);
 
-  const statusConfig = {
+  const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+    SAVED: { label: "Gespeichert", color: "bg-gray-100 text-gray-600", icon: ClockIcon },
     APPLIED: { label: "Beworben", color: "bg-blue-100 text-blue-800", icon: ClockIcon },
     INITIATIVE: { label: "Initiativbewerbung", color: "bg-teal-100 text-teal-800", icon: GlobeEuropeAfricaIcon },
     REVIEWED: { label: "Geprüft", color: "bg-purple-100 text-purple-800", icon: EyeIcon },
+    TASK_RECEIVED: { label: "Testaufgabe erhalten", color: "bg-orange-100 text-orange-800", icon: CalendarDaysIcon },
+    TASK_SUBMITTED: { label: "Testaufgabe eingereicht", color: "bg-amber-100 text-amber-800", icon: CalendarDaysIcon },
     INTERVIEW_SCHEDULED: { label: "Interview geplant", color: "bg-yellow-100 text-yellow-800", icon: CalendarDaysIcon },
     INTERVIEWED: { label: "Interview geführt", color: "bg-indigo-100 text-indigo-800", icon: CalendarDaysIcon },
     OFFER_RECEIVED: { label: "Angebot erhalten", color: "bg-green-100 text-green-800", icon: CalendarDaysIcon },
+    NEGOTIATION: { label: "Verhandlung", color: "bg-lime-100 text-lime-800", icon: CalendarDaysIcon },
     ACCEPTED: { label: "Angenommen", color: "bg-emerald-100 text-emerald-800", icon: CalendarDaysIcon },
     REJECTED: { label: "Abgelehnt", color: "bg-red-100 text-red-800", icon: CalendarDaysIcon },
+    GHOSTING: { label: "Ghosting", color: "bg-zinc-100 text-zinc-600", icon: CalendarDaysIcon },
     WITHDRAWN: { label: "Zurückgezogen", color: "bg-gray-100 text-gray-800", icon: CalendarDaysIcon },
     OTHER: { label: "Sonstiges", color: "bg-slate-100 text-slate-800", icon: CalendarDaysIcon },
   };
@@ -179,17 +184,22 @@ export default function ApplicationsOverview() {
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
 
   const STATUS_ORDER: Record<string, number> = {
-    APPLIED: 1,
-    INITIATIVE: 2,
-    REVIEWED: 3,
-    INTERVIEW_SCHEDULED: 4,
-    INTERVIEWED: 5,
-    OFFER_RECEIVED: 6,
-    ACCEPTED: 7,
-    REJECTED: 8,
-    WITHDRAWN: 9,
-    OTHER: 10,
-    PLANNED: 4,
+    SAVED: 1,
+    APPLIED: 2,
+    INITIATIVE: 3,
+    REVIEWED: 4,
+    TASK_RECEIVED: 5,
+    TASK_SUBMITTED: 6,
+    INTERVIEW_SCHEDULED: 7,
+    INTERVIEWED: 8,
+    OFFER_RECEIVED: 9,
+    NEGOTIATION: 10,
+    ACCEPTED: 11,
+    REJECTED: 12,
+    GHOSTING: 13,
+    WITHDRAWN: 14,
+    OTHER: 15,
+    PLANNED: 7,
   };
 
   const handleSortClick = (field: "appliedAt" | "status") => {
@@ -267,14 +277,19 @@ export default function ApplicationsOverview() {
   }, [userId]);
 
   const statusFlow = [
+    "SAVED",
     "APPLIED",
     "INITIATIVE",
     "REVIEWED",
+    "TASK_RECEIVED",
+    "TASK_SUBMITTED",
     "INTERVIEW_SCHEDULED",
     "INTERVIEWED",
     "OFFER_RECEIVED",
+    "NEGOTIATION",
     "ACCEPTED",
     "REJECTED",
+    "GHOSTING",
     "WITHDRAWN",
     "OTHER",
   ];
@@ -1108,14 +1123,19 @@ export default function ApplicationsOverview() {
               className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100 dark:focus:ring-blue-400 dark:focus:border-blue-400"
             >
               <option value="all">Alle Status</option>
+              <option value="SAVED">Gespeichert</option>
               <option value="APPLIED">Beworben</option>
               <option value="INITIATIVE">Initiativbewerbung</option>
               <option value="REVIEWED">Geprüft</option>
+              <option value="TASK_RECEIVED">Testaufgabe erhalten</option>
+              <option value="TASK_SUBMITTED">Testaufgabe eingereicht</option>
               <option value="INTERVIEW_SCHEDULED">Interview geplant</option>
               <option value="INTERVIEWED">Interview geführt</option>
               <option value="OFFER_RECEIVED">Angebot erhalten</option>
+              <option value="NEGOTIATION">Verhandlung</option>
               <option value="ACCEPTED">Angenommen</option>
               <option value="REJECTED">Abgelehnt</option>
+              <option value="GHOSTING">Ghosting</option>
               <option value="WITHDRAWN">Zurückgezogen</option>
               <option value="OTHER">Sonstiges</option>
             </select>
@@ -1260,15 +1280,19 @@ export default function ApplicationsOverview() {
                     onChange={handleEditChange}
                     className="w-full px-3 py-2 border text-gray-800 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="PLANNED">Geplant</option>
+                    <option value="SAVED">Gespeichert</option>
                     <option value="APPLIED">Beworben</option>
                     <option value="INITIATIVE">Initiativbewerbung</option>
                     <option value="REVIEWED">Geprüft</option>
+                    <option value="TASK_RECEIVED">Testaufgabe erhalten</option>
+                    <option value="TASK_SUBMITTED">Testaufgabe eingereicht</option>
                     <option value="INTERVIEW_SCHEDULED">Interview geplant</option>
                     <option value="INTERVIEWED">Interview geführt</option>
                     <option value="OFFER_RECEIVED">Angebot erhalten</option>
+                    <option value="NEGOTIATION">Verhandlung</option>
                     <option value="ACCEPTED">Angenommen</option>
                     <option value="REJECTED">Abgelehnt</option>
+                    <option value="GHOSTING">Ghosting</option>
                     <option value="WITHDRAWN">Zurückgezogen</option>
                     <option value="OTHER">Sonstiges</option>
                   </select>

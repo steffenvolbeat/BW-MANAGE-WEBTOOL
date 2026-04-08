@@ -1,0 +1,6 @@
+-- AlterEnum
+ALTER TYPE "ApplicationStatus" ADD VALUE 'SAVED';
+ALTER TYPE "ApplicationStatus" ADD VALUE 'TASK_RECEIVED';
+ALTER TYPE "ApplicationStatus" ADD VALUE 'TASK_SUBMITTED';
+ALTER TYPE "ApplicationStatus" ADD VALUE 'GHOSTING';
+ALTER TYPE "ApplicationStatus" ADD VALUE 'NEGOTIATION';

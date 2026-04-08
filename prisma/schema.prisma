@@ -381,6 +381,11 @@ enum ApplicationStatus {
   WITHDRAWN
   INITIATIVE
   OTHER
+  SAVED
+  TASK_RECEIVED
+  TASK_SUBMITTED
+  GHOSTING
+  NEGOTIATION
 }
 
 enum Priority {
