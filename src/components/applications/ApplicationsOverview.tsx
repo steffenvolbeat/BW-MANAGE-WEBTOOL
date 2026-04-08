@@ -1150,33 +1150,55 @@ export default function ApplicationsOverview() {
           </div>
 
           {/* Land Filter */}
-          {(() => {
-            const countries = [...new Set(applications.map((a) => a.country).filter(Boolean))].sort();
-            if (countries.length <= 1) return null;
-            return (
-              <div>
-                <select
-                  value={selectedCountry}
-                  onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState("all"); }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
-                >
-                  <option value="all">Alle Länder</option>
-                  {countries.map((c) => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </div>
-            );
-          })()}
+          <div>
+            <select
+              value={selectedCountry}
+              onChange={(e) => { setSelectedCountry(e.target.value); setSelectedState("all"); }}
+              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
+            >
+              <option value="all">Alle Länder</option>
+              <option value="Deutschland">Deutschland</option>
+              <option value="Österreich">Österreich</option>
+              <option value="Schweiz">Schweiz</option>
+              <option value="Luxemburg">Luxemburg</option>
+              <option value="Niederlande">Niederlande</option>
+              <option value="Belgien">Belgien</option>
+              <option value="Frankreich">Frankreich</option>
+              <option value="Italien">Italien</option>
+              <option value="Spanien">Spanien</option>
+              <option value="Portugal">Portugal</option>
+              <option value="Polen">Polen</option>
+              <option value="Tschechien">Tschechien</option>
+              <option value="Ungarn">Ungarn</option>
+              <option value="Rumänien">Rumänien</option>
+              <option value="Schweden">Schweden</option>
+              <option value="Norwegen">Norwegen</option>
+              <option value="Dänemark">Dänemark</option>
+              <option value="Finnland">Finnland</option>
+              <option value="Irland">Irland</option>
+              <option value="Vereinigtes Königreich">Vereinigtes Königreich</option>
+              <option value="Griechenland">Griechenland</option>
+              <option value="Kroatien">Kroatien</option>
+              <option value="Slowenien">Slowenien</option>
+              <option value="Slowakei">Slowakei</option>
+              <option value="USA">USA</option>
+              <option value="Kanada">Kanada</option>
+              <option value="Australien">Australien</option>
+              <option value="Sonstiges">Sonstiges</option>
+            </select>
+          </div>
 
           {/* Bundesland / Kanton Filter */}
           {(() => {
-            const statesForCountry = [...new Set(
-              applications
-                .filter((a) => selectedCountry === "all" || a.country === selectedCountry)
-                .map((a) => a.state)
-                .filter((s): s is string => !!s)
-            )].sort();
-            if (statesForCountry.length === 0) return null;
-            const isSwiss = selectedCountry === "Schweiz" || selectedCountry === "Luxemburg";
+            const allStatesByCountry: Record<string, string[]> = {
+              Deutschland: ["Baden-Württemberg","Bayern","Berlin","Brandenburg","Bremen","Hamburg","Hessen","Mecklenburg-Vorpommern","Niedersachsen","Nordrhein-Westfalen","Rheinland-Pfalz","Saarland","Sachsen","Sachsen-Anhalt","Schleswig-Holstein","Thüringen"],
+              Österreich: ["Burgenland","Kärnten","Niederösterreich","Oberösterreich","Salzburg","Steiermark","Tirol","Vorarlberg","Wien"],
+              Schweiz: ["Aargau","Appenzell Ausserrhoden","Appenzell Innerrhoden","Basel-Landschaft","Basel-Stadt","Bern","Freiburg","Genf","Glarus","Graubünden","Jura","Luzern","Neuenburg","Nidwalden","Obwalden","Schaffhausen","Schwyz","Solothurn","St. Gallen","Tessin","Thurgau","Uri","Waadt","Wallis","Zug","Zürich"],
+              Luxemburg: ["Capellen","Clervaux","Diekirch","Echternach","Esch-sur-Alzette","Grevenmacher","Luxemburg","Mersch","Redange","Remich","Vianden","Wiltz"],
+            };
+            const stateList = selectedCountry !== "all" ? (allStatesByCountry[selectedCountry] ?? []) : [];
+            if (stateList.length === 0) return null;
+            const isKanton = selectedCountry === "Schweiz" || selectedCountry === "Luxemburg";
             return (
               <div>
                 <select
@@ -1184,8 +1206,8 @@ export default function ApplicationsOverview() {
                   onChange={(e) => setSelectedState(e.target.value)}
                   className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-100"
                 >
-                  <option value="all">{isSwiss ? "Alle Kantone" : "Alle Bundesländer"}</option>
-                  {statesForCountry.map((s) => <option key={s} value={s}>{s}</option>)}
+                  <option value="all">{isKanton ? "Alle Kantone" : "Alle Bundesländer"}</option>
+                  {stateList.map((s) => <option key={s} value={s}>{s}</option>)}
                 </select>
               </div>
             );
