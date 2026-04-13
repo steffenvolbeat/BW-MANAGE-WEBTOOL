@@ -333,14 +333,14 @@ function E({
 /** Section heading with icon circle (Novoresume style) */
 function SectionHeading({ title, icon }: { title: string; icon: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 mb-3">
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
       <div
-        className="w-7 h-7 rounded-full border-2 flex items-center justify-center shrink-0"
-        style={{ borderColor: ACCENT, color: ACCENT }}
+        style={{ width: 26, height: 26, borderRadius: "50%", border: `2px solid ${ACCENT}`, color: ACCENT, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
       >
         {icon}
       </div>
-      <h2 className="text-sm font-bold tracking-widest uppercase text-gray-800">{title}</h2>
+      <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#1a202c", whiteSpace: "nowrap" }}>{title}</span>
+      <div style={{ flex: 1, height: 1, background: "#e5e7eb" }} />
     </div>
   );
 }
@@ -530,7 +530,7 @@ export default function LebenslaufTemplate() {
   return (
     <div className="min-h-screen bg-gray-100 py-6 px-4">
       {/* Controls */}
-      <div className="flex gap-3 mb-5 max-w-212.5 mx-auto print:hidden">
+      <div className="flex gap-3 mb-5 print:hidden" style={{ maxWidth: 850, margin: "0 auto 20px" }}>
         <button
           onClick={() => setEditing((e) => !e)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -568,8 +568,8 @@ export default function LebenslaufTemplate() {
 
       {/* ── CV Document ────────────────────────────────────────────────────────── */}
       <div
-        className="max-w-212.5 mx-auto shadow-2xl bg-white print:shadow-none print:max-w-none"
-        style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}
+        className="shadow-2xl bg-white print:shadow-none"
+        style={{ maxWidth: 850, margin: "0 auto", fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif" }}
       >
         <div className="flex">
           {/* ─── LEFT COLUMN ──────────────────────────────────────────────────── */}
@@ -604,21 +604,24 @@ export default function LebenslaufTemplate() {
                 />
               </div>
               <div className="flex-1 pt-1">
-                <E
-                  value={data.personal.name}
-                  onChange={(v) => setPersonal({ name: v })}
-                  editing={editing}
-                  className="block text-3xl font-bold text-gray-900 leading-tight mb-0.5"
-                />
                 {editing ? (
                   <input
-                    className="border border-dashed border-blue-300 rounded px-1 py-0.5 bg-blue-50/40 outline-none focus:border-blue-500 w-full text-sm font-medium mb-2"
+                    value={data.personal.name}
+                    onChange={(e) => setPersonal({ name: e.target.value })}
+                    style={{ display: "block", fontSize: 34, fontWeight: 700, color: "#0f1e2e", lineHeight: 1.2, marginBottom: 4, border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", background: "rgba(219,234,254,0.3)", outline: "none", width: "100%" }}
+                  />
+                ) : (
+                  <span style={{ display: "block", fontSize: 34, fontWeight: 700, color: "#0f1e2e", lineHeight: 1.2, marginBottom: 4 }}>{data.personal.name}</span>
+                )}
+                {editing ? (
+                  <input
+                    style={{ display: "block", fontSize: 14, color: ACCENT, fontWeight: 500, marginBottom: 8, border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", background: "rgba(219,234,254,0.3)", outline: "none", width: "100%" }}
                     value={data.personal.subtitle}
                     onChange={(e) => setPersonal({ subtitle: e.target.value })}
                     placeholder="Berufsbezeichnung..."
                   />
                 ) : (
-                  <span className="block text-sm font-medium mb-2" style={{ color: ACCENT }}>
+                  <span style={{ display: "block", fontSize: 14, color: ACCENT, fontWeight: 500, marginBottom: 8 }}>
                     {data.personal.subtitle}
                   </span>
                 )}
@@ -886,8 +889,7 @@ export default function LebenslaufTemplate() {
 
           {/* ─── RIGHT SIDEBAR ─────────────────────────────────────────────────── */}
           <div
-            className="w-73.75 shrink-0 py-8 px-5"
-            style={{ backgroundColor: SIDEBAR_BG, color: "white" }}
+            style={{ width: 295, flexShrink: 0, backgroundColor: SIDEBAR_BG, color: "white", padding: "32px 20px" }}
           >
             {/* Contact */}
             <div className="mb-6">

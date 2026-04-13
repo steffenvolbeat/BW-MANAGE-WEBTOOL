@@ -154,8 +154,17 @@ function ContactRow({
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
-export default function CoverLetterNovoresume() {
-  const [data, setData] = useState<CLData>(JSON.parse(JSON.stringify(DEFAULT_CL)));
+export default function CoverLetterNovoresume({
+  initialCompany,
+  initialPosition,
+}: {
+  initialCompany?: string;
+  initialPosition?: string;
+}) {
+  const startData = JSON.parse(JSON.stringify(DEFAULT_CL)) as CLData;
+  if (initialCompany) startData.recipient.company = initialCompany;
+  if (initialPosition) startData.subject = `Bewerbung als ${initialPosition}`;
+  const [data, setData] = useState<CLData>(startData);
   const [editing, setEditing] = useState(false);
 
   const setPersonal = (patch: Partial<CLData["personal"]>) =>
@@ -180,7 +189,7 @@ export default function CoverLetterNovoresume() {
   return (
     <div className="min-h-screen bg-gray-100 py-6 px-4">
       {/* Controls */}
-      <div className="flex gap-3 mb-5 max-w-212.5 mx-auto print:hidden">
+      <div className="flex gap-3 mb-5 print:hidden" style={{ maxWidth: 850, margin: "0 auto 20px" }}>
         <button
           onClick={() => setEditing((e) => !e)}
           className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -218,32 +227,36 @@ export default function CoverLetterNovoresume() {
 
       {/* ── Cover Letter Document ──────────────────────────────────────────────── */}
       <div
-        className="max-w-212.5 mx-auto shadow-2xl bg-white print:shadow-none print:max-w-none"
-        style={{ fontFamily: "'Segoe UI', Arial, sans-serif" }}
+        className="shadow-2xl bg-white print:shadow-none"
+        style={{ maxWidth: 850, margin: "0 auto", fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif" }}
       >
-        <div className="flex min-h-275">
+        <div className="flex" style={{ minHeight: 1100 }}>
           {/* ─── LEFT COLUMN ──────────────────────────────────────────────────── */}
-          <div className="flex-1 bg-white py-10 pl-10 pr-6">
+          <div className="flex-1 bg-white" style={{ padding: "40px 24px 40px 40px" }}>
             {/* Name + Subtitle */}
             <div className="mb-6">
-              <E
-                value={data.personal.name}
-                onChange={(v) => setPersonal({ name: v })}
-                editing={editing}
-                className="block text-4xl font-bold text-gray-900 leading-tight"
-              />
-              <div style={{ color: ACCENT }} className="text-base font-medium mt-1 mb-6">
-                <E
-                  value={data.personal.subtitle}
-                  onChange={(v) => setPersonal({ subtitle: v })}
-                  editing={editing}
-                  className="block"
+              {editing ? (
+                <input
+                  value={data.personal.name}
+                  onChange={(e) => setPersonal({ name: e.target.value })}
+                  style={{ display: "block", fontSize: 36, fontWeight: 700, color: "#0f1e2e", lineHeight: 1.2, border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", background: "rgba(219,234,254,0.3)", outline: "none", width: "100%", marginBottom: 4 }}
                 />
-              </div>
+              ) : (
+                <span style={{ display: "block", fontSize: 36, fontWeight: 700, color: "#0f1e2e", lineHeight: 1.2, marginBottom: 4 }}>{data.personal.name}</span>
+              )}
+              {editing ? (
+                <input
+                  value={data.personal.subtitle}
+                  onChange={(e) => setPersonal({ subtitle: e.target.value })}
+                  style={{ display: "block", fontSize: 14, color: ACCENT, fontWeight: 500, marginBottom: 24, border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", background: "rgba(219,234,254,0.3)", outline: "none", width: "100%" }}
+                />
+              ) : (
+                <span style={{ display: "block", fontSize: 14, color: ACCENT, fontWeight: 500, marginBottom: 24 }}>{data.personal.subtitle}</span>
+              )}
 
               {/* Recipient block */}
               <div className="mb-1">
-                <p className="text-xs italic text-gray-400 mb-0.5">An</p>
+                <p style={{ fontSize: 11, fontStyle: "italic", color: "#9ca3af", marginBottom: 2 }}>An</p>
                 <E
                   value={data.recipient.company}
                   onChange={(v) => setRecipient({ company: v })}
@@ -366,8 +379,7 @@ export default function CoverLetterNovoresume() {
 
           {/* ─── RIGHT SIDEBAR ─────────────────────────────────────────────────── */}
           <div
-            className="w-73.75 shrink-0 py-10 px-5"
-            style={{ backgroundColor: SIDEBAR_BG, color: "white" }}
+            style={{ width: 295, flexShrink: 0, backgroundColor: SIDEBAR_BG, color: "white", padding: "40px 20px" }}
           >
             <ContactRow
               icon={<EnvelopeIcon className="w-3 h-3" />}

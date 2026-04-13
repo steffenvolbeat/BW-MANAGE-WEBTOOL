@@ -1,12 +1,20 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import AnschreibenStudio from "@/components/anschreiben/AnschreibenStudio";
 import CoverLetterNovoresume from "@/components/anschreiben/CoverLetterNovoresume";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
 
 export default function AnschreibenPage() {
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<"din" | "novoresume">("din");
+
+  useEffect(() => {
+    if (searchParams.get("mode") === "novoresume") {
+      setTab("novoresume");
+    }
+  }, [searchParams]);
 
   return (
     <ProtectedRoute>
@@ -35,7 +43,14 @@ export default function AnschreibenPage() {
           </button>
         </div>
 
-        {tab === "din" ? <AnschreibenStudio /> : <CoverLetterNovoresume />}
+        {tab === "din" ? (
+          <AnschreibenStudio />
+        ) : (
+          <CoverLetterNovoresume
+            initialCompany={searchParams.get("company") ?? undefined}
+            initialPosition={searchParams.get("position") ?? undefined}
+          />
+        )}
       </MainLayout>
     </ProtectedRoute>
   );

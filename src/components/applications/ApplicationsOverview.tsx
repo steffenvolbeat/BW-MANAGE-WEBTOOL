@@ -20,6 +20,7 @@ import {
   ChevronDownIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 interface Application {
   id: string;
   companyName: string;
@@ -93,6 +94,7 @@ export default function ApplicationsOverview() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -1912,6 +1914,21 @@ export default function ApplicationsOverview() {
                             }}
                           >
                             <DocumentTextIcon className="w-4 h-4" />
+                          </button>
+                          <button
+                            className="text-teal-600 hover:text-teal-800 p-1"
+                            title="Novoresume Anschreiben erstellen"
+                            onClick={() => {
+                              const params = new URLSearchParams({
+                                mode: "novoresume",
+                                company: application.companyName,
+                                position: application.position,
+                              });
+                              router.push(`/anschreiben?${params.toString()}`);
+                            }}
+                          >
+                            <DocumentTextIcon className="w-4 h-4" />
+                            <span className="text-xs leading-none ml-0.5 font-semibold">NR</span>
                           </button>
                           <button
                             className="text-gray-600 hover:text-gray-900 p-1 flex items-center gap-0.5"
