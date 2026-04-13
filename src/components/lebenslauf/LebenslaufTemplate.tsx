@@ -14,10 +14,11 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 
-// ── Accent color (Novoresume London teal) ─────────────────────────────────────
+// ── Tokens ────────────────────────────────────────────────────────────────────
 const ACCENT = "#3ecfd6";
 const SIDEBAR_BG = "#1d2a3a";
 const TAG_BG = "#0f1e2e";
+const DOC_FONT = "'Nunito','Calibri','Segoe UI',Arial,sans-serif";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Project {
@@ -301,6 +302,7 @@ function E({
   multiline = false,
   className = "",
   placeholder = "...",
+  style,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -308,12 +310,14 @@ function E({
   multiline?: boolean;
   className?: string;
   placeholder?: string;
+  style?: React.CSSProperties;
 }) {
-  if (!editing) return <span className={className}>{value || <span className="opacity-30">{placeholder}</span>}</span>;
+  if (!editing) return <span className={className} style={style}>{value || <span className="opacity-30">{placeholder}</span>}</span>;
   if (multiline)
     return (
       <textarea
         className={`w-full border border-dashed border-blue-300 rounded px-1 py-0.5 text-inherit bg-blue-50/40 resize-y outline-none focus:border-blue-500 ${className}`}
+        style={style}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
@@ -323,6 +327,7 @@ function E({
   return (
     <input
       className={`border border-dashed border-blue-300 rounded px-1 py-0.5 text-inherit bg-blue-50/40 outline-none focus:border-blue-500 w-full ${className}`}
+      style={style}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
@@ -446,20 +451,26 @@ function TagList({
   onChange,
   editing,
   dark = false,
+  outlined = false,
 }: {
   tags: string[];
   onChange: (t: string[]) => void;
   editing: boolean;
   dark?: boolean;
+  outlined?: boolean;
 }) {
   const [newTag, setNewTag] = useState("");
+  const tagStyle: React.CSSProperties = outlined
+    ? { border: "1px solid rgba(255,255,255,0.35)", color: "white", backgroundColor: "transparent", borderRadius: 12, padding: "2px 10px", fontSize: 11 }
+    : dark
+    ? { backgroundColor: TAG_BG, color: "white", borderRadius: 3, padding: "2px 9px", fontSize: 11 }
+    : { backgroundColor: "#e5f9fa", color: "#0e7490", borderRadius: 3, padding: "2px 9px", fontSize: 11 };
   return (
     <div className="flex flex-wrap gap-1.5">
       {tags.map((t, i) => (
         <div
           key={i}
-          className="flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium"
-          style={dark ? { backgroundColor: TAG_BG, color: "white" } : { backgroundColor: "#e5f9fa", color: "#0e7490" }}
+          style={{ ...tagStyle, display: "flex", alignItems: "center", gap: 4 }}
         >
           {t}
           {editing && (
@@ -528,7 +539,8 @@ export default function LebenslaufTemplate() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6 px-4">
+    <div style={{ minHeight: "100vh", background: "#f3f4f6", padding: "24px 16px", overflowX: "auto" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');`}</style>
       {/* Controls */}
       <div className="flex gap-3 mb-5 print:hidden" style={{ maxWidth: 850, margin: "0 auto 20px" }}>
         <button
@@ -568,24 +580,23 @@ export default function LebenslaufTemplate() {
 
       {/* ── CV Document ────────────────────────────────────────────────────────── */}
       <div
-        className="shadow-2xl bg-white print:shadow-none"
-        style={{ maxWidth: 850, margin: "0 auto", fontFamily: "'Calibri', 'Segoe UI', Arial, sans-serif" }}
+        className="print:shadow-none"
+        style={{ maxWidth: 850, margin: "0 auto", fontFamily: DOC_FONT, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)" }}
       >
-        <div className="flex">
+        <div style={{ display: "flex" }}>
           {/* ─── LEFT COLUMN ──────────────────────────────────────────────────── */}
-          <div className="flex-1 bg-white py-8 pl-8 pr-5">
+          <div style={{ flex: 1, backgroundColor: "white", padding: "32px 20px 32px 32px", color: "#111827" }}>
             {/* Header */}
-            <div className="flex items-start gap-4 mb-7 pb-6 border-b border-gray-100">
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 16, marginBottom: 28, paddingBottom: 24, borderBottom: "1px solid #f3f4f6" }}>
               <div
-                className="w-24 h-28 rounded overflow-hidden shrink-0 bg-gray-200 flex items-center justify-center relative cursor-pointer"
-                style={{ border: `2px solid ${ACCENT}` }}
+                style={{ width: 96, height: 112, borderRadius: 4, overflow: "hidden", flexShrink: 0, backgroundColor: "#e5e7eb", border: `2px solid ${ACCENT}`, display: "flex", alignItems: "center", justifyContent: "center", position: "relative", cursor: editing ? "pointer" : "default" }}
                 onClick={() => editing && photoInputRef.current?.click()}
                 title={editing ? "Klicken zum Foto hochladen" : ""}
               >
                 {photoSrc ? (
-                  <img src={photoSrc} alt="Profilfoto" className="w-full h-full object-cover" />
+                  <img src={photoSrc} alt="Profilfoto" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <span className="text-xs text-gray-400 text-center px-1 leading-tight">
+                  <span style={{ fontSize: 11, color: "#9ca3af", textAlign: "center", padding: "0 4px", lineHeight: 1.3 }}>
                     {editing ? "📷 Hochladen" : "Foto"}
                   </span>
                 )}
@@ -603,7 +614,7 @@ export default function LebenslaufTemplate() {
                   }}
                 />
               </div>
-              <div className="flex-1 pt-1">
+              <div style={{ flex: 1 }}>
                 {editing ? (
                   <input
                     value={data.personal.name}
@@ -630,7 +641,9 @@ export default function LebenslaufTemplate() {
                   onChange={(v) => setPersonal({ bio: v })}
                   editing={editing}
                   multiline
-                  className="block text-xs text-gray-600 leading-relaxed"
+                  className="block"
+                  placeholder="Profiltext / Bio..."
+                  style={{ fontSize: 11, color: "#6b7280", lineHeight: 1.5 }}
                 />
               </div>
             </div>
@@ -1144,6 +1157,7 @@ export default function LebenslaufTemplate() {
                     onChange={(v) => setLanguages(data.languages.map((l) => (l.id === lang.id ? { ...l, level: v } : l)))}
                     editing={editing}
                     className="text-xs italic block"
+                    style={{ color: ACCENT }}
                   />
                   {editing && (
                     <button
@@ -1181,14 +1195,14 @@ export default function LebenslaufTemplate() {
                 tags={data.interests}
                 onChange={(t) => setData((d) => ({ ...d, interests: t }))}
                 editing={editing}
-                dark
+                outlined
               />
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex justify-between px-8 py-2 border-t border-gray-100 text-xs text-gray-400">
+        <div style={{ display: "flex", justifyContent: "space-between", padding: "8px 32px", borderTop: "1px solid #f3f4f6", fontSize: 11, color: "#9ca3af" }}>
           <span>{new Date().toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" })}</span>
           <span>Seite 1 von 1</span>
         </div>
