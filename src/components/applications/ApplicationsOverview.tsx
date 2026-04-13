@@ -149,6 +149,11 @@ export default function ApplicationsOverview() {
   const [coverLettersLoading, setCoverLettersLoading] = useState(false);
   const [activeCoverIdx, setActiveCoverIdx] = useState<number | null>(null);
 
+  // Inline-Datepicker "Beworben am"
+  const [quickDateId, setQuickDateId] = useState<string | null>(null);
+  const [quickDateVal, setQuickDateVal] = useState<string>("");
+  const [savingQuickDate, setSavingQuickDate] = useState(false);
+
   const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
     SAVED: { label: "Gespeichert", color: "bg-gray-100 text-gray-600", icon: ClockIcon },
     APPLIED: { label: "Beworben", color: "bg-blue-100 text-blue-800", icon: ClockIcon },
@@ -800,6 +805,29 @@ export default function ApplicationsOverview() {
       showToast(message, "error");
     } finally {
       setUploadingDoc(false);
+    }
+  };
+
+  const handleQuickDateSave = async (appId: string, dateValue: string) => {
+    if (!userId || !dateValue) return;
+    setSavingQuickDate(true);
+    try {
+      const res = await fetch("/api/applications", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: appId, userId, appliedAt: dateValue }),
+      });
+      if (!res.ok) throw new Error(`Update fehlgeschlagen (${res.status})`);
+      const updated = await res.json();
+      setApplications((prev) =>
+        prev.map((a) => (a.id === appId ? { ...a, appliedAt: updated.appliedAt ?? dateValue } : a))
+      );
+      showToast("Datum gespeichert.");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Datum konnte nicht gespeichert werden.", "error");
+    } finally {
+      setSavingQuickDate(false);
+      setQuickDateId(null);
     }
   };
 
@@ -1791,8 +1819,49 @@ export default function ApplicationsOverview() {
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getPriorityBadge(application.priority)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDate(application.appliedAt)}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {quickDateId === application.id ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="date"
+                              className="text-xs border border-blue-400 rounded px-1.5 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
+                              value={quickDateVal}
+                              onChange={(e) => setQuickDateVal(e.target.value)}
+                              autoFocus
+                            />
+                            <button
+                              type="button"
+                              disabled={savingQuickDate}
+                              onClick={() => handleQuickDateSave(application.id, quickDateVal)}
+                              className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60"
+                            >
+                              {savingQuickDate ? "…" : "OK"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setQuickDateId(null)}
+                              className="text-xs px-1.5 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            title="Klicken zum Ändern"
+                            onClick={() => {
+                              const val = application.appliedAt
+                                ? new Date(application.appliedAt).toISOString().slice(0, 10)
+                                : new Date().toISOString().slice(0, 10);
+                              setQuickDateVal(val);
+                              setQuickDateId(application.id);
+                            }}
+                            className="flex items-center gap-1 text-sm text-gray-900 hover:text-blue-600 hover:underline group"
+                          >
+                            <CalendarDaysIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500" />
+                            {formatDate(application.appliedAt)}
+                          </button>
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {application.salary || "-"}

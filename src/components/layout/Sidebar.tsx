@@ -167,10 +167,17 @@ const navigation: NavigationItem[] = [
     badge: "AUTO",
   },
   {
+    name: "Lebenslauf-Template",
+    href: "/lebenslauf",
+    icon: DocumentMagnifyingGlassIcon,
+    description: "Novoresume-Vorlage bearbeiten",
+    badge: "NEU",
+  },
+  {
     name: "Anschreiben-Studio",
     href: "/anschreiben",
     icon: PencilSquareIcon,
-    description: "DIN-5008 konforme Anschreiben",
+    description: "DIN-5008 & Novoresume-Template",
     badge: "NEU",
   },
   {

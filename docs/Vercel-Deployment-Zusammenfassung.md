@@ -1,6 +1,6 @@
 # Vercel + Prisma Postgres – Vollständige Deployment-Dokumentation
 
-> Erstellt: 9. März 2026  
+> Erstellt: 9. März 2026 | Zuletzt aktualisiert: 15. März 2026  
 > Projekt: `bw-manage-webtool`  
 > Live-URL: **https://bw-manage-webtool.vercel.app**
 
@@ -14,10 +14,11 @@
 4. [Abhängigkeits-Konflikte beheben](#4-abhängigkeits-konflikte-beheben)
 5. [Environment Variables – vollständige Übersicht](#5-environment-variables--vollständige-übersicht)
 6. [Prisma Postgres verknüpfen](#6-prisma-postgres-verknüpfen)
-7. [Deployment via CLI](#7-deployment-via-cli)
-8. [Fehler & Lösungen aus diesem Deployment](#8-fehler--lösungen-aus-diesem-deployment)
-9. [Security-Checkliste](#9-security-checkliste)
-10. [Nach dem Deployment](#10-nach-dem-deployment)
+7. [Vercel Blob Store einrichten](#7-vercel-blob-store-einrichten)
+8. [Deployment via CLI](#8-deployment-via-cli)
+9. [Fehler & Lösungen aus diesem Deployment](#9-fehler--lösungen-aus-diesem-deployment)
+10. [Security-Checkliste](#10-security-checkliste)
+11. [Nach dem Deployment](#11-nach-dem-deployment)
 
 ---
 
@@ -29,11 +30,13 @@ GitHub Repo
     ▼
 Vercel (Next.js 16, SSR + Static)
     │
-    ├── Build: prisma generate → prisma migrate deploy → next build
+    ├── Build: prisma generate → prisma migrate resolve --rolled-back → prisma migrate deploy → next build
     │
-    └── Prisma Postgres (db.prisma.io:5432)
-              │
-              └── Datenbank: bewerbungs_management_db / postgres
+    ├── Prisma Postgres (db.prisma.io:5432)
+    │         └── Datenbank: bewerbungs_management_db / postgres
+    │
+    └── Vercel Blob Store (bw-uploads)
+              └── Persistente Datei-Uploads via @vercel/blob
 ```
 
 | Komponente       | Wert                                                       |
@@ -41,6 +44,7 @@ Vercel (Next.js 16, SSR + Static)
 | Framework        | Next.js 16 (App Router)                                    |
 | Datenbank        | Prisma Postgres (Vercel-Integration)                       |
 | ORM              | Prisma 7.x                                                 |
+| Dateispeicher    | Vercel Blob Store (`bw-uploads`, `store_NKKNQ6BO1IgaA1Au`) |
 | Auth             | JWT + WebAuthn + TOTP                                      |
 | Node.js Ziel     | 20.x (Vercel Standard)                                     |
 | React Version    | 18.2.0 (fix auf 18, nicht 19!)                             |
@@ -324,15 +328,19 @@ npm install --legacy-peer-deps  # nicht empfohlen für Production
 | `DATABASE_URL` | Prisma DB-Verbindung (Prisma Postgres) | Vercel (auto via Storage Connect) |
 | `POSTGRES_URL` | Alias für DB-Verbindung | Vercel (auto via Storage Connect) |
 | `PRISMA_DATABASE_URL` | Alias für Prisma Studio | Vercel (auto via Storage Connect) |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob Store Zugriff für Datei-Uploads | Vercel (auto via Blob Store Connect) |
 | `JWT_SECRET` | Signierung der JWT-Tokens | Vercel → Settings → Env Vars |
 | `JWT_EXPIRES_IN` | Gültigkeitsdauer der Tokens | Vercel → Settings → Env Vars |
 
 **Lokal (`.env.local`)** – wird nie committed:
 ```dotenv
-DATABASE_URL="postgresql://user:password@localhost:5432/bewerbungs_management_db?schema=public"
+DATABASE_URL="postgresql://user:password@localhost:5432/bewerbungs_management_db?schema=public&sslmode=verify-full"
 JWT_SECRET="YOUR_STRONG_SECRET_MIN_64_CHARS"
 JWT_EXPIRES_IN="7d"
+BLOB_READ_WRITE_TOKEN="eyJ2IjoidjIi..."   # aus Vercel Blob Store Dashboard
 ```
+
+> **Hinweis zu SSL:** `sslmode=require` → `sslmode=verify-full` für alle Prisma-DB-URLs (lokal + Prod). Das stärkere Verify-Full verhindert Man-in-the-Middle-Angriffe.
 
 ---
 
@@ -345,7 +353,7 @@ JWT_EXPIRES_IN="7d"
 ### Variante B: CLI
 ```bash
 # Env Vars manuell setzen
-DB_URL="postgres://USER:TOKEN@db.prisma.io:5432/postgres?sslmode=require"
+DB_URL="postgres://USER:TOKEN@db.prisma.io:5432/postgres?sslmode=verify-full"
 printf "%s" "$DB_URL" | npx vercel env add DATABASE_URL production
 printf "%s" "$DB_URL" | npx vercel env add DATABASE_URL preview
 printf "%s" "$DB_URL" | npx vercel env add DATABASE_URL development
@@ -364,7 +372,80 @@ rm .env.vercel.local  # SOFORT löschen! Enthält Secrets
 
 ---
 
-## 7. Deployment via CLI
+## 7. Vercel Blob Store einrichten
+
+Dateien, die Nutzer hochladen (Lebenslauf, Anschreiben etc.), müssen persistent gespeichert werden.
+Vercel's `/tmp`-Verzeichnis wird nach jeder Serverless-Invokation geleert – daher **Vercel Blob Store**.
+
+### 7.1 Store über Vercel Dashboard
+1. Vercel Projekt → **Storage** → **Create Database** → **Blob**
+2. Name vergeben: z. B. `bw-uploads`
+3. Region: `Washington DC (iad1)` (passend zur DB-Region)
+4. **Create** → danach **Connect Project** → alle 3 Environments wählen
+5. `BLOB_READ_WRITE_TOKEN` wird automatisch als Env Var gesetzt
+
+### 7.2 Store über Vercel API (alternativ, ohne Dashboard)
+```bash
+TOKEN="dein_vercel_auth_token"   # aus ~/.config/vercel/auth.json
+PROJECT_ID="prj_XCd3fmED2FqS0QFsxomXizr1NqY3"
+TEAM_ID="team_NedkExdSjzWBe3FCzHQL5nWy"
+
+# Store erstellen
+curl -X POST "https://api.vercel.com/v1/storage/stores/blob?teamId=$TEAM_ID" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"bw-uploads","region":"iad1"}'
+
+# Store mit Projekt verbinden
+STORE_ID="store_NKKNQ6BO1IgaA1Au"
+for ENV in production preview development; do
+  curl -X POST "https://api.vercel.com/v1/storage/stores/$STORE_ID/connections?teamId=$TEAM_ID" \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"projectId\":\"$PROJECT_ID\",\"environment\":\"$ENV\"}"
+done
+
+# Token aus API holen und lokal eintragen
+TOKEN_VALUE=$(curl -s "https://api.vercel.com/v9/projects/$PROJECT_ID/env?decrypt=true&teamId=$TEAM_ID" \
+  -H "Authorization: Bearer $TOKEN" | jq -r '.envs[] | select(.key=="BLOB_READ_WRITE_TOKEN") | .value')
+echo "BLOB_READ_WRITE_TOKEN=\"$TOKEN_VALUE\"" >> .env.local
+```
+
+### 7.3 Upload-Logik in der App
+Die API-Route `src/app/api/documents/route.ts` arbeitet dreistufig:
+1. `BLOB_READ_WRITE_TOKEN` vorhanden → `put()` via `@vercel/blob` (Produktion)
+2. `process.env.VERCEL` gesetzt aber kein Token → `503` mit klarer Fehlermeldung
+3. Lokal ohne Token → `public/uploads/` Fallback
+
+```ts
+import { put } from "@vercel/blob";
+
+if (process.env.BLOB_READ_WRITE_TOKEN) {
+  const blob = await put(filename, file, { access: "public" });
+  filePath = blob.url;
+} else if (process.env.VERCEL) {
+  return NextResponse.json({ error: "Blob Store not configured" }, { status: 503 });
+} else {
+  // Lokaler Fallback
+  filePath = `/uploads/${filename}`;
+}
+```
+
+### 7.4 Datei-Löschen aus Blob Store
+`src/app/api/files/items/route.ts` löscht auch aus dem Store beim DELETE:
+```ts
+import { del } from "@vercel/blob";
+
+if (filePath.startsWith("https://")) {
+  await del(filePath);
+} else {
+  fs.unlinkSync(localPath);
+}
+```
+
+---
+
+## 8. Deployment via CLI
 
 ### Einmalige Einrichtung
 ```bash
@@ -469,6 +550,85 @@ Error: Project names must be lowercase. Cannot contain '---'
 
 ---
 
+### Fehler 8: FileBrowser-Ordner verschwinden nach Reload
+**Ursache:** Ordner wurden in einer server-seitigen `Map` (In-Memory) gespeichert – geht bei jedem Serverless-Restart verloren.  
+**Lösung:** Neues Prisma-Modell `FileFolder` angelegt, `src/app/api/files/folders/route.ts` komplett auf Prisma umgeschrieben. Default-Ordner werden per `seedDefaultFolders()` idempotent angelegt (zählt erst `fileFolder.count()` bevor geseedet wird).
+
+---
+
+### Fehler 9: Datei-Uploads gehen auf Vercel verloren
+**Ursache:** Uploads wurden nach `public/uploads/` geschrieben – Vercel's Dateisystem ist read-only nach dem Build, `/tmp` wird nach jeder Invokation geleert.  
+**Lösung:** `@vercel/blob` installiert, Upload-Route auf `put()` umgestellt. Lokal weiterhin `public/uploads/` als Fallback.
+
+---
+
+### Fehler 10: Migration P3018 – FK-Constraint schlägt fehl
+```
+Error: P3018 A migration failed to apply. New constraint failed: documents_fileBrowserFolderId_fkey
+```
+**Ursache:** In der Produktions-DB standen noch alte In-Memory-Ordner-IDs (z. B. `folder_abc123`) in `documents.fileBrowserFolderId`. Die neue FK-Constraint auf die `file_folders`-Tabelle konnte nicht angelegt werden, weil diese IDs dort nicht existieren.  
+**Lösung (zweiteilig):**
+1. Migration SQL idempotent gemacht:
+```sql
+-- Erst fehlerhafte Referenzen nullen
+UPDATE "documents" SET "fileBrowserFolderId" = NULL
+  WHERE "fileBrowserFolderId" IS NOT NULL
+  AND "fileBrowserFolderId" NOT IN (SELECT "id" FROM "file_folders");
+
+-- Tabelle nur anlegen wenn nicht vorhanden
+CREATE TABLE IF NOT EXISTS "file_folders" (...);
+
+-- FK nur anlegen wenn nicht vorhanden
+DO $$ BEGIN
+  ALTER TABLE "documents" ADD CONSTRAINT "documents_fileBrowserFolderId_fkey" ...;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+```
+2. `package.json` build-Script angepasst:
+```json
+"build": "prisma generate && prisma migrate resolve --rolled-back 20260314124236_add_file_folders 2>/dev/null; prisma migrate deploy && next build"
+```
+`--rolled-back` markiert eine fehlgeschlagene Migration zurück, damit `migrate deploy` sie erneut ausführen kann. `2>/dev/null` ignoriert den Fehler wenn die Migration noch gar nicht existiert.
+
+---
+
+### Fehler 11: 500-Fehler beim Upload ohne BLOB_READ_WRITE_TOKEN
+**Ursache:** Auf Vercel fehlte `BLOB_READ_WRITE_TOKEN`, die Route versuchte `put()` aufzurufen und crashte mit unklarem 500.  
+**Lösung:** Expliziter Check: wenn `process.env.VERCEL` gesetzt aber kein Token vorhanden → `503` mit Erklärung. Lokal (kein `VERCEL`-Flag) → stiller Fallback auf Disk.
+
+---
+
+### Fehler 12: 503 beim Upload in `vercel dev` (lokale Entwicklung)
+```
+Failed to load resource: the server responded with a status of 503
+```
+**Ursache:** `BLOB_READ_WRITE_TOKEN` war in Vercel nur für `production` und `preview` gesetzt – **nicht für `development`**. `vercel dev` setzt jedoch automatisch `VERCEL=1` im lokalen Prozess. Dadurch griff der `else if (process.env.VERCEL)`-Zweig → 503.  
+**Diagnose:**
+```bash
+curl -s "https://api.vercel.com/v9/projects/PROJECT_ID/env?teamId=TEAM_ID" \
+  -H "Authorization: Bearer TOKEN" | \
+  python3 -c "import json,sys; [print(e['key'], e.get('target')) for e in json.load(sys.stdin).get('envs',[]) if 'BLOB' in e.get('key','')]"
+# Ausgabe war: BLOB_READ_WRITE_TOKEN ['production', 'preview']  ← development fehlte!
+```
+**Lösung (dreiteilig):**
+1. Token auch für `development` in Vercel hinzufügen:
+```bash
+printf "%s" "$BLOB_TOKEN" | npx vercel env add BLOB_READ_WRITE_TOKEN development --yes
+```
+2. `JWT_SECRET` + `JWT_EXPIRES_IN` ebenfalls für `development` setzen (gehen beim `env pull` verloren wenn sie nur in `production` waren):
+```bash
+printf "%s" "$(openssl rand -hex 64)" | npx vercel env add JWT_SECRET development --yes
+printf "%s" "7d" | npx vercel env add JWT_EXPIRES_IN development --yes
+```
+3. `.env.local` neu synchronisieren:
+```bash
+npx vercel env pull .env.local --yes
+# + JWT_SECRET und JWT_EXPIRES_IN manuell anhängen falls sie fehlen
+```
+**Merksatz:** Jeder Blob-/Auth-Token muss in **allen drei Environments** (`production`, `preview`, `development`) gesetzt sein.
+
+---
+
 ## 9. Security-Checkliste
 
 | Punkt | Status | Maßnahme |
@@ -480,6 +640,9 @@ Error: Project names must be lowercase. Cannot contain '---'
 | Starkes `JWT_SECRET` | ✅ | `openssl rand -hex 64` → 128 Zeichen Hex |
 | Env Vars in Vercel verschlüsselt | ✅ | Vercel speichert als "Encrypted" |
 | `.vercelignore` vorhanden | ✅ | Blockiert `.env*` beim Upload |
+| SSL-Modus | ✅ | `sslmode=verify-full` statt `sslmode=require` |
+| `BLOB_READ_WRITE_TOKEN` gesichert | ✅ | Nur in `.env.local` (gitignored) + Vercel Env Vars |
+| Env Vars in **allen** Environments | ✅ | `production` + `preview` + `development` prüfen – `vercel dev` braucht alle drei! |
 
 **Neuen JWT_SECRET generieren:**
 ```bash
@@ -512,6 +675,22 @@ npx prisma studio  # öffnet Prisma Studio mit Cloud-DB
 rm .env.vercel.local
 ```
 
+### Blob Store Status prüfen
+```bash
+TOKEN="dein_vercel_auth_token"
+curl "https://api.vercel.com/v1/storage/stores/store_NKKNQ6BO1IgaA1Au?teamId=team_NedkExdSjzWBe3FCzHQL5nWy" \
+  -H "Authorization: Bearer $TOKEN" | jq '.store.status,.store.projects'
+# Erwartet: "available" + ["bw-manage-webtool"]
+```
+
+### Env Vars auf alle Environments prüfen
+```bash
+curl -s "https://api.vercel.com/v9/projects/prj_XCd3fmED2FqS0QFsxomXizr1NqY3/env?teamId=team_NedkExdSjzWBe3FCzHQL5nWy" \
+  -H "Authorization: Bearer $TOKEN" | \
+  python3 -c "import json,sys; [print(e['key'], e.get('target')) for e in json.load(sys.stdin).get('envs',[])]"
+# Alle kritischen Vars müssen ['production','preview','development'] enthalten!
+```
+
 ### Weitere Deployments
 Nach dem ersten Deployment reicht für alle künftigen Updates:
 ```bash
@@ -522,7 +701,7 @@ git push  # Vercel deployed automatisch per GitHub-Webhook
 
 ---
 
-## Zusammenfassung der Git-Commits in dieser Session
+## 11. Zusammenfassung aller Git-Commits
 
 | Hash | Beschreibung |
 |---|---|
@@ -530,6 +709,12 @@ git push  # Vercel deployed automatisch per GitHub-Webhook
 | `7737207` | Fix React peer deps, Next suspense errors, Vercel Prisma build |
 | `faae3ed` | Add Vercel ignore rules and project linkage hygiene |
 | `b1829ce` | Fix prisma.config.ts: use process.env for DATABASE_URL (Vercel postinstall compat) |
+| `d2517e0` | Fix A11y: id/name/htmlFor auf alle FileBrowser-Formularfelder |
+| `4a830db` | Feat: Prisma FileFolder-Modell + @vercel/blob für persistente Ordner & Uploads |
+| `54e229f` | Fix: Migration P3018 – UPDATE fileBrowserFolderId NULL + migrate resolve --rolled-back |
+| `b5a243f` | Fix: IF NOT EXISTS + DO/EXCEPTION für idempotente Migration |
+| `a291554` | Fix: 503 statt 500 wenn BLOB_READ_WRITE_TOKEN fehlt + VERCEL-Env-Check |
+| —  | Fix: BLOB_READ_WRITE_TOKEN + JWT_SECRET/EXPIRES_IN für `development` Environment nachgetragen (kein Commit – nur Vercel Env Vars + .env.local) |
 
 ---
 
