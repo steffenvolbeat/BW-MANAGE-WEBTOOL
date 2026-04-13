@@ -1931,6 +1931,16 @@ export default function ApplicationsOverview() {
                             <span className="text-xs leading-none ml-0.5 font-semibold">NR</span>
                           </button>
                           <button
+                            className="text-orange-500 hover:text-orange-700 p-1 flex items-center gap-0.5"
+                            title="Lebenslauf (Novoresume Template) öffnen"
+                            onClick={() => router.push("/lebenslauf")}
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                            <span className="text-xs leading-none font-semibold">CV</span>
+                          </button>
+                          <button
                             className="text-gray-600 hover:text-gray-900 p-1 flex items-center gap-0.5"
                             title="Dokumente ansehen"
                             onClick={() => {
