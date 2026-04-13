@@ -497,6 +497,8 @@ function TagList({
 export default function LebenslaufTemplate() {
   const [data, setData] = useState<CVData>(JSON.parse(JSON.stringify(DEFAULT_DATA)));
   const [editing, setEditing] = useState(false);
+  const [photoSrc, setPhotoSrc] = useState<string>("");
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   const setPersonal = (patch: Partial<CVData["personal"]>) =>
     setData((d) => ({ ...d, personal: { ...d.personal, ...patch } }));
@@ -575,10 +577,31 @@ export default function LebenslaufTemplate() {
             {/* Header */}
             <div className="flex items-start gap-4 mb-7 pb-6 border-b border-gray-100">
               <div
-                className="w-24 h-28 rounded overflow-hidden shrink-0 bg-gray-200 flex items-center justify-center"
+                className="w-24 h-28 rounded overflow-hidden shrink-0 bg-gray-200 flex items-center justify-center relative cursor-pointer"
                 style={{ border: `2px solid ${ACCENT}` }}
+                onClick={() => editing && photoInputRef.current?.click()}
+                title={editing ? "Klicken zum Foto hochladen" : ""}
               >
-                <span className="text-xs text-gray-400">Foto</span>
+                {photoSrc ? (
+                  <img src={photoSrc} alt="Profilfoto" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-xs text-gray-400 text-center px-1 leading-tight">
+                    {editing ? "📷 Hochladen" : "Foto"}
+                  </span>
+                )}
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => setPhotoSrc((ev.target?.result as string) ?? "");
+                    reader.readAsDataURL(file);
+                  }}
+                />
               </div>
               <div className="flex-1 pt-1">
                 <E
@@ -642,12 +665,18 @@ export default function LebenslaufTemplate() {
                     editing={editing}
                   />
                   {(project.link || editing) && (
-                    <E
-                      value={project.link ?? ""}
-                      onChange={(v) => updateProject(project.id, { link: v })}
-                      editing={editing}
-                      className="text-xs mt-1 underline"
-                    />
+                    editing ? (
+                      <E
+                        value={project.link ?? ""}
+                        onChange={(v) => updateProject(project.id, { link: v })}
+                        editing={editing}
+                        className="text-xs mt-1"
+                      />
+                    ) : (
+                      <span className="text-xs mt-1 block underline" style={{ color: ACCENT }}>
+                        {project.link}
+                      </span>
+                    )
                   )}
                   {editing && (
                     <button
@@ -700,13 +729,12 @@ export default function LebenslaufTemplate() {
                     editing={editing}
                     className="text-sm text-gray-700 block"
                   />
-                  <div className="flex items-center justify-between text-xs mt-0.5 mb-1">
+                  <div className="flex items-center justify-between text-xs mt-0.5 mb-1" style={{ color: ACCENT }}>
                     <E
                       value={edu.period}
                       onChange={(v) => updateEducation(edu.id, { period: v })}
                       editing={editing}
                       className="italic"
-                      // In view: teal color
                     />
                     <E
                       value={edu.location}
@@ -716,7 +744,12 @@ export default function LebenslaufTemplate() {
                     />
                   </div>
                   <p className="text-xs italic mb-1" style={{ color: ACCENT }}>
-                    {edu.type}
+                    <E
+                      value={edu.type}
+                      onChange={(v) => updateEducation(edu.id, { type: v })}
+                      editing={editing}
+                      className="italic"
+                    />
                   </p>
                   <BulletList
                     bullets={edu.bullets}
@@ -777,7 +810,7 @@ export default function LebenslaufTemplate() {
                     editing={editing}
                     className="text-sm text-gray-700 block"
                   />
-                  <div className="flex items-center justify-between text-xs mt-0.5 mb-1">
+                  <div className="flex items-center justify-between text-xs mt-0.5 mb-1" style={{ color: ACCENT }}>
                     <E
                       value={exp.period}
                       onChange={(v) => updateExperience(exp.id, { period: v })}
@@ -800,7 +833,12 @@ export default function LebenslaufTemplate() {
                     />
                   )}
                   <p className="text-xs italic mb-1" style={{ color: ACCENT }}>
-                    {exp.type}
+                    <E
+                      value={exp.type ?? "Aufgaben"}
+                      onChange={(v) => updateExperience(exp.id, { type: v })}
+                      editing={editing}
+                      className="italic"
+                    />
                   </p>
                   <BulletList
                     bullets={exp.bullets}

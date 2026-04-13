@@ -58,8 +58,8 @@ const DEFAULT_CL: CLData = {
   },
   recipient: {
     company: "addON Solution GmbH",
-    street: "Otto-Eppenstein-Straße 26",
-    cityZip: "07745 Jena",
+    street: "Otto-Eppenstein-Straße",
+    cityZip: "26 07745 Jena",
     country: "Germany",
   },
   date: "01. April 2026",
