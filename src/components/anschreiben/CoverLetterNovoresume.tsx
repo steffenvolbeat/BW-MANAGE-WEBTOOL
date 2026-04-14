@@ -6,7 +6,7 @@ import {
   MapPinIcon, LinkIcon,
 } from "@heroicons/react/24/outline";
 
-// ─── Tokens ──────────────────────────────────────────────────────────────────
+// ─── Tokens ───────────────────────────────────────────────────────────────────
 const A   = "#3ecfd6";
 const SBG = "#1d2a3a";
 const FNT = "'Nunito','Calibri','Segoe UI',Arial,sans-serif";
@@ -14,10 +14,35 @@ const CT  = "#111827";
 const CB  = "#374151";
 const CM  = "#9ca3af";
 
+// ─── Inline contact item (header bar) ─────────────────────────────────────────
+function HContact({ icon, value, editing, onChange }: {
+  icon: React.ReactNode; value: string; editing: boolean; onChange: (v: string) => void;
+}) {
+  const s: React.CSSProperties = {
+    background: "rgba(255,255,255,0.15)", border: "1px dashed rgba(255,255,255,0.5)",
+    borderRadius: 3, padding: "1px 4px", outline: "none", color: "white",
+    fontFamily: FNT, fontSize: 11, boxSizing: "border-box",
+  };
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ width: 20, height: 20, borderRadius: 3, backgroundColor: A, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+        <span style={{ color: SBG, display: "flex" }}>{icon}</span>
+      </div>
+      {editing
+        ? <input style={s} value={value} onChange={e => onChange(e.target.value)} />
+        : <span style={{ fontSize: 11, color: "white", lineHeight: 1.3 }}>{value}</span>
+      }
+    </div>
+  );
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface CLData {
-  personal: { name:string; subtitle:string; email:string; phone:string; location:string; website:string; linkedin:string; github:string; };
-  recipient: { company:string; street:string; cityZip:string; country:string; };
+  personal: {
+    name: string; subtitle: string; email: string; phone: string;
+    location: string; website: string; linkedin: string; github: string;
+  };
+  recipient: { company: string; street: string; cityZip: string; country: string; };
   date: string; subject: string; salutation: string;
   bodyParagraphs: string[];
   closing: string; signatureName: string;
@@ -44,11 +69,11 @@ const DEFAULT_CL: CLData = {
   subject:    "Bewerbung als Quereinsteiger (m/w/d) Software-Entwicklung / Web-Entwicklung",
   salutation: "Sehr geehrte Damen und Herren,",
   bodyParagraphs: [
-    "Ihre Ausschreibung ist deshalb interessant, weil sie nicht auf formale Lebensl\u00e4ufe fixiert ist, sondern auf echte Entwicklungsbegeisterung, Probleml\u00f6sung und technisches Wachstum. Genau darin sehe ich meine St\u00e4rke. Ich arbeite mich konsequent in Technologien ein, entwickle eigene Projekte, denke strukturiert und bleibe an Problemen so lange dran, bis eine belastbare L\u00f6sung steht.",
-    "Aktuell absolviere ich eine Weiterbildung zum Web- und Softwareentwickler. Dabei arbeite ich mit Linux, Git-Workflows, HTML, CSS, JavaScript, TypeScript, Node.js, React, Next.js, PostgreSQL, Docker, APIs sowie agilen Workflows. Mein Abschlussprojekt \u201e3D Event Plattform\u201c setze ich eigenst\u00e4ndig um. Dadurch kenne ich nicht nur einzelne Werkzeuge, sondern den Aufbau moderner Webanwendungen \u00fcber Frontend, Backend, Datenbank, Testing und saubere Projektstruktur hinweg.",
-    "Besonders passend finde ich Ihr Umfeld, weil Sie mit Ihren L\u00f6sungen egON und LeON seit Jahren spezialisierte Software f\u00fcr Energievertriebe, Distributionen und Energieversorger entwickeln. Mich \u00fcberzeugt daran die Verbindung aus fachlicher Spezialisierung, produktnaher Entwicklung und realem Kundennutzen. Dass in Ihrem Team enger Kundenkontakt, kurze Kommunikationswege, agile Zusammenarbeit und Raum f\u00fcr eigene Ideen ausdr\u00fccklich Teil der Arbeitsweise sind, entspricht genau dem Umfeld, in dem ich mich fachlich schnell weiterentwickeln und produktiv einbringen kann.",
-    "Ich komme zwar nicht aus einem klassischen Informatikstudium, bringe aber genau die Mischung mit, die Sie f\u00fcr den Einstieg beschreiben, technische Lernbereitschaft, Begeisterung f\u00fcr Programmierung und den Anspruch, mich Schritt f\u00fcr Schritt zu einem belastbaren Entwicklerprofi weiterzuentwickeln. In meinen bisherigen Projekten arbeite ich bereits mit modernen Webtechnologien, komponentenbasierten Strukturen und datengetriebenen Anwendungen. Dabei lege ich Wert auf nachvollziehbaren Code, saubere Architektur und eine L\u00f6sung, die nicht nur funktioniert, sondern auch weiterentwickelbar bleibt.",
-    "Ich bewerbe mich bei Ihnen, weil Ihre Stelle nicht auf reine Routine zielt, sondern auf Entwicklung im eigentlichen Sinn \u2013 neues Lernen, Verantwortung \u00fcbernehmen, Ideen umsetzen und in realen Projekten wachsen. Genau diesen Anspruch verfolge ich auch selbst. Ich m\u00f6chte mein technisches Fundament, meine Disziplin und meine hohe Motivation in Ihr Team einbringen und mich dort zu einem starken Entwickler mit belastbarem Praxisbezug weiterentwickeln.",
+    "Ihre Ausschreibung ist deshalb interessant, weil sie nicht auf formale Lebensläufe fixiert ist, sondern auf echte Entwicklungsbegeisterung, Problemlösung und technisches Wachstum. Genau darin sehe ich meine Stärke. Ich arbeite mich konsequent in Technologien ein, entwickle eigene Projekte, denke strukturiert und bleibe an Problemen so lange dran, bis eine belastbare Lösung steht.",
+    "Aktuell absolviere ich eine Weiterbildung zum Web- und Softwareentwickler. Dabei arbeite ich mit Linux, Git-Workflows, HTML, CSS, JavaScript, TypeScript, Node.js, React, Next.js, PostgreSQL, Docker, APIs sowie agilen Workflows. Mein Abschlussprojekt \u201e3D Event Plattform\u201c setze ich eigenst\u00e4ndig um. Dadurch kenne ich nicht nur einzelne Werkzeuge, sondern den Aufbau moderner Webanwendungen über Frontend, Backend, Datenbank, Testing und saubere Projektstruktur hinweg.",
+    "Besonders passend finde ich Ihr Umfeld, weil Sie mit Ihren Lösungen egON und LeON seit Jahren spezialisierte Software für Energievertriebe, Distributionen und Energieversorger entwickeln. Mich überzeugt daran die Verbindung aus fachlicher Spezialisierung, produktnaher Entwicklung und realem Kundennutzen. Dass in Ihrem Team enger Kundenkontakt, kurze Kommunikationswege, agile Zusammenarbeit und Raum für eigene Ideen ausdrücklich Teil der Arbeitsweise sind, entspricht genau dem Umfeld, in dem ich mich fachlich schnell weiterentwickeln und produktiv einbringen kann.",
+    "Ich komme zwar nicht aus einem klassischen Informatikstudium, bringe aber genau die Mischung mit, die Sie für den Einstieg beschreiben, technische Lernbereitschaft, Begeisterung für Programmierung und den Anspruch, mich Schritt für Schritt zu einem belastbaren Entwicklerprofi weiterzuentwickeln. In meinen bisherigen Projekten arbeite ich bereits mit modernen Webtechnologien, komponentenbasierten Strukturen und datengetriebenen Anwendungen. Dabei lege ich Wert auf nachvollziehbaren Code, saubere Architektur und eine Lösung, die nicht nur funktioniert, sondern auch weiterentwickelbar bleibt.",
+    "Ich bewerbe mich bei Ihnen, weil Ihre Stelle nicht auf reine Routine zielt, sondern auf Entwicklung im eigentlichen Sinn \u2013 neues Lernen, Verantwortung übernehmen, Ideen umsetzen und in realen Projekten wachsen. Genau diesen Anspruch verfolge ich auch selbst. Ich möchte mein technisches Fundament, meine Disziplin und meine hohe Motivation in Ihr Team einbringen und mich dort zu einem starken Entwickler mit belastbarem Praxisbezug weiterentwickeln.",
     "\u00dcber die Einladung zu einem pers\u00f6nlichen Gespr\u00e4ch freue ich mich.",
   ],
   closing:       "Mit freundlichen Gr\u00fc\u00dfen,",
@@ -56,53 +81,42 @@ const DEFAULT_CL: CLData = {
 };
 
 // ─── Editable field ───────────────────────────────────────────────────────────
-function E({ value, onChange, editing, multiline=false, style={} as React.CSSProperties, placeholder="...", rows=4 }: {
-  value:string; onChange:(v:string)=>void; editing:boolean;
-  multiline?:boolean; style?:React.CSSProperties; placeholder?:string; rows?:number;
+function E({ value, onChange, editing, multiline = false, style = {} as React.CSSProperties, placeholder = "...", rows = 4 }: {
+  value: string; onChange: (v: string) => void; editing: boolean;
+  multiline?: boolean; style?: React.CSSProperties; placeholder?: string; rows?: number;
 }) {
   const s: React.CSSProperties = {
     ...style,
-    background:"rgba(219,234,254,0.35)", border:"1px dashed #93c5fd", borderRadius:3,
-    padding:"2px 4px", outline:"none", width:"100%", fontFamily:"inherit",
-    fontSize:"inherit", color:"inherit", lineHeight:"inherit", fontWeight:"inherit",
-    fontStyle:"inherit", boxSizing:"border-box" as const,
+    background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3,
+    padding: "2px 4px", outline: "none", width: "100%", fontFamily: "inherit",
+    fontSize: "inherit", color: "inherit", lineHeight: "inherit", fontWeight: "inherit",
+    fontStyle: "inherit", boxSizing: "border-box",
   };
-  if (!editing) return <span style={style}>{value || <span style={{opacity:0.28,fontStyle:"italic"}}>{placeholder}</span>}</span>;
-  if (multiline) return <textarea style={{...s,resize:"vertical",display:"block"}} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} rows={rows}/>;
-  return <input style={s} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}/>;
-}
-
-// ─── Contact row (sidebar) ────────────────────────────────────────────────────
-function CRow({ icon, value, editing, onChange }: { icon:React.ReactNode; value:string; editing:boolean; onChange:(v:string)=>void; }) {
-  return (
-    <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:14}}>
-      <div style={{width:26,height:26,borderRadius:4,backgroundColor:A,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
-        <span style={{color:"white",display:"flex"}}>{icon}</span>
-      </div>
-      <E value={value} onChange={onChange} editing={editing} style={{fontSize:12,color:"white",lineHeight:1.4,wordBreak:"break-all"}}/>
-    </div>
-  );
+  if (!editing) return <span style={style}>{value || <span style={{ opacity: 0.28, fontStyle: "italic" }}>{placeholder}</span>}</span>;
+  if (multiline) return <textarea style={{ ...s, resize: "vertical", display: "block" }} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows} />;
+  return <input style={s} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />;
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function CoverLetterNovoresume({
   initialCompany, initialPosition,
-}: { initialCompany?:string; initialPosition?:string; }) {
+}: { initialCompany?: string; initialPosition?: string; }) {
   const start = JSON.parse(JSON.stringify(DEFAULT_CL)) as CLData;
   if (initialCompany)  start.recipient.company = initialCompany;
   if (initialPosition) start.subject = `Bewerbung als ${initialPosition}`;
-  const [data,setData]     = useState<CLData>(start);
-  const [editing,setEditing] = useState(false);
+  const [data, setData]       = useState<CLData>(start);
+  const [editing, setEditing] = useState(false);
 
-  const setP = (p:Partial<CLData["personal"]>)  => setData(d=>({...d,personal:{...d.personal,...p}}));
-  const setR = (p:Partial<CLData["recipient"]>) => setData(d=>({...d,recipient:{...d.recipient,...p}}));
+  const setP = (p: Partial<CLData["personal"]>)  => setData(d => ({ ...d, personal:  { ...d.personal,  ...p } }));
+  const setR = (p: Partial<CLData["recipient"]>) => setData(d => ({ ...d, recipient: { ...d.recipient, ...p } }));
 
-  const updatePara  = useCallback((i:number,v:string)=>setData(d=>{const b=[...d.bodyParagraphs];b[i]=v;return{...d,bodyParagraphs:b};}),[]);
-  const addPara     = () => setData(d=>({...d,bodyParagraphs:[...d.bodyParagraphs,""]}));
-  const removePara  = (i:number) => setData(d=>({...d,bodyParagraphs:d.bodyParagraphs.filter((_,idx)=>idx!==i)}));
+  const updatePara = useCallback((i: number, v: string) =>
+    setData(d => { const b = [...d.bodyParagraphs]; b[i] = v; return { ...d, bodyParagraphs: b }; }), []);
+  const addPara    = () => setData(d => ({ ...d, bodyParagraphs: [...d.bodyParagraphs, ""] }));
+  const removePara = (i: number) => setData(d => ({ ...d, bodyParagraphs: d.bodyParagraphs.filter((_, idx) => idx !== i) }));
 
   return (
-    <div style={{minHeight:"100vh",backgroundColor:"#f3f4f6",padding:"24px 16px",fontFamily:FNT}}>
+    <div style={{ minHeight: "100vh", backgroundColor: "#f3f4f6", padding: "24px 16px", fontFamily: FNT }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
         @media print {
@@ -111,7 +125,6 @@ export default function CoverLetterNovoresume({
           .cl-doc, .cl-doc * { visibility: visible !important; }
           .cl-ctrl { display: none !important; visibility: hidden !important; }
 
-          /* Dokument exakt A4, kein Overflow auf Seite 2 */
           .cl-doc {
             position: absolute !important;
             top: 0 !important; left: 0 !important;
@@ -119,141 +132,132 @@ export default function CoverLetterNovoresume({
             height: 297mm !important; max-height: 297mm !important;
             overflow: hidden !important;
             box-shadow: none !important; margin: 0 !important;
-            /* Gesamtes Dokument auf 210mm skalieren (850px → 794px) */
             zoom: 0.935 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* Inner flex: kein min-height, Sidebar nur so hoch wie Inhalt */
-          .cl-inner {
-            min-height: 0 !important;
-            height: 297mm !important;
-            align-items: flex-start !important;
+          .cl-header {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
-          /* Linke Spalte: engere Abstände */
-          .cl-left {
-            padding: 26px 22px 26px 32px !important;
+          .cl-body {
+            padding: 20px 32px 20px 32px !important;
           }
-          /* Absätze: kleinere Schrift + engerer Zeilenabstand */
           .cl-para * {
             font-size: 11.5px !important;
             line-height: 1.45 !important;
           }
-          .cl-paras { gap: 8px !important; }
-          /* Datum-Abstand reduzieren */
-          .cl-date { margin-bottom: 18px !important; }
-          /* Unterschrift-Abstand reduzieren */
-          .cl-sig { margin-top: 22px !important; }
-          .cl-sig-gap { margin-bottom: 20px !important; }
+          .cl-paras { gap: 7px !important; }
+          .cl-date  { margin-bottom: 14px !important; }
+          .cl-sig   { margin-top: 16px !important; }
         }
       `}</style>
 
       {/* Controls */}
-      <div className="cl-ctrl" style={{maxWidth:850,margin:"0 auto 20px",display:"flex",gap:10,flexWrap:"wrap"}}>
-        <button onClick={()=>setEditing(e=>!e)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"none",backgroundColor:editing?"#16a34a":"#4f46e5",color:"white",fontFamily:FNT}}>
-          {editing?<CheckIcon style={{width:16,height:16}}/>:<PencilSquareIcon style={{width:16,height:16}}/>}
-          {editing?"Fertig bearbeiten":"Bearbeiten"}
+      <div className="cl-ctrl" style={{ maxWidth: 850, margin: "0 auto 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+        <button onClick={() => setEditing(e => !e)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", backgroundColor: editing ? "#16a34a" : "#4f46e5", color: "white", fontFamily: FNT }}>
+          {editing ? <CheckIcon style={{ width: 16, height: 16 }} /> : <PencilSquareIcon style={{ width: 16, height: 16 }} />}
+          {editing ? "Fertig bearbeiten" : "Bearbeiten"}
         </button>
-        <button onClick={()=>window.print()} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"none",backgroundColor:"#374151",color:"white",fontFamily:FNT}}>
-          <PrinterIcon style={{width:16,height:16}}/>Drucken / PDF
+        <button onClick={() => window.print()} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", backgroundColor: "#374151", color: "white", fontFamily: FNT }}>
+          <PrinterIcon style={{ width: 16, height: 16 }} />Drucken / PDF
         </button>
-        <button onClick={()=>{if(window.confirm("Zurücksetzen?"))setData(JSON.parse(JSON.stringify(DEFAULT_CL)));}} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"1px solid #d1d5db",backgroundColor:"white",color:CB,fontFamily:FNT}}>
-          <XMarkIcon style={{width:16,height:16}}/>Zurücksetzen
+        <button onClick={() => { if (window.confirm("Zurücksetzen?")) setData(JSON.parse(JSON.stringify(DEFAULT_CL))); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid #d1d5db", backgroundColor: "white", color: CB, fontFamily: FNT }}>
+          <XMarkIcon style={{ width: 16, height: 16 }} />Zurücksetzen
         </button>
-        {editing&&<span style={{alignSelf:"center",fontSize:12,color:"#6b7280",fontStyle:"italic"}}>Alle Felder direkt bearbeitbar</span>}
+        {editing && <span style={{ alignSelf: "center", fontSize: 12, color: "#6b7280", fontStyle: "italic" }}>Alle Felder direkt bearbeitbar</span>}
       </div>
 
-      {/* ── Document ─────────────────────────────────────────────────────────── */}
-      <div className="cl-doc" style={{maxWidth:850,margin:"0 auto",fontFamily:FNT,backgroundColor:"white",boxShadow:"0 4px 32px rgba(0,0,0,0.14)"}}>
-        <div className="cl-inner" style={{display:"flex",minHeight:1056}}>
+      {/* ── Document ────────────────────────────────────────────────────────── */}
+      <div className="cl-doc" style={{ maxWidth: 850, margin: "0 auto", fontFamily: FNT, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)" }}>
 
-          {/* ── LEFT COLUMN ─────────────────────────────────────────────────── */}
-          <div className="cl-left" style={{flex:1,backgroundColor:"white",padding:"40px 28px 40px 40px",minWidth:0}}>
+        {/* ── DARK HEADER BAR ───────────────────────────────────────────────── */}
+        <div className="cl-header" style={{ backgroundColor: SBG, padding: "28px 40px", WebkitPrintColorAdjust: "exact" as const }}>
+          {/* Name */}
+          {editing
+            ? <input value={data.personal.name} onChange={e => setP({ name: e.target.value })} style={{ display: "block", fontSize: 40, fontWeight: 800, color: "white", lineHeight: 1.1, marginBottom: 4, fontFamily: FNT, background: "rgba(255,255,255,0.12)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "2px 6px", outline: "none", width: "100%", boxSizing: "border-box" }} />
+            : <div style={{ fontSize: 40, fontWeight: 800, color: "white", lineHeight: 1.1, marginBottom: 4 }}>{data.personal.name}</div>
+          }
+          {/* Subtitle */}
+          {editing
+            ? <input value={data.personal.subtitle} onChange={e => setP({ subtitle: e.target.value })} style={{ display: "block", fontSize: 14, fontWeight: 600, color: A, marginBottom: 16, fontFamily: FNT, background: "rgba(255,255,255,0.12)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "2px 6px", outline: "none", width: "100%", boxSizing: "border-box" }} />
+            : <div style={{ fontSize: 14, fontWeight: 600, color: A, marginBottom: 16 }}>{data.personal.subtitle}</div>
+          }
+          {/* Contact row */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 22px" }}>
+            <HContact icon={<EnvelopeIcon style={{ width: 12, height: 12 }} />} value={data.personal.email}    editing={editing} onChange={v => setP({ email: v })} />
+            <HContact icon={<PhoneIcon    style={{ width: 12, height: 12 }} />} value={data.personal.phone}    editing={editing} onChange={v => setP({ phone: v })} />
+            <HContact icon={<MapPinIcon   style={{ width: 12, height: 12 }} />} value={data.personal.location} editing={editing} onChange={v => setP({ location: v })} />
+            <HContact icon={<LinkIcon     style={{ width: 12, height: 12 }} />} value={data.personal.website}  editing={editing} onChange={v => setP({ website: v })} />
+            <HContact
+              icon={<svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12 }}><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8 10v7H6v-7h2zm0-2a1 1 0 10-2 0 1 1 0 002 0zm8 3.5c0-1.38-1.12-2.5-2.5-2.5H13v1.5h.5c.55 0 1 .45 1 1V17h2v-5.5z" /></svg>}
+              value={data.personal.linkedin} editing={editing} onChange={v => setP({ linkedin: v })} />
+            <HContact
+              icon={<svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12 }}><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" /></svg>}
+              value={data.personal.github} editing={editing} onChange={v => setP({ github: v })} />
+          </div>
+        </div>
 
-            {/* Name */}
+        {/* ── FULL-WIDTH LETTER BODY ─────────────────────────────────────────── */}
+        <div className="cl-body" style={{ backgroundColor: "white", padding: "28px 40px 36px 40px" }}>
+
+          {/* Recipient */}
+          <div style={{ marginBottom: 18 }}>
+            <div style={{ fontSize: 11, fontStyle: "italic", color: CM, marginBottom: 4 }}>An</div>
             {editing
-              ? <input value={data.personal.name} onChange={e=>setP({name:e.target.value})} style={{display:"block",fontSize:42,fontWeight:800,color:CT,lineHeight:1.1,marginBottom:4,fontFamily:FNT,background:"rgba(219,234,254,0.35)",border:"1px dashed #93c5fd",borderRadius:3,padding:"2px 4px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
-              : <div style={{fontSize:42,fontWeight:800,color:CT,lineHeight:1.1,marginBottom:4}}>{data.personal.name}</div>
+              ? <input value={data.recipient.company} onChange={e => setR({ company: e.target.value })} style={{ display: "block", fontSize: 15, fontWeight: 700, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 3 }} />
+              : <div style={{ fontSize: 15, fontWeight: 700, color: CT, marginBottom: 3 }}>{data.recipient.company}</div>
             }
-            {/* Subtitle */}
-            {editing
-              ? <input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:15,fontWeight:600,color:A,marginBottom:28,fontFamily:FNT,background:"rgba(219,234,254,0.35)",border:"1px dashed #93c5fd",borderRadius:3,padding:"2px 4px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
-              : <div style={{fontSize:15,fontWeight:600,color:A,marginBottom:28}}>{data.personal.subtitle}</div>
-            }
+            {(["street", "cityZip", "country"] as const).map(k => (
+              editing
+                ? <input key={k} value={data.recipient[k]} onChange={e => setR({ [k]: e.target.value })} style={{ display: "block", fontSize: 14, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }} />
+                : <div key={k} style={{ fontSize: 14, color: CT, marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }}>{data.recipient[k]}</div>
+            ))}
+          </div>
 
-            {/* Recipient */}
-            <div style={{marginBottom:20}}>
-              <div style={{fontSize:11,fontStyle:"italic",color:CM,marginBottom:4}}>An</div>
-              {editing
-                ? <input value={data.recipient.company} onChange={e=>setR({company:e.target.value})} style={{display:"block",fontSize:16,fontWeight:700,color:CT,fontFamily:FNT,background:"rgba(219,234,254,0.35)",border:"1px dashed #93c5fd",borderRadius:3,padding:"2px 4px",outline:"none",width:"100%",boxSizing:"border-box",marginBottom:3}}/>
-                : <div style={{fontSize:16,fontWeight:700,color:CT,marginBottom:3}}>{data.recipient.company}</div>
-              }
-              {(["street","cityZip","country"] as const).map(k=>(
-                editing
-                  ? <input key={k} value={data.recipient[k]} onChange={e=>setR({[k]:e.target.value})} style={{display:"block",fontSize:15,color:CT,fontFamily:FNT,background:"rgba(219,234,254,0.35)",border:"1px dashed #93c5fd",borderRadius:3,padding:"2px 4px",outline:"none",width:"100%",boxSizing:"border-box",marginBottom:2,fontWeight:k==="country"?600:400}}/>
-                  : <div key={k} style={{fontSize:15,color:CT,marginBottom:2,fontWeight:k==="country"?600:400}}>{data.recipient[k]}</div>
+          {/* Date */}
+          <div className="cl-date" style={{ marginBottom: 24 }}>
+            {editing
+              ? <input value={data.date} onChange={e => setData(d => ({ ...d, date: e.target.value }))} style={{ fontSize: 13, fontStyle: "italic", color: A, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", boxSizing: "border-box" }} />
+              : <div style={{ fontSize: 13, fontStyle: "italic", color: A }}>{data.date}</div>
+            }
+          </div>
+
+          {/* Letter body – teal left border */}
+          <div style={{ borderLeft: `4px solid ${A}`, paddingLeft: 18 }}>
+            {/* Subject */}
+            <div style={{ marginBottom: 14 }}>
+              <E value={data.subject} onChange={v => setData(d => ({ ...d, subject: v }))} editing={editing} style={{ fontSize: 13, fontWeight: 600, color: CT, display: "block" }} />
+            </div>
+            {/* Salutation */}
+            <div style={{ marginBottom: 12 }}>
+              <E value={data.salutation} onChange={v => setData(d => ({ ...d, salutation: v }))} editing={editing} style={{ fontSize: 13, color: CT }} />
+            </div>
+            {/* Paragraphs */}
+            <div className="cl-paras" style={{ display: "flex", flexDirection: "column", gap: 11 }}>
+              {data.bodyParagraphs.map((para, i) => (
+                <div key={i} className="cl-para" style={{ position: "relative", paddingRight: editing ? 22 : 0 }}>
+                  <E value={para} onChange={v => updatePara(i, v)} editing={editing} multiline rows={4} style={{ fontSize: 13, color: CB, lineHeight: 1.65, display: "block" }} />
+                  {editing && (
+                    <button type="button" onClick={() => removePara(i)} style={{ position: "absolute", top: 0, right: 0, background: "none", border: "none", cursor: "pointer", color: "#f87171", padding: 0 }}>
+                      <XMarkIcon style={{ width: 14, height: 14 }} />
+                    </button>
+                  )}
+                </div>
               ))}
+              {editing && (
+                <button type="button" onClick={addPara} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#3b82f6", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, fontFamily: FNT }}>
+                  <PlusIcon style={{ width: 14, height: 14 }} />Absatz hinzufügen
+                </button>
+              )}
             </div>
+          </div>
 
-            {/* Date */}
-            <div className="cl-date" style={{marginBottom:32}}>
-              {editing
-                ? <input value={data.date} onChange={e=>setData(d=>({...d,date:e.target.value}))} style={{fontSize:14,fontStyle:"italic",color:A,fontFamily:FNT,background:"rgba(219,234,254,0.35)",border:"1px dashed #93c5fd",borderRadius:3,padding:"2px 4px",outline:"none",boxSizing:"border-box"}}/>
-                : <div style={{fontSize:14,fontStyle:"italic",color:A}}>{data.date}</div>
-              }
-            </div>
-
-            {/* Body – teal left border */}
-            <div style={{borderLeft:`4px solid ${A}`,paddingLeft:18}}>
-              {/* Subject */}
-              <div style={{marginBottom:16}}>
-                <E value={data.subject} onChange={v=>setData(d=>({...d,subject:v}))} editing={editing} style={{fontSize:13,fontWeight:600,color:CT,display:"block"}}/>
-              </div>
-              {/* Salutation */}
-              <div style={{marginBottom:14}}>
-                <E value={data.salutation} onChange={v=>setData(d=>({...d,salutation:v}))} editing={editing} style={{fontSize:13,color:CT}}/>
-              </div>
-              {/* Paragraphs */}
-              <div className="cl-paras" style={{display:"flex",flexDirection:"column",gap:12}}>
-                {data.bodyParagraphs.map((para,i)=>(
-                  <div key={i} className="cl-para" style={{position:"relative",paddingRight:editing?22:0}}>
-                    <E value={para} onChange={v=>updatePara(i,v)} editing={editing} multiline rows={5} style={{fontSize:13,color:CB,lineHeight:1.65,display:"block"}}/>
-                    {editing&&(
-                      <button type="button" onClick={()=>removePara(i)} style={{position:"absolute",top:0,right:0,background:"none",border:"none",cursor:"pointer",color:"#f87171",padding:0}}>
-                        <XMarkIcon style={{width:14,height:14}}/>
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {editing&&(
-                  <button type="button" onClick={addPara} style={{display:"flex",alignItems:"center",gap:4,fontSize:12,color:"#3b82f6",background:"none",border:"none",cursor:"pointer",padding:0,marginTop:4,fontFamily:FNT}}>
-                    <PlusIcon style={{width:14,height:14}}/>Absatz hinzufügen
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Signature */}
-            <div className="cl-sig" style={{marginTop:40}}>
-              <E value={data.closing} onChange={v=>setData(d=>({...d,closing:v}))} editing={editing} style={{fontSize:13,color:CT,display:"block",marginBottom:36}} />
-              <div style={{borderBottom:"1px solid #d1d5db",width:180,marginBottom:6}}/>
-              <E value={data.signatureName} onChange={v=>setData(d=>({...d,signatureName:v}))} editing={editing} style={{fontSize:13,fontWeight:700,color:CT}}/>
-            </div>
-
-          </div>{/* end left column */}
-
-          {/* ── RIGHT SIDEBAR ───────────────────────────────────────────────── */}
-          <div style={{width:295,flexShrink:0,backgroundColor:SBG,padding:"40px 22px",color:"white"}}>
-            <CRow icon={<EnvelopeIcon style={{width:13,height:13}}/>} value={data.personal.email} editing={editing} onChange={v=>setP({email:v})}/>
-            <CRow icon={<PhoneIcon style={{width:13,height:13}}/>} value={data.personal.phone} editing={editing} onChange={v=>setP({phone:v})}/>
-            <CRow icon={<MapPinIcon style={{width:13,height:13}}/>} value={data.personal.location} editing={editing} onChange={v=>setP({location:v})}/>
-            <CRow icon={<LinkIcon style={{width:13,height:13}}/>} value={data.personal.website} editing={editing} onChange={v=>setP({website:v})}/>
-            <CRow
-              icon={<svg viewBox="0 0 24 24" fill="currentColor" style={{width:13,height:13}}><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8 10v7H6v-7h2zm0-2a1 1 0 10-2 0 1 1 0 002 0zm8 3.5c0-1.38-1.12-2.5-2.5-2.5H13v1.5h.5c.55 0 1 .45 1 1V17h2v-5.5z"/></svg>}
-              value={data.personal.linkedin} editing={editing} onChange={v=>setP({linkedin:v})}/>
-            <CRow
-              icon={<svg viewBox="0 0 24 24" fill="currentColor" style={{width:13,height:13}}><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>}
-              value={data.personal.github} editing={editing} onChange={v=>setP({github:v})}/>
+          {/* Signature */}
+          <div className="cl-sig" style={{ marginTop: 32 }}>
+            <E value={data.closing} onChange={v => setData(d => ({ ...d, closing: v }))} editing={editing} style={{ fontSize: 13, color: CT, display: "block", marginBottom: 32 }} />
+            <div style={{ borderBottom: "1px solid #d1d5db", width: 180, marginBottom: 6 }} />
+            <E value={data.signatureName} onChange={v => setData(d => ({ ...d, signatureName: v }))} editing={editing} style={{ fontSize: 13, fontWeight: 700, color: CT }} />
           </div>
 
         </div>
