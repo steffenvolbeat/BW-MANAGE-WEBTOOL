@@ -18,8 +18,8 @@ function AnschreibenContent() {
 
   return (
     <>
-      {/* Tab-Leiste */}
-      <div className="flex gap-1 mb-0 px-4 pt-4 border-b border-gray-200 bg-white">
+      {/* Tab-Leiste – beim Drucken ausblenden */}
+      <div className="flex gap-1 mb-0 px-4 pt-4 border-b border-gray-200 bg-white print:hidden">
         <button
           onClick={() => setTab("din")}
           className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${

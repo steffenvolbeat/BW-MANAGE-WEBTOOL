@@ -266,7 +266,22 @@ export default function LebenslaufTemplate() {
     <div style={{minHeight:"100vh",background:"#f3f4f6",padding:"24px 16px",overflowX:"auto",fontFamily:FNT}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
-        @media print { .cv-ctrl { display:none!important; } .cv-doc { box-shadow:none!important; } }
+        @media print {
+          @page { size: A4 portrait; margin: 0; }
+          body * { visibility: hidden !important; }
+          .cv-doc, .cv-doc * { visibility: visible !important; }
+          .cv-doc {
+            position: absolute !important;
+            top: 0 !important; left: 0 !important;
+            width: 210mm !important; max-width: 210mm !important;
+            box-shadow: none !important; margin: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          /* Sidebar nur so hoch wie ihr Inhalt – kein dunkler Balken auf Seite 2 */
+          .cv-doc > div > div:first-child { align-items: flex-start !important; }
+          .cv-ctrl { display: none !important; visibility: hidden !important; }
+        }
       `}</style>
 
       {/* Controls */}

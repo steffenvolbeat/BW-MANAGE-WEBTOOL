@@ -105,7 +105,23 @@ export default function CoverLetterNovoresume({
     <div style={{minHeight:"100vh",backgroundColor:"#f3f4f6",padding:"24px 16px",fontFamily:FNT}}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
-        @media print { .cl-ctrl { display:none!important; } .cl-doc { box-shadow:none!important; } }
+        @media print {
+          @page { size: A4 portrait; margin: 0; }
+          /* Alles verstecken – nur das Dokument bleibt sichtbar */
+          body * { visibility: hidden !important; }
+          .cl-doc, .cl-doc * { visibility: visible !important; }
+          .cl-doc {
+            position: absolute !important;
+            top: 0 !important; left: 0 !important;
+            width: 210mm !important; max-width: 210mm !important;
+            box-shadow: none !important; margin: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          /* Sidebar NUR so hoch wie ihr eigener Inhalt – kein dunkler Balken auf Seite 2 */
+          .cl-doc > div { min-height: 0 !important; align-items: flex-start !important; }
+          .cl-ctrl { display: none !important; visibility: hidden !important; }
+        }
       `}</style>
 
       {/* Controls */}
@@ -125,7 +141,7 @@ export default function CoverLetterNovoresume({
 
       {/* ── Document ─────────────────────────────────────────────────────────── */}
       <div className="cl-doc" style={{maxWidth:850,margin:"0 auto",fontFamily:FNT,backgroundColor:"white",boxShadow:"0 4px 32px rgba(0,0,0,0.14)"}}>
-        <div style={{display:"flex",minHeight:1100}}>
+        <div style={{display:"flex",minHeight:1056}}>
 
           {/* ── LEFT COLUMN ─────────────────────────────────────────────────── */}
           <div style={{flex:1,backgroundColor:"white",padding:"40px 28px 40px 40px",minWidth:0}}>
