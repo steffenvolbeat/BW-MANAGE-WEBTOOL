@@ -184,7 +184,7 @@ export default function JobCoachDrawer() {
   const placeholderEN = "Ask JobCoach… (Enter to send, Shift+Enter new line)";
 
   return (
-    <>
+    <div className="print:hidden">
       {/* ── Floating-Button ──────────────────────────────────────────────── */}
       <button
         onClick={() => setOpen((v) => !v)}
@@ -377,6 +377,6 @@ export default function JobCoachDrawer() {
           </p>
         </div>
       </div>
-    </>
+    </div>
   );
 }

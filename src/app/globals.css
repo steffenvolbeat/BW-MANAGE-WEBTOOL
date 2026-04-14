@@ -257,6 +257,19 @@ textarea::placeholder,
   }
   header, aside, nav, footer, .no-print { display: none !important; }
   body { background: #fff !important; color: #000 !important; }
+
+  /* ── Nuclear: auf Seiten mit einem druckbaren Dokument ────────────────── */
+  /* Alles ausblenden – nur das Dokument bleibt sichtbar                    */
+  body:has(.cl-doc) *,
+  body:has(.cv-doc) * {
+    visibility: hidden !important;
+  }
+  body:has(.cl-doc) .cl-doc,
+  body:has(.cl-doc) .cl-doc *,
+  body:has(.cv-doc) .cv-doc,
+  body:has(.cv-doc) .cv-doc * {
+    visibility: visible !important;
+  }
 }
 
 /* Smooth theme transition */
