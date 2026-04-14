@@ -107,20 +107,44 @@ export default function CoverLetterNovoresume({
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
         @media print {
           @page { size: A4 portrait; margin: 0; }
-          /* Alles verstecken – nur das Dokument bleibt sichtbar */
           body * { visibility: hidden !important; }
           .cl-doc, .cl-doc * { visibility: visible !important; }
+          .cl-ctrl { display: none !important; visibility: hidden !important; }
+
+          /* Dokument exakt A4, kein Overflow auf Seite 2 */
           .cl-doc {
             position: absolute !important;
             top: 0 !important; left: 0 !important;
-            width: 210mm !important; max-width: 210mm !important;
+            width: 850px !important; max-width: 850px !important;
+            height: 297mm !important; max-height: 297mm !important;
+            overflow: hidden !important;
             box-shadow: none !important; margin: 0 !important;
+            /* Gesamtes Dokument auf 210mm skalieren (850px → 794px) */
+            zoom: 0.935 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* Sidebar NUR so hoch wie ihr eigener Inhalt – kein dunkler Balken auf Seite 2 */
-          .cl-doc > div { min-height: 0 !important; align-items: flex-start !important; }
-          .cl-ctrl { display: none !important; visibility: hidden !important; }
+          /* Inner flex: kein min-height, Sidebar nur so hoch wie Inhalt */
+          .cl-inner {
+            min-height: 0 !important;
+            height: 297mm !important;
+            align-items: flex-start !important;
+          }
+          /* Linke Spalte: engere Abstände */
+          .cl-left {
+            padding: 26px 22px 26px 32px !important;
+          }
+          /* Absätze: kleinere Schrift + engerer Zeilenabstand */
+          .cl-para * {
+            font-size: 11.5px !important;
+            line-height: 1.45 !important;
+          }
+          .cl-paras { gap: 8px !important; }
+          /* Datum-Abstand reduzieren */
+          .cl-date { margin-bottom: 18px !important; }
+          /* Unterschrift-Abstand reduzieren */
+          .cl-sig { margin-top: 22px !important; }
+          .cl-sig-gap { margin-bottom: 20px !important; }
         }
       `}</style>
 
@@ -141,10 +165,10 @@ export default function CoverLetterNovoresume({
 
       {/* ── Document ─────────────────────────────────────────────────────────── */}
       <div className="cl-doc" style={{maxWidth:850,margin:"0 auto",fontFamily:FNT,backgroundColor:"white",boxShadow:"0 4px 32px rgba(0,0,0,0.14)"}}>
-        <div style={{display:"flex",minHeight:1056}}>
+        <div className="cl-inner" style={{display:"flex",minHeight:1056}}>
 
           {/* ── LEFT COLUMN ─────────────────────────────────────────────────── */}
-          <div style={{flex:1,backgroundColor:"white",padding:"40px 28px 40px 40px",minWidth:0}}>
+          <div className="cl-left" style={{flex:1,backgroundColor:"white",padding:"40px 28px 40px 40px",minWidth:0}}>
 
             {/* Name */}
             {editing
@@ -172,7 +196,7 @@ export default function CoverLetterNovoresume({
             </div>
 
             {/* Date */}
-            <div style={{marginBottom:32}}>
+            <div className="cl-date" style={{marginBottom:32}}>
               {editing
                 ? <input value={data.date} onChange={e=>setData(d=>({...d,date:e.target.value}))} style={{fontSize:14,fontStyle:"italic",color:A,fontFamily:FNT,background:"rgba(219,234,254,0.35)",border:"1px dashed #93c5fd",borderRadius:3,padding:"2px 4px",outline:"none",boxSizing:"border-box"}}/>
                 : <div style={{fontSize:14,fontStyle:"italic",color:A}}>{data.date}</div>
@@ -190,9 +214,9 @@ export default function CoverLetterNovoresume({
                 <E value={data.salutation} onChange={v=>setData(d=>({...d,salutation:v}))} editing={editing} style={{fontSize:13,color:CT}}/>
               </div>
               {/* Paragraphs */}
-              <div style={{display:"flex",flexDirection:"column",gap:12}}>
+              <div className="cl-paras" style={{display:"flex",flexDirection:"column",gap:12}}>
                 {data.bodyParagraphs.map((para,i)=>(
-                  <div key={i} style={{position:"relative",paddingRight:editing?22:0}}>
+                  <div key={i} className="cl-para" style={{position:"relative",paddingRight:editing?22:0}}>
                     <E value={para} onChange={v=>updatePara(i,v)} editing={editing} multiline rows={5} style={{fontSize:13,color:CB,lineHeight:1.65,display:"block"}}/>
                     {editing&&(
                       <button type="button" onClick={()=>removePara(i)} style={{position:"absolute",top:0,right:0,background:"none",border:"none",cursor:"pointer",color:"#f87171",padding:0}}>
@@ -210,8 +234,8 @@ export default function CoverLetterNovoresume({
             </div>
 
             {/* Signature */}
-            <div style={{marginTop:40}}>
-              <E value={data.closing} onChange={v=>setData(d=>({...d,closing:v}))} editing={editing} style={{fontSize:13,color:CT,display:"block",marginBottom:36}}/>
+            <div className="cl-sig" style={{marginTop:40}}>
+              <E value={data.closing} onChange={v=>setData(d=>({...d,closing:v}))} editing={editing} style={{fontSize:13,color:CT,display:"block",marginBottom:36}} />
               <div style={{borderBottom:"1px solid #d1d5db",width:180,marginBottom:6}}/>
               <E value={data.signatureName} onChange={v=>setData(d=>({...d,signatureName:v}))} editing={editing} style={{fontSize:13,fontWeight:700,color:CT}}/>
             </div>
