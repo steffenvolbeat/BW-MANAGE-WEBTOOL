@@ -14,7 +14,7 @@ function buildCsp(isDev: boolean): string {
   const parts = [
     "default-src 'self'",
     scriptSrc,
-    "style-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     `img-src 'self' data: blob:${isDev ? " https://*.readyplayer.me" : ""}`,
     "font-src 'self' data: https://vercel.live https://fonts.gstatic.com",
     connectSrc,
