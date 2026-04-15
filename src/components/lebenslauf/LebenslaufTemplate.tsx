@@ -231,13 +231,20 @@ function SbH({ title, icon }: { title:string; icon:React.ReactNode }) {
 }
 
 // ─── Contact row (sidebar) ────────────────────────────────────────────────────
-function CRow({ icon, value, editing, onChange }: { icon:React.ReactNode; value:string; editing:boolean; onChange:(v:string)=>void; }) {
+function CRow({ icon, value, editing, onChange, onDelete, hidden }: { icon:React.ReactNode; value:string; editing:boolean; onChange:(v:string)=>void; onDelete?:()=>void; hidden?:boolean; }) {
+  if (hidden && !editing) return null;
   return (
-    <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:14}}>
-      <div style={{width:26,height:26,borderRadius:4,backgroundColor:A,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
+    <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:14,opacity:hidden?0.35:1}}>
+      <div style={{width:26,height:26,borderRadius:4,backgroundColor:hidden?"#6b7280":A,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
         <span style={{color:"white",display:"flex"}}>{icon}</span>
       </div>
       <E value={value} onChange={onChange} editing={editing} style={{fontSize:12,color:"white",lineHeight:1.4,wordBreak:"break-all"}}/>
+      {editing && onDelete && (
+        <button type="button" onClick={onDelete} title={hidden?"Wieder einblenden":"Ausblenden"}
+          style={{background:hidden?"rgba(62,207,214,0.18)":"rgba(248,113,113,0.18)",border:`1px solid ${hidden?A:"#f87171"}`,borderRadius:4,cursor:"pointer",color:hidden?A:"#f87171",padding:"2px 4px",lineHeight:1,flexShrink:0,marginTop:2,display:"flex",alignItems:"center"}}>
+          <XMarkIcon style={{width:14,height:14}}/>
+        </button>
+      )}
     </div>
   );
 }
@@ -247,7 +254,9 @@ export default function LebenslaufTemplate() {
   const [data,setData]     = useState<CVData>(JSON.parse(JSON.stringify(DEFAULT_DATA)));
   const [editing,setEditing] = useState(false);
   const [photoSrc,setPhotoSrc] = useState("");
+  const [hiddenContacts,setHiddenContacts] = useState<Set<string>>(new Set());
   const photoInputRef = useRef<HTMLInputElement>(null);
+  const toggleContact = (key:string) => setHiddenContacts(s=>{const n=new Set(s);n.has(key)?n.delete(key):n.add(key);return n;});
 
   const setPersonal  = (p:Partial<CVData["personal"]>)  => setData(d=>({...d,personal:{...d.personal,...p}}));
   const setProjects  = (v:Project[])     => setData(d=>({...d,projects:v}));
@@ -285,7 +294,7 @@ export default function LebenslaufTemplate() {
       `}</style>
 
       {/* Controls */}
-      <div className="cv-ctrl" style={{maxWidth:850,margin:"0 auto 20px",display:"flex",gap:10,flexWrap:"wrap",position:"sticky",top:0,zIndex:20,backgroundColor:"#f3f4f6",paddingTop:8,paddingBottom:8}}>
+      <div className="cv-ctrl" style={{maxWidth:850,margin:"0 auto 20px",display:"flex",gap:10,flexWrap:"wrap"}}>
         <button onClick={()=>setEditing(e=>!e)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"none",backgroundColor:editing?"#16a34a":"#4f46e5",color:"white",fontFamily:FNT}}>
           {editing?<CheckIcon style={{width:16,height:16}}/>:<PencilSquareIcon style={{width:16,height:16}}/>}
           {editing?"Fertig bearbeiten":"Bearbeiten"}
@@ -293,7 +302,7 @@ export default function LebenslaufTemplate() {
         <button onClick={()=>window.print()} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"none",backgroundColor:"#374151",color:"white",fontFamily:FNT}}>
           <PrinterIcon style={{width:16,height:16}}/>Drucken / PDF
         </button>
-        <button onClick={()=>{if(window.confirm("Zurücksetzen?"))setData(JSON.parse(JSON.stringify(DEFAULT_DATA)));}} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"1px solid #d1d5db",backgroundColor:"white",color:CB,fontFamily:FNT}}>
+        <button onClick={()=>{if(window.confirm("Zurücksetzen?")){setData(JSON.parse(JSON.stringify(DEFAULT_DATA)));setHiddenContacts(new Set());}}} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"1px solid #d1d5db",backgroundColor:"white",color:CB,fontFamily:FNT}}>
           <XMarkIcon style={{width:16,height:16}}/>Zurücksetzen
         </button>
         {editing&&<span style={{alignSelf:"center",fontSize:12,color:CM,fontStyle:"italic"}}>Alle Felder direkt bearbeitbar</span>}
@@ -404,16 +413,16 @@ export default function LebenslaufTemplate() {
 
             {/* Contact */}
             <div style={{marginBottom:22}}>
-              <CRow icon={<EnvelopeIcon style={{width:13,height:13}}/>} value={data.personal.email}    editing={editing} onChange={v=>setPersonal({email:v})}/>
-              <CRow icon={<PhoneIcon    style={{width:13,height:13}}/>} value={data.personal.phone}    editing={editing} onChange={v=>setPersonal({phone:v})}/>
-              <CRow icon={<MapPinIcon   style={{width:13,height:13}}/>} value={data.personal.location} editing={editing} onChange={v=>setPersonal({location:v})}/>
-              <CRow icon={<LinkIcon     style={{width:13,height:13}}/>} value={data.personal.website??""} editing={editing} onChange={v=>setPersonal({website:v})}/>
+              <CRow icon={<EnvelopeIcon style={{width:13,height:13}}/>} value={data.personal.email}    editing={editing} onChange={v=>setPersonal({email:v})}    hidden={hiddenContacts.has("email")}    onDelete={()=>toggleContact("email")}/>
+              <CRow icon={<PhoneIcon    style={{width:13,height:13}}/>} value={data.personal.phone}    editing={editing} onChange={v=>setPersonal({phone:v})}    hidden={hiddenContacts.has("phone")}    onDelete={()=>toggleContact("phone")}/>
+              <CRow icon={<MapPinIcon   style={{width:13,height:13}}/>} value={data.personal.location} editing={editing} onChange={v=>setPersonal({location:v})} hidden={hiddenContacts.has("location")} onDelete={()=>toggleContact("location")}/>
+              <CRow icon={<LinkIcon     style={{width:13,height:13}}/>} value={data.personal.website??""} editing={editing} onChange={v=>setPersonal({website:v})} hidden={hiddenContacts.has("website")} onDelete={()=>toggleContact("website")}/>
               <CRow
                 icon={<svg viewBox="0 0 24 24" fill="currentColor" style={{width:13,height:13}}><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8 10v7H6v-7h2zm0-2a1 1 0 10-2 0 1 1 0 002 0zm8 3.5c0-1.38-1.12-2.5-2.5-2.5H13v1.5h.5c.55 0 1 .45 1 1V17h2v-5.5z"/></svg>}
-                value={data.personal.linkedin} editing={editing} onChange={v=>setPersonal({linkedin:v})}/>
+                value={data.personal.linkedin} editing={editing} onChange={v=>setPersonal({linkedin:v})} hidden={hiddenContacts.has("linkedin")} onDelete={()=>toggleContact("linkedin")}/>
               <CRow
                 icon={<svg viewBox="0 0 24 24" fill="currentColor" style={{width:13,height:13}}><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>}
-                value={data.personal.github} editing={editing} onChange={v=>setPersonal({github:v})}/>
+                value={data.personal.github} editing={editing} onChange={v=>setPersonal({github:v})} hidden={hiddenContacts.has("github")} onDelete={()=>toggleContact("github")}/>
             </div>
 
             {/* FERTIGKEITEN */}
