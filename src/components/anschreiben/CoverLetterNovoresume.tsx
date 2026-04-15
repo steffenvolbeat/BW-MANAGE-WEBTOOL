@@ -15,23 +15,30 @@ const CB  = "#374151";
 const CM  = "#9ca3af";
 
 // ─── Inline contact item (header bar) ─────────────────────────────────────────
-function HContact({ icon, value, editing, onChange }: {
+function HContact({ icon, value, editing, onChange, onDelete, hidden }: {
   icon: React.ReactNode; value: string; editing: boolean; onChange: (v: string) => void;
+  onDelete?: () => void; hidden?: boolean;
 }) {
+  if (hidden && !editing) return null;
   const s: React.CSSProperties = {
     background: "rgba(255,255,255,0.15)", border: "1px dashed rgba(255,255,255,0.5)",
     borderRadius: 3, padding: "1px 4px", outline: "none", color: "white",
-    fontFamily: FNT, fontSize: 11, boxSizing: "border-box",
+    fontFamily: FNT, fontSize: 11, boxSizing: "border-box", minWidth: 60,
   };
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 4, opacity: hidden ? 0.4 : 1 }}>
       <div style={{ width: 20, height: 20, borderRadius: 3, backgroundColor: A, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
         <span style={{ color: SBG, display: "flex" }}>{icon}</span>
       </div>
       {editing
-        ? <input style={s} value={value} onChange={e => onChange(e.target.value)} />
-        : <span style={{ fontSize: 11, color: "white", lineHeight: 1.3 }}>{value}</span>
+        ? <input style={s} value={value} onChange={e => onChange(e.target.value)} placeholder="—" />
+        : <span style={{ fontSize: 11, color: "white", lineHeight: 1.3 }}>{value || <span style={{ opacity: 0.4 }}>—</span>}</span>
       }
+      {editing && onDelete && (
+        <button type="button" onClick={onDelete} title="Entfernen" style={{ background: "none", border: "none", cursor: "pointer", color: "#f87171", padding: 0, lineHeight: 1, flexShrink: 0 }}>
+          <XMarkIcon style={{ width: 12, height: 12 }} />
+        </button>
+      )}
     </div>
   );
 }
@@ -106,6 +113,10 @@ export default function CoverLetterNovoresume({
   if (initialPosition) start.subject = `Bewerbung als ${initialPosition}`;
   const [data, setData]       = useState<CLData>(start);
   const [editing, setEditing] = useState(false);
+  const [hiddenContacts, setHiddenContacts] = useState<Set<string>>(new Set());
+
+  const toggleContact = (key: string) =>
+    setHiddenContacts(s => { const n = new Set(s); n.has(key) ? n.delete(key) : n.add(key); return n; });
 
   const setP = (p: Partial<CLData["personal"]>)  => setData(d => ({ ...d, personal:  { ...d.personal,  ...p } }));
   const setR = (p: Partial<CLData["recipient"]>) => setData(d => ({ ...d, recipient: { ...d.recipient, ...p } }));
@@ -185,16 +196,16 @@ export default function CoverLetterNovoresume({
           }
           {/* Contact row */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: "8px 22px" }}>
-            <HContact icon={<EnvelopeIcon style={{ width: 12, height: 12 }} />} value={data.personal.email}    editing={editing} onChange={v => setP({ email: v })} />
-            <HContact icon={<PhoneIcon    style={{ width: 12, height: 12 }} />} value={data.personal.phone}    editing={editing} onChange={v => setP({ phone: v })} />
-            <HContact icon={<MapPinIcon   style={{ width: 12, height: 12 }} />} value={data.personal.location} editing={editing} onChange={v => setP({ location: v })} />
-            <HContact icon={<LinkIcon     style={{ width: 12, height: 12 }} />} value={data.personal.website}  editing={editing} onChange={v => setP({ website: v })} />
+            <HContact icon={<EnvelopeIcon style={{ width: 12, height: 12 }} />} value={data.personal.email}    editing={editing} onChange={v => setP({ email: v })}    hidden={hiddenContacts.has("email")}    onDelete={() => toggleContact("email")} />
+            <HContact icon={<PhoneIcon    style={{ width: 12, height: 12 }} />} value={data.personal.phone}    editing={editing} onChange={v => setP({ phone: v })}    hidden={hiddenContacts.has("phone")}    onDelete={() => toggleContact("phone")} />
+            <HContact icon={<MapPinIcon   style={{ width: 12, height: 12 }} />} value={data.personal.location} editing={editing} onChange={v => setP({ location: v })} hidden={hiddenContacts.has("location")} onDelete={() => toggleContact("location")} />
+            <HContact icon={<LinkIcon     style={{ width: 12, height: 12 }} />} value={data.personal.website}  editing={editing} onChange={v => setP({ website: v })}  hidden={hiddenContacts.has("website")}  onDelete={() => toggleContact("website")} />
             <HContact
               icon={<svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12 }}><path d="M19 3a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h14zM8 10v7H6v-7h2zm0-2a1 1 0 10-2 0 1 1 0 002 0zm8 3.5c0-1.38-1.12-2.5-2.5-2.5H13v1.5h.5c.55 0 1 .45 1 1V17h2v-5.5z" /></svg>}
-              value={data.personal.linkedin} editing={editing} onChange={v => setP({ linkedin: v })} />
+              value={data.personal.linkedin} editing={editing} onChange={v => setP({ linkedin: v })} hidden={hiddenContacts.has("linkedin")} onDelete={() => toggleContact("linkedin")} />
             <HContact
               icon={<svg viewBox="0 0 24 24" fill="currentColor" style={{ width: 12, height: 12 }}><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.268 2.75 1.026A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.026 2.747-1.026.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.137 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z" /></svg>}
-              value={data.personal.github} editing={editing} onChange={v => setP({ github: v })} />
+              value={data.personal.github} editing={editing} onChange={v => setP({ github: v })} hidden={hiddenContacts.has("github")} onDelete={() => toggleContact("github")} />
           </div>
         </div>
 
