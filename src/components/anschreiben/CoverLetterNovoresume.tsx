@@ -93,7 +93,7 @@ function CRow({ icon, value, editing, onChange, onDelete, hidden }: {
           : <span style={{ fontSize: 12, color: "white", lineHeight: 1.4, wordBreak: "break-all" }}>{value}</span>
         }
       </div>
-      {onDelete && (
+      {editing && onDelete && (
         <button
           type="button"
           onClick={onDelete}
