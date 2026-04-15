@@ -82,8 +82,8 @@ function CRow({ icon, value, editing, onChange, onDelete, hidden }: {
 }) {
   if (hidden && !editing) return null;
   return (
-    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14, opacity: hidden ? 0.4 : 1 }}>
-      <div style={{ width: 26, height: 26, borderRadius: 4, backgroundColor: A, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
+    <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14, opacity: hidden ? 0.35 : 1 }}>
+      <div style={{ width: 26, height: 26, borderRadius: 4, backgroundColor: hidden ? "#6b7280" : A, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 1 }}>
         <span style={{ color: "white", display: "flex" }}>{icon}</span>
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -93,9 +93,14 @@ function CRow({ icon, value, editing, onChange, onDelete, hidden }: {
           : <span style={{ fontSize: 12, color: "white", lineHeight: 1.4, wordBreak: "break-all" }}>{value}</span>
         }
       </div>
-      {editing && onDelete && (
-        <button type="button" onClick={onDelete} style={{ background: "none", border: "none", cursor: "pointer", color: "#f87171", padding: 0, lineHeight: 1, flexShrink: 0, marginTop: 4 }}>
-          <XMarkIcon style={{ width: 12, height: 12 }} />
+      {onDelete && (
+        <button
+          type="button"
+          onClick={onDelete}
+          title={hidden ? "Wieder einblenden" : "Ausblenden"}
+          style={{ background: hidden ? "rgba(62,207,214,0.18)" : "rgba(248,113,113,0.18)", border: `1px solid ${hidden ? A : "#f87171"}`, borderRadius: 4, cursor: "pointer", color: hidden ? A : "#f87171", padding: "2px 4px", lineHeight: 1, flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center" }}
+        >
+          <XMarkIcon style={{ width: 14, height: 14 }} />
         </button>
       )}
     </div>
@@ -169,7 +174,7 @@ export default function CoverLetterNovoresume({
       `}</style>
 
       {/* Controls */}
-      <div className="cl-ctrl" style={{ maxWidth: 850, margin: "0 auto 20px", display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <div className="cl-ctrl" style={{ maxWidth: 850, margin: "0 auto 20px", display: "flex", gap: 10, flexWrap: "wrap", position: "sticky", top: 0, zIndex: 20, backgroundColor: "#f3f4f6", paddingTop: 8, paddingBottom: 8 }}>
         <button onClick={() => setEditing(e => !e)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", backgroundColor: editing ? "#16a34a" : "#4f46e5", color: "white", fontFamily: FNT }}>
           {editing ? <CheckIcon style={{ width: 16, height: 16 }} /> : <PencilSquareIcon style={{ width: 16, height: 16 }} />}
           {editing ? "Fertig bearbeiten" : "Bearbeiten"}
