@@ -10,6 +10,25 @@ import {
 const A   = "#3ecfd6";
 const SBG = "#1d2a3a";
 const FNT = "'Nunito','Calibri','Segoe UI',Arial,sans-serif";
+
+const FONTS: { key:string; label:string; family:string; gf:string }[] = [
+  { key:"nunito",       label:"Nunito",        family:"'Nunito','Calibri',sans-serif",       gf:"Nunito:wght@400;600;700;800" },
+  { key:"roboto",       label:"Roboto",         family:"'Roboto',Arial,sans-serif",           gf:"Roboto:wght@400;500;700" },
+  { key:"opensans",     label:"Open Sans",      family:"'Open Sans',Arial,sans-serif",        gf:"Open+Sans:wght@400;600;700" },
+  { key:"lato",         label:"Lato",           family:"'Lato',Arial,sans-serif",             gf:"Lato:wght@400;700" },
+  { key:"inter",        label:"Inter",          family:"'Inter',Arial,sans-serif",            gf:"Inter:wght@400;500;600;700" },
+  { key:"merriweather", label:"Merriweather",   family:"'Merriweather',Georgia,serif",        gf:"Merriweather:wght@400;700" },
+  { key:"playfair",     label:"Playfair",       family:"'Playfair Display',Georgia,serif",    gf:"Playfair+Display:wght@400;700" },
+  { key:"georgia",      label:"Georgia",        family:"Georgia,serif",                       gf:"" },
+];
+const FONT_SIZES: { key:string; label:string; scale:number }[] = [
+  { key:"xs", label:"XS", scale:0.85 },
+  { key:"sm", label:"S",  scale:0.92 },
+  { key:"md", label:"M",  scale:1.0  },
+  { key:"lg", label:"L",  scale:1.08 },
+  { key:"xl", label:"XL", scale:1.15 },
+];
+
 const CT  = "#111827";
 const CB  = "#374151";
 const CM  = "#9ca3af";
@@ -117,6 +136,13 @@ export default function CoverLetterNovoresume({
   const [data, setData]       = useState<CLData>(start);
   const [editing, setEditing] = useState(false);
   const [hiddenContacts, setHiddenContacts] = useState<Set<string>>(new Set());
+  const [fontKey, setFontKey]   = useState("nunito");
+  const [sizeKey, setSizeKey]   = useState("md");
+  const [showDesign, setShowDesign] = useState(false);
+  const curFont = FONTS.find(f => f.key === fontKey) ?? FONTS[0];
+  const curSize = FONT_SIZES.find(s => s.key === sizeKey) ?? FONT_SIZES[2];
+  const fnt   = curFont.family;
+  const scale = curSize.scale;
 
   const toggleContact = (key: string) =>
     setHiddenContacts(s => { const n = new Set(s); n.has(key) ? n.delete(key) : n.add(key); return n; });
@@ -132,7 +158,8 @@ export default function CoverLetterNovoresume({
   return (
     <div style={{ minHeight: "100vh", backgroundColor: "#f3f4f6", padding: "24px 16px", fontFamily: FNT }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+        ${curFont.gf ? `@import url('https://fonts.googleapis.com/css2?family=${curFont.gf}&display=swap');` : ""}
+        .cl-doc, .cl-doc * { font-family: ${fnt} !important; }
         @media print {
           @page { size: A4 portrait; margin: 0; }
           body * { visibility: hidden !important; }
@@ -176,14 +203,41 @@ export default function CoverLetterNovoresume({
         <button onClick={() => window.print()} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "none", backgroundColor: "#374151", color: "white", fontFamily: FNT }}>
           <PrinterIcon style={{ width: 16, height: 16 }} />Drucken / PDF
         </button>
-        <button onClick={() => { if (window.confirm("Zurücksetzen?")) { setData(JSON.parse(JSON.stringify(DEFAULT_CL))); setHiddenContacts(new Set()); } }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid #d1d5db", backgroundColor: "white", color: CB, fontFamily: FNT }}>
+        <button onClick={() => setShowDesign(v => !v)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: `1px solid ${showDesign ? "#4f46e5" : "#e5e7eb"}`, backgroundColor: showDesign ? "#eef2ff" : "white", color: showDesign ? "#4f46e5" : CB, fontFamily: FNT }}>
+          🎨 Design
+        </button>
+        <button onClick={() => { if (window.confirm("Zurücksetzen?")) { setData(JSON.parse(JSON.stringify(DEFAULT_CL))); setHiddenContacts(new Set()); setFontKey("nunito"); setSizeKey("md"); setShowDesign(false); } }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid #d1d5db", backgroundColor: "white", color: CB, fontFamily: FNT }}>
           <XMarkIcon style={{ width: 16, height: 16 }} />Zurücksetzen
         </button>
         {editing && <span style={{ alignSelf: "center", fontSize: 12, color: "#6b7280", fontStyle: "italic" }}>Alle Felder direkt bearbeitbar</span>}
+        {showDesign && (
+          <div style={{ width: "100%", background: "white", border: "1px solid #e5e7eb", borderRadius: 10, padding: "14px 18px", display: "flex", gap: 24, flexWrap: "wrap", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", marginBottom: 7, letterSpacing: "0.06em", textTransform: "uppercase" }}>Schriftart</div>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                {FONTS.map(f => (
+                  <button key={f.key} onClick={() => setFontKey(f.key)} style={{ padding: "4px 10px", borderRadius: 6, border: `1px solid ${fontKey === f.key ? "#4f46e5" : "#e5e7eb"}`, background: fontKey === f.key ? "#eef2ff" : "white", color: fontKey === f.key ? "#4f46e5" : "#374151", fontSize: 12, cursor: "pointer", fontFamily: f.family, fontWeight: fontKey === f.key ? 700 : 400 }}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", marginBottom: 7, letterSpacing: "0.06em", textTransform: "uppercase" }}>Schriftgröße</div>
+              <div style={{ display: "flex", gap: 5 }}>
+                {FONT_SIZES.map(s => (
+                  <button key={s.key} onClick={() => setSizeKey(s.key)} style={{ padding: "4px 14px", borderRadius: 6, border: `1px solid ${sizeKey === s.key ? "#4f46e5" : "#e5e7eb"}`, background: sizeKey === s.key ? "#eef2ff" : "white", color: sizeKey === s.key ? "#4f46e5" : "#374151", fontSize: 12, cursor: "pointer", fontWeight: sizeKey === s.key ? 700 : 400 }}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Document ────────────────────────────────────────────────────────── */}
-      <div className="cl-doc" style={{ maxWidth: 850, margin: "0 auto", fontFamily: FNT, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)", display: "flex", flexDirection: "column", minHeight: 1056 }}>
+      <div className="cl-doc" style={{ maxWidth: 850, margin: "0 auto", fontFamily: fnt, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)", display: "flex", flexDirection: "column", minHeight: 1056, zoom: scale }}>
 
         {/* ── DUNKLER HEADER (volle Breite) ─────────────────────────────────── */}
         <div className="cl-header" style={{ backgroundColor: SBG, padding: "22px 40px", display: "flex", gap: 32, alignItems: "center" }}>

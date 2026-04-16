@@ -11,6 +11,33 @@ const A   = "#3ecfd6";
 const SBG = "#1d2a3a";
 const TBG = "#0f1e2e";
 const FNT = "'Nunito','Calibri','Segoe UI',Arial,sans-serif";
+
+const FONTS: { key:string; label:string; family:string; gf:string }[] = [
+  { key:"nunito",       label:"Nunito",        family:"'Nunito','Calibri',sans-serif",       gf:"Nunito:wght@400;600;700;800" },
+  { key:"roboto",       label:"Roboto",         family:"'Roboto',Arial,sans-serif",           gf:"Roboto:wght@400;500;700" },
+  { key:"opensans",     label:"Open Sans",      family:"'Open Sans',Arial,sans-serif",        gf:"Open+Sans:wght@400;600;700" },
+  { key:"lato",         label:"Lato",           family:"'Lato',Arial,sans-serif",             gf:"Lato:wght@400;700" },
+  { key:"inter",        label:"Inter",          family:"'Inter',Arial,sans-serif",            gf:"Inter:wght@400;500;600;700" },
+  { key:"merriweather", label:"Merriweather",   family:"'Merriweather',Georgia,serif",        gf:"Merriweather:wght@400;700" },
+  { key:"playfair",     label:"Playfair",       family:"'Playfair Display',Georgia,serif",    gf:"Playfair+Display:wght@400;700" },
+  { key:"georgia",      label:"Georgia",        family:"Georgia,serif",                       gf:"" },
+];
+const FONT_SIZES: { key:string; label:string; scale:number }[] = [
+  { key:"xs", label:"XS", scale:0.85 },
+  { key:"sm", label:"S",  scale:0.92 },
+  { key:"md", label:"M",  scale:1.0  },
+  { key:"lg", label:"L",  scale:1.08 },
+  { key:"xl", label:"XL", scale:1.15 },
+];
+const PHOTO_SHAPES: { key:string; label:string; br:string; w:number; h:number; clip?:string }[] = [
+  { key:"square",  label:"Quadrat",    br:"0px",  w:96,  h:112 },
+  { key:"rounded", label:"Abgerundet", br:"8px",  w:96,  h:112 },
+  { key:"pill",    label:"Stark rund", br:"24px", w:96,  h:112 },
+  { key:"ellipse", label:"Ellipse",    br:"50%",  w:96,  h:112 },
+  { key:"circle",  label:"Kreis",      br:"50%",  w:100, h:100  },
+  { key:"diamond", label:"Diamant",    br:"0px",  w:90,  h:90,  clip:"polygon(50% 0%,100% 50%,50% 100%,0% 50%)" },
+];
+
 const CT  = "#111827";
 const CB  = "#374151";
 const CM  = "#6b7280";
@@ -255,6 +282,15 @@ export default function LebenslaufTemplate() {
   const [editing,setEditing] = useState(false);
   const [photoSrc,setPhotoSrc] = useState("");
   const [hiddenContacts,setHiddenContacts] = useState<Set<string>>(new Set());
+  const [fontKey,setFontKey]             = useState("nunito");
+  const [sizeKey,setSizeKey]             = useState("md");
+  const [photoShapeKey,setPhotoShapeKey] = useState("rounded");
+  const [showDesign,setShowDesign]       = useState(false);
+  const curFont  = FONTS.find(f=>f.key===fontKey)??FONTS[0];
+  const curSize  = FONT_SIZES.find(s=>s.key===sizeKey)??FONT_SIZES[2];
+  const curShape = PHOTO_SHAPES.find(s=>s.key===photoShapeKey)??PHOTO_SHAPES[1];
+  const fnt   = curFont.family;
+  const scale = curSize.scale;
   const photoInputRef = useRef<HTMLInputElement>(null);
   const toggleContact = (key:string) => setHiddenContacts(s=>{const n=new Set(s);n.has(key)?n.delete(key):n.add(key);return n;});
 
@@ -274,7 +310,8 @@ export default function LebenslaufTemplate() {
   return (
     <div style={{minHeight:"100vh",background:"#f3f4f6",padding:"24px 16px",overflowX:"auto",fontFamily:FNT}}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
+        ${curFont.gf ? `@import url('https://fonts.googleapis.com/css2?family=${curFont.gf}&display=swap');` : ""}
+        .cv-doc, .cv-doc * { font-family: ${fnt} !important; }
         @media print {
           @page { size: A4 portrait; margin: 0; }
           body * { visibility: hidden !important; }
@@ -302,14 +339,52 @@ export default function LebenslaufTemplate() {
         <button onClick={()=>window.print()} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"none",backgroundColor:"#374151",color:"white",fontFamily:FNT}}>
           <PrinterIcon style={{width:16,height:16}}/>Drucken / PDF
         </button>
-        <button onClick={()=>{if(window.confirm("Zurücksetzen?")){setData(JSON.parse(JSON.stringify(DEFAULT_DATA)));setHiddenContacts(new Set());}}} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"1px solid #d1d5db",backgroundColor:"white",color:CB,fontFamily:FNT}}>
+        <button onClick={()=>setShowDesign(v=>!v)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:`1px solid ${showDesign?"#4f46e5":"#e5e7eb"}`,backgroundColor:showDesign?"#eef2ff":"white",color:showDesign?"#4f46e5":CB,fontFamily:FNT}}>
+          🎨 Design
+        </button>
+        <button onClick={()=>{if(window.confirm("Zurücksetzen?")){setData(JSON.parse(JSON.stringify(DEFAULT_DATA)));setHiddenContacts(new Set());setFontKey("nunito");setSizeKey("md");setPhotoShapeKey("rounded");setShowDesign(false);}}} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"1px solid #d1d5db",backgroundColor:"white",color:CB,fontFamily:FNT}}>
           <XMarkIcon style={{width:16,height:16}}/>Zurücksetzen
         </button>
         {editing&&<span style={{alignSelf:"center",fontSize:12,color:CM,fontStyle:"italic"}}>Alle Felder direkt bearbeitbar</span>}
+        {showDesign&&(
+          <div style={{width:"100%",background:"white",border:"1px solid #e5e7eb",borderRadius:10,padding:"14px 18px",display:"flex",gap:24,flexWrap:"wrap",boxShadow:"0 2px 8px rgba(0,0,0,0.08)"}}>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:CM,marginBottom:7,letterSpacing:"0.06em",textTransform:"uppercase"}}>Schriftart</div>
+              <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
+                {FONTS.map(f=>(
+                  <button key={f.key} onClick={()=>setFontKey(f.key)} style={{padding:"4px 10px",borderRadius:6,border:`1px solid ${fontKey===f.key?"#4f46e5":"#e5e7eb"}`,background:fontKey===f.key?"#eef2ff":"white",color:fontKey===f.key?"#4f46e5":"#374151",fontSize:12,cursor:"pointer",fontFamily:f.family,fontWeight:fontKey===f.key?700:400}}>
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:CM,marginBottom:7,letterSpacing:"0.06em",textTransform:"uppercase"}}>Schriftgröße</div>
+              <div style={{display:"flex",gap:5}}>
+                {FONT_SIZES.map(s=>(
+                  <button key={s.key} onClick={()=>setSizeKey(s.key)} style={{padding:"4px 14px",borderRadius:6,border:`1px solid ${sizeKey===s.key?"#4f46e5":"#e5e7eb"}`,background:sizeKey===s.key?"#eef2ff":"white",color:sizeKey===s.key?"#4f46e5":"#374151",fontSize:12,cursor:"pointer",fontWeight:sizeKey===s.key?700:400}}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{fontSize:11,fontWeight:700,color:CM,marginBottom:7,letterSpacing:"0.06em",textTransform:"uppercase"}}>Foto-Form</div>
+              <div style={{display:"flex",gap:8,alignItems:"flex-end"}}>
+                {PHOTO_SHAPES.map(s=>(
+                  <button key={s.key} onClick={()=>setPhotoShapeKey(s.key)} title={s.label} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4,padding:"6px 8px",borderRadius:8,border:`2px solid ${photoShapeKey===s.key?"#4f46e5":"#e5e7eb"}`,background:photoShapeKey===s.key?"#eef2ff":"white",cursor:"pointer"}}>
+                    <div style={{width:22,height:s.key==="ellipse"?28:22,borderRadius:s.br,clipPath:s.clip??"",backgroundColor:photoShapeKey===s.key?"#4f46e5":"#9ca3af"}}/>
+                    <span style={{fontSize:9,color:photoShapeKey===s.key?"#4f46e5":"#9ca3af",whiteSpace:"nowrap"}}>{s.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Document */}
-      <div className="cv-doc" style={{maxWidth:850,margin:"0 auto",fontFamily:FNT,backgroundColor:"white",boxShadow:"0 4px 32px rgba(0,0,0,0.14)"}}>
+      <div className="cv-doc" style={{maxWidth:850,margin:"0 auto",fontFamily:fnt,backgroundColor:"white",boxShadow:"0 4px 32px rgba(0,0,0,0.14)",zoom:scale}}>
         <div style={{display:"flex"}}>
 
           {/* ── LEFT COLUMN ──────────────────────────────────────────────────── */}
@@ -319,7 +394,7 @@ export default function LebenslaufTemplate() {
             <div style={{display:"flex",alignItems:"flex-start",gap:16,marginBottom:28,paddingBottom:24,borderBottom:"1px solid #f3f4f6"}}>
               {/* Photo */}
               <div
-                style={{width:96,height:112,borderRadius:4,overflow:"hidden",flexShrink:0,backgroundColor:"#e5e7eb",border:`2px solid ${A}`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",cursor:editing?"pointer":"default"}}
+                style={{width:curShape.w,height:curShape.h,borderRadius:curShape.br,clipPath:curShape.clip??"",overflow:"hidden",flexShrink:0,backgroundColor:"#e5e7eb",border:`2px solid ${A}`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",cursor:editing?"pointer":"default"}}
                 onClick={()=>editing&&photoInputRef.current?.click()}
                 title={editing?"Klicken zum Foto hochladen":""}
               >
