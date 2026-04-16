@@ -14,6 +14,29 @@ import CV_Obsidian from "@/components/cv-templates/CV_Obsidian";
 import CV_Solar from "@/components/cv-templates/CV_Solar";
 import CV_Sakura from "@/components/cv-templates/CV_Sakura";
 import CV_Matrix from "@/components/cv-templates/CV_Matrix";
+import CV_Neon from "@/components/cv-templates/CV_Neon";
+import CV_Ember from "@/components/cv-templates/CV_Ember";
+import CV_Violet from "@/components/cv-templates/CV_Violet";
+import CV_Coral from "@/components/cv-templates/CV_Coral";
+import CV_Slate from "@/components/cv-templates/CV_Slate";
+import CV_Mint from "@/components/cv-templates/CV_Mint";
+import CV_Indigo from "@/components/cv-templates/CV_Indigo";
+import CV_Rust from "@/components/cv-templates/CV_Rust";
+import CV_Lavender from "@/components/cv-templates/CV_Lavender";
+import CV_Teal from "@/components/cv-templates/CV_Teal";
+import CV_Copper from "@/components/cv-templates/CV_Copper";
+import CV_Navy from "@/components/cv-templates/CV_Navy";
+import CV_Noir from "@/components/cv-templates/CV_Noir";
+import CV_Cloud from "@/components/cv-templates/CV_Cloud";
+import CV_Sunset from "@/components/cv-templates/CV_Sunset";
+import CV_Ocean from "@/components/cv-templates/CV_Ocean";
+import CV_Lemon from "@/components/cv-templates/CV_Lemon";
+import CV_Marble from "@/components/cv-templates/CV_Marble";
+import CV_Graphite from "@/components/cv-templates/CV_Graphite";
+import CV_Blush from "@/components/cv-templates/CV_Blush";
+import CV_Jade from "@/components/cv-templates/CV_Jade";
+import CV_Smoke from "@/components/cv-templates/CV_Smoke";
+import CV_Gold from "@/components/cv-templates/CV_Gold";
 
 const CV_MAP: Record<string, React.ComponentType> = {
   novoresume: LebenslaufTemplate,
@@ -26,6 +49,29 @@ const CV_MAP: Record<string, React.ComponentType> = {
   solar: CV_Solar,
   sakura: CV_Sakura,
   matrix: CV_Matrix,
+  neon: CV_Neon,
+  ember: CV_Ember,
+  violet: CV_Violet,
+  coral: CV_Coral,
+  slate: CV_Slate,
+  mint: CV_Mint,
+  indigo: CV_Indigo,
+  rust: CV_Rust,
+  lavender: CV_Lavender,
+  teal: CV_Teal,
+  copper: CV_Copper,
+  navy: CV_Navy,
+  noir: CV_Noir,
+  cloud: CV_Cloud,
+  sunset: CV_Sunset,
+  ocean: CV_Ocean,
+  lemon: CV_Lemon,
+  marble: CV_Marble,
+  graphite: CV_Graphite,
+  blush: CV_Blush,
+  jade: CV_Jade,
+  smoke: CV_Smoke,
+  gold: CV_Gold,
 };
 
 function LebenslaufContent() {

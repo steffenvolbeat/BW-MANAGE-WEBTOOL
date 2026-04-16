@@ -16,6 +16,29 @@ import CL_Obsidian from "@/components/cv-templates/CL_Obsidian";
 import CL_Solar from "@/components/cv-templates/CL_Solar";
 import CL_Sakura from "@/components/cv-templates/CL_Sakura";
 import CL_Matrix from "@/components/cv-templates/CL_Matrix";
+import CL_Neon from "@/components/cv-templates/CL_Neon";
+import CL_Ember from "@/components/cv-templates/CL_Ember";
+import CL_Violet from "@/components/cv-templates/CL_Violet";
+import CL_Coral from "@/components/cv-templates/CL_Coral";
+import CL_Slate from "@/components/cv-templates/CL_Slate";
+import CL_Mint from "@/components/cv-templates/CL_Mint";
+import CL_Indigo from "@/components/cv-templates/CL_Indigo";
+import CL_Rust from "@/components/cv-templates/CL_Rust";
+import CL_Lavender from "@/components/cv-templates/CL_Lavender";
+import CL_Teal from "@/components/cv-templates/CL_Teal";
+import CL_Copper from "@/components/cv-templates/CL_Copper";
+import CL_Navy from "@/components/cv-templates/CL_Navy";
+import CL_Noir from "@/components/cv-templates/CL_Noir";
+import CL_Cloud from "@/components/cv-templates/CL_Cloud";
+import CL_Sunset from "@/components/cv-templates/CL_Sunset";
+import CL_Ocean from "@/components/cv-templates/CL_Ocean";
+import CL_Lemon from "@/components/cv-templates/CL_Lemon";
+import CL_Marble from "@/components/cv-templates/CL_Marble";
+import CL_Graphite from "@/components/cv-templates/CL_Graphite";
+import CL_Blush from "@/components/cv-templates/CL_Blush";
+import CL_Jade from "@/components/cv-templates/CL_Jade";
+import CL_Smoke from "@/components/cv-templates/CL_Smoke";
+import CL_Gold from "@/components/cv-templates/CL_Gold";
 
 const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   midnight: CL_Midnight,
@@ -27,6 +50,29 @@ const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   solar: CL_Solar,
   sakura: CL_Sakura,
   matrix: CL_Matrix,
+  neon: CL_Neon,
+  ember: CL_Ember,
+  violet: CL_Violet,
+  coral: CL_Coral,
+  slate: CL_Slate,
+  mint: CL_Mint,
+  indigo: CL_Indigo,
+  rust: CL_Rust,
+  lavender: CL_Lavender,
+  teal: CL_Teal,
+  copper: CL_Copper,
+  navy: CL_Navy,
+  noir: CL_Noir,
+  cloud: CL_Cloud,
+  sunset: CL_Sunset,
+  ocean: CL_Ocean,
+  lemon: CL_Lemon,
+  marble: CL_Marble,
+  graphite: CL_Graphite,
+  blush: CL_Blush,
+  jade: CL_Jade,
+  smoke: CL_Smoke,
+  gold: CL_Gold,
 };
 
 function AnschreibenContent() {

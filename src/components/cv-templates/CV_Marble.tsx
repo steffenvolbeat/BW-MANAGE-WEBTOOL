@@ -1,18 +1,18 @@
 "use client";
-// ─── CV Template: Obsidian ─────────────────────────────────────────────────
+// ─── CV Template: Marble ─────────────────────────────────────────────────
 import { useState, useRef } from "react";
 import { PrinterIcon, PencilSquareIcon, CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FONTS, FONT_SIZES, PHOTO_SHAPES, CVData, DEFAULT_CV_DATA, uid } from "./shared";
 
 const A   = "#6b7280";
-const BG  = "#111827";
-const S2  = "#1f2937";
-const S3  = "#374151";
-const SBG = "#161d2b";
-const CT  = "#ffffff";
-const CB  = "#d1d5db";
-const CM  = "#9ca3af";
-const PFX = "obs";
+const BG  = "#f9fafb";
+const S2  = "#f3f4f6";
+const S3  = "#e5e7eb";
+const SBG = "#f7f8fa";
+const CT  = "#111827";
+const CB  = "#374151";
+const CM  = "#6b7280";
+const PFX = "mrb";
 
 function E({ value, onChange, editing, multiline = false, style = {} as React.CSSProperties, placeholder = "...", rows = 3 }: {
   value: string; onChange: (v: string) => void; editing: boolean;
@@ -68,7 +68,7 @@ function SecH({ title }: { title: string }) {
   );
 }
 
-export default function CV_Obsidian() {
+export default function CV_Marble() {
   const [data, setData] = useState<CVData>(JSON.parse(JSON.stringify(DEFAULT_CV_DATA)));
   const [editing, setEditing] = useState(false);
   const [photoSrc, setPhotoSrc] = useState("");
@@ -89,7 +89,7 @@ export default function CV_Obsidian() {
   const updExp  = (id: string, p: Partial<typeof data.experience[0]>) => setData(d => ({ ...d, experience: d.experience.map(x => x.id === id ? { ...x, ...p } : x) }));
 
   return (
-    <div style={{ minHeight: "100vh", background: "#111827", padding: "24px 16px", fontFamily: fnt }}>
+    <div style={{ minHeight: "100vh", background: "#f0f0f0", padding: "24px 16px", fontFamily: fnt }}>
       <style>{`
         ${curFont.gf ? `@import url('https://fonts.googleapis.com/css2?family=${curFont.gf}&display=swap');` : ""}
         .${PFX}-doc, .${PFX}-doc * { font-family: ${fnt} !important; }
