@@ -32,6 +32,7 @@ import {
   QrCodeIcon,
   ArrowTrendingUpIcon,
   ExclamationTriangleIcon,
+  AcademicCapIcon,
 } from "@heroicons/react/24/outline";
 
 interface NavigationItem {
@@ -178,6 +179,13 @@ const navigation: NavigationItem[] = [
     href: "/anschreiben",
     icon: PencilSquareIcon,
     description: "DIN-5008 & Novoresume-Template",
+    badge: "NEU",
+  },
+  {
+    name: "DCI Classroom",
+    href: "/classroom",
+    icon: AcademicCapIcon,
+    description: "12-Wochen ISP-Bewerbungsprogramm",
     badge: "NEU",
   },
   {
