@@ -116,7 +116,7 @@ export default function CV_Sakura() {
         <button onClick={() => setShowDesign(v => !v)} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: `1px solid ${showDesign ? A : "#333"}`, backgroundColor: showDesign ? hex2rgba(A,0.1) : "transparent", color: showDesign ? A : "#888" }}>
           🎨 Design
         </button>
-        <button onClick={() => { if (window.confirm("Zurücksetzen?")) { setData(JSON.parse(JSON.stringify(DEFAULT_CV_DATA))); setPhotoSrc(""); setFontKey("nunito"); setSizeKey("md"); setPhotoShapeKey("circle"); setShowDesign(false); } }} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: "1px solid #333", backgroundColor: "transparent", color: "#888", display: "flex", alignItems: "center", gap: 6 }}>
+        <button onClick={() => { setData(JSON.parse(JSON.stringify(DEFAULT_CV_DATA))); setPhotoSrc(""); setFontKey("nunito"); setSizeKey("md"); setPhotoShapeKey("circle"); setClrs(DEFAULT_COLORS); setShowDesign(false); }} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: "1px solid #333", backgroundColor: "transparent", color: "#888", display: "flex", alignItems: "center", gap: 6 }}>
           <XMarkIcon style={{ width: 16, height: 16 }} />Reset
         </button>
         {showDesign && (
@@ -142,7 +142,7 @@ export default function CV_Sakura() {
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, color: "#555", marginBottom: 7, letterSpacing: "0.1em", textTransform: "uppercase" }}>Farben</div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
-                {([{k:"A" as const,l:"Akzent"},{k:"BG" as const,l:"Hintergrund"},{k:"S2" as const,l:"Sektion"},{k:"S3" as const,l:"Karte"},{k:"SBG" as const,l:"Sidebar"}]).map(({k,l}) => (
+                {([{k:"A" as const,l:"Akzent"},{k:"BG" as const,l:"Hintergrund"},{k:"S2" as const,l:"Sektion"},{k:"S3" as const,l:"Karte"},{k:"SBG" as const,l:"Sidebar"},{k:"CT" as const,l:"Titel-Text"},{k:"CB" as const,l:"Body-Text"},{k:"CM" as const,l:"Gedimmt"}]).map(({k,l}) => (
                   <label key={k} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer" }}>
                     <input type="color" value={clrs[k]} onChange={e => setClrs(c => ({ ...c, [k]: e.target.value }))} style={{ width: 32, height: 32, padding: 2, borderRadius: 6, border: "1px solid #444", cursor: "pointer", background: "none" }} />
                     <span style={{ fontSize: 9, color: "#777" }}>{l}</span>

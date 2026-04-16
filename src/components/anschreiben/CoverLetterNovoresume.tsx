@@ -1,5 +1,5 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, createContext, useContext } from "react";
 import {
   PrinterIcon, PencilSquareIcon, CheckIcon,
   PlusIcon, XMarkIcon, EnvelopeIcon, PhoneIcon,
@@ -7,8 +7,9 @@ import {
 } from "@heroicons/react/24/outline";
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
-const A   = "#3ecfd6";
-const SBG = "#1d2a3a";
+const DEFAULT_COLORS = { A:"#3ecfd6", SBG:"#1d2a3a", DBG:"#ffffff", CT:"#111827", CB:"#374151", CM:"#9ca3af" };
+const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
+const ColCtx = createContext(DEFAULT_COLORS);
 const FNT = "'Nunito','Calibri','Segoe UI',Arial,sans-serif";
 
 const FONTS: { key:string; label:string; family:string; gf:string }[] = [
@@ -29,9 +30,7 @@ const FONT_SIZES: { key:string; label:string; scale:number }[] = [
   { key:"xl", label:"XL", scale:1.15 },
 ];
 
-const CT  = "#111827";
-const CB  = "#374151";
-const CM  = "#9ca3af";
+
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface CLData {
@@ -82,9 +81,10 @@ function E({ value, onChange, editing, multiline = false, style = {} as React.CS
   value: string; onChange: (v: string) => void; editing: boolean;
   multiline?: boolean; style?: React.CSSProperties; placeholder?: string; rows?: number;
 }) {
+  const {A} = useContext(ColCtx);
   const s: React.CSSProperties = {
     ...style,
-    background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3,
+    background: hex2rgba(A,0.12), border: `1px dashed ${A}66`, borderRadius: 3,
     padding: "2px 4px", outline: "none", width: "100%", fontFamily: "inherit",
     fontSize: "inherit", color: "inherit", lineHeight: "inherit", fontWeight: "inherit",
     fontStyle: "inherit", boxSizing: "border-box",
@@ -99,6 +99,7 @@ function CRow({ icon, value, editing, onChange, onDelete, hidden }: {
   icon: React.ReactNode; value: string; editing: boolean; onChange: (v: string) => void;
   onDelete?: () => void; hidden?: boolean;
 }) {
+  const {A} = useContext(ColCtx);
   if (hidden && !editing) return null;
   return (
     <div style={{ display: "flex", alignItems: "flex-start", gap: 10, marginBottom: 14, opacity: hidden ? 0.35 : 1 }}>
@@ -139,6 +140,8 @@ export default function CoverLetterNovoresume({
   const [fontKey, setFontKey]   = useState("nunito");
   const [sizeKey, setSizeKey]   = useState("md");
   const [showDesign, setShowDesign] = useState(false);
+  const [clrs, setClrs] = useState(DEFAULT_COLORS);
+  const {A, SBG, DBG, CT, CB, CM} = clrs;
   const curFont = FONTS.find(f => f.key === fontKey) ?? FONTS[0];
   const curSize = FONT_SIZES.find(s => s.key === sizeKey) ?? FONT_SIZES[2];
   const fnt   = curFont.family;
@@ -156,12 +159,14 @@ export default function CoverLetterNovoresume({
   const removePara = (i: number) => setData(d => ({ ...d, bodyParagraphs: d.bodyParagraphs.filter((_, idx) => idx !== i) }));
 
   return (
+  <ColCtx.Provider value={clrs}>
     <div style={{ minHeight: "100vh", backgroundColor: "#f3f4f6", padding: "24px 16px", fontFamily: FNT }}>
       <style>{`
         ${curFont.gf ? `@import url('https://fonts.googleapis.com/css2?family=${curFont.gf}&display=swap');` : ""}
         .cl-doc, .cl-doc * { font-family: ${fnt} !important; }
         @media print {
           @page { size: A4 portrait; margin: 0; }
+          *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           body * { visibility: hidden !important; }
           .cl-doc, .cl-doc * { visibility: visible !important; }
           .cl-ctrl { display: none !important; visibility: hidden !important; }
@@ -207,7 +212,7 @@ export default function CoverLetterNovoresume({
         <button onClick={() => setShowDesign(v => !v)} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: `1px solid ${showDesign ? "#4f46e5" : "#e5e7eb"}`, backgroundColor: showDesign ? "#eef2ff" : "white", color: showDesign ? "#4f46e5" : CB, fontFamily: FNT }}>
           🎨 Design
         </button>
-        <button onClick={() => { if (window.confirm("Zurücksetzen?")) { setData(JSON.parse(JSON.stringify(DEFAULT_CL))); setHiddenContacts(new Set()); setFontKey("nunito"); setSizeKey("md"); setShowDesign(false); } }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid #d1d5db", backgroundColor: "white", color: CB, fontFamily: FNT }}>
+        <button onClick={() => { setData(JSON.parse(JSON.stringify(DEFAULT_CL))); setHiddenContacts(new Set()); setFontKey("nunito"); setSizeKey("md"); setClrs(DEFAULT_COLORS); setShowDesign(false); }} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 16px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", border: "1px solid #d1d5db", backgroundColor: "white", color: CB, fontFamily: FNT }}>
           <XMarkIcon style={{ width: 16, height: 16 }} />Zurücksetzen
         </button>
         {editing && <span style={{ alignSelf: "center", fontSize: 12, color: "#6b7280", fontStyle: "italic" }}>Alle Felder direkt bearbeitbar</span>}
@@ -233,12 +238,24 @@ export default function CoverLetterNovoresume({
                 ))}
               </div>
             </div>
+            <div>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#9ca3af", marginBottom: 7, letterSpacing: "0.06em", textTransform: "uppercase" }}>Farben</div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
+                {([{k:"A" as const,l:"Akzent"},{k:"SBG" as const,l:"Sidebar-BG"},{k:"DBG" as const,l:"Dok.-BG"},{k:"CT" as const,l:"Titel-Text"},{k:"CB" as const,l:"Body-Text"},{k:"CM" as const,l:"Gedimmt"}]).map(({k,l}) => (
+                  <label key={k} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer" }}>
+                    <input type="color" value={clrs[k]} onChange={e => setClrs(c => ({ ...c, [k]: e.target.value }))} style={{ width: 32, height: 32, padding: 2, borderRadius: 6, border: "1px solid #d1d5db", cursor: "pointer", background: "none" }} />
+                    <span style={{ fontSize: 9, color: "#9ca3af" }}>{l}</span>
+                  </label>
+                ))}
+                <button onClick={() => setClrs(DEFAULT_COLORS)} style={{ padding: "4px 10px", borderRadius: 6, fontSize: 11, border: "1px solid #d1d5db", background: "transparent", color: "#9ca3af", cursor: "pointer", alignSelf: "center" }}>↺ Reset</button>
+              </div>
+            </div>
           </div>
         )}
       </div>
 
       {/* ── Document ────────────────────────────────────────────────────────── */}
-      <div className="cl-doc" style={{ width: 850, margin: "0 auto", fontFamily: fnt, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)", overflow: "hidden" }}>
+      <div className="cl-doc" style={{ width: 850, margin: "0 auto", fontFamily: fnt, backgroundColor: DBG, boxShadow: "0 4px 32px rgba(0,0,0,0.14)", overflow: "hidden" }}>
         <div className="cl-zoom-wrapper" style={{ width: Math.round(850/scale), zoom: scale, display: "flex", flexDirection: "column", minHeight: Math.round(1056/scale) }}>
 
         {/* ── DUNKLER HEADER (volle Breite) ─────────────────────────────────── */}
@@ -280,7 +297,7 @@ export default function CoverLetterNovoresume({
         </div>
 
         {/* ── BRIEF-INHALT (volle Dokumentbreite) ───────────────────────────── */}
-        <div className="cl-left" style={{ flex: 1, backgroundColor: "white", padding: "28px 40px 32px" }}>
+        <div className="cl-left" style={{ flex: 1, backgroundColor: DBG, padding: "28px 40px 32px" }}>
 
           {/* Empfänger */}
           <div style={{ marginBottom: 16 }}>
@@ -345,5 +362,6 @@ export default function CoverLetterNovoresume({
         </div>{/* end cl-zoom-wrapper */}
       </div>
     </div>
+  </ColCtx.Provider>
   );
 }

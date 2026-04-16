@@ -4,7 +4,7 @@ import { useState, useContext, createContext } from "react";
 import { PrinterIcon, PencilSquareIcon, CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FONTS, FONT_SIZES, CLData, DEFAULT_CL_DATA, uid } from "./shared";
 
-const DEFAULT_COLORS = { A:"#f472b6", BG:"#831843", S2:"#9d174d" };
+const DEFAULT_COLORS = { A:"#f472b6", BG:"#831843", HD:"#c9336f", S2:"#9d174d", CT:"#ffffff", CB:"#d1d5db", CM:"#9ca3af" };
 const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
 const ColCtx = createContext(DEFAULT_COLORS);
 
@@ -26,12 +26,13 @@ export default function CL_Sakura() {
   const [sizeKey, setSizeKey] = useState("md");
   const [showDesign, setShowDesign] = useState(false);
   const [clrs, setClrs] = useState(DEFAULT_COLORS);
-  const {A,BG,S2} = clrs;
+  const {A,BG,HD,S2,CT,CB,CM} = clrs;
   const curFont = FONTS.find(f => f.key === fontKey) ?? FONTS[0];
   const curSize = FONT_SIZES.find(s => s.key === sizeKey) ?? FONT_SIZES[2];
   const fnt = curFont.family; const scale = curSize.scale;
   const setP = (p: Partial<CLData["personal"]>) => setData(d => ({ ...d, personal: { ...d.personal, ...p } }));
   const setR = (p: Partial<CLData["recipient"]>) => setData(d => ({ ...d, recipient: { ...d.recipient, ...p } }));
+  const doReset = () => { setData(JSON.parse(JSON.stringify(DEFAULT_CL_DATA))); setClrs(DEFAULT_COLORS); setFontKey("nunito"); setSizeKey("md"); };
 
   return (
   <ColCtx.Provider value={clrs}>
@@ -41,9 +42,10 @@ export default function CL_Sakura() {
         .clsak-doc, .clsak-doc * { font-family: ${fnt} !important; }
         @media print {
           @page { size: A4 portrait; margin: 0; }
+          *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           body * { visibility: hidden !important; }
           .clsak-doc, .clsak-doc * { visibility: visible !important; }
-          .clsak-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; box-shadow: none !important; margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .clsak-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; box-shadow: none !important; margin: 0 !important; }
           .clsak-zoom { zoom: 1 !important; width: 100% !important; }
           .clsak-ctrl { display: none !important; }
         }
@@ -56,7 +58,7 @@ export default function CL_Sakura() {
           <PrinterIcon style={{ width: 16, height: 16 }} />Drucken
         </button>
         <button onClick={() => setShowDesign(v => !v)} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: `1px solid ${showDesign ? A : "#333"}`, backgroundColor: "transparent", color: showDesign ? A : "#888" }}>🎨 Design</button>
-        <button onClick={() => { if (window.confirm("Zurücksetzen?")) setData(JSON.parse(JSON.stringify(DEFAULT_CL_DATA))); }} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: "1px solid #333", backgroundColor: "transparent", color: "#888", display: "flex", alignItems: "center", gap: 6 }}>
+        <button onClick={doReset} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: "1px solid #333", backgroundColor: "transparent", color: "#888", display: "flex", alignItems: "center", gap: 6 }}>
           <XMarkIcon style={{ width: 16, height: 16 }} />Reset
         </button>
         {showDesign && (
@@ -67,9 +69,9 @@ export default function CL_Sakura() {
             <div><div style={{ fontSize: 10, fontWeight: 700, color: "#555", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.1em" }}>Schriftgröße</div>
               <div style={{ display: "flex", gap: 5 }}>{FONT_SIZES.map(s => <button key={s.key} onClick={() => setSizeKey(s.key)} style={{ padding: "3px 12px", borderRadius: 5, border: `1px solid ${sizeKey === s.key ? A : "#333"}`, background: sizeKey === s.key ? hex2rgba(A,0.1) : "transparent", color: sizeKey === s.key ? A : "#888", fontSize: 11, cursor: "pointer" }}>{s.label}</button>)}</div>
             </div>
-            <div><div style={{ fontSize: 10, fontWeight: 700, color: "#555", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.1em" }}>Farben</div>
+            <div style={{ flex: 1 }}><div style={{ fontSize: 10, fontWeight: 700, color: "#555", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.1em" }}>Farben</div>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
-                {([{k:"A" as const,l:"Akzent"},{k:"BG" as const,l:"Hintergrund"},{k:"S2" as const,l:"Sektion"}]).map(({k,l}) => (
+                {([{k:"A" as const,l:"Akzent"},{k:"BG" as const,l:"Dok.-BG"},{k:"HD" as const,l:"Header-BG"},{k:"S2" as const,l:"Sektion-BG"},{k:"CT" as const,l:"Titel-Text"},{k:"CB" as const,l:"Body-Text"},{k:"CM" as const,l:"Gedimmt"}]).map(({k,l}) => (
                   <label key={k} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer" }}>
                     <input type="color" value={clrs[k]} onChange={e => setClrs(c => ({ ...c, [k]: e.target.value }))} style={{ width: 32, height: 32, padding: 2, borderRadius: 6, border: "1px solid #444", cursor: "pointer", background: "none" }} />
                     <span style={{ fontSize: 9, color: "#777" }}>{l}</span>
@@ -82,29 +84,29 @@ export default function CL_Sakura() {
         )}
       </div>
 
-      <div className="clsak-doc" style={{ width: 850, margin: "0 auto", backgroundColor: BG, boxShadow: `0 0 60px rgba(244,114,182,0.15)`, overflow: "hidden" }}>
+      <div className="clsak-doc" style={{ width: 850, margin: "0 auto", backgroundColor: BG, boxShadow: `0 0 60px ${hex2rgba(A,0.15)}`, overflow: "hidden" }}>
         <div className="clsak-zoom" style={{ width: Math.round(850 / scale), zoom: scale }}>
           {/* Header */}
-          <div style={{ background: `linear-gradient(135deg, ${BG}, "#9d174d")`, padding: "32px 48px 24px", borderBottom: `2px solid ${A}` }}>
+          <div style={{ background: `linear-gradient(135deg, ${HD}, ${S2})`, padding: "32px 48px 24px", borderBottom: `2px solid ${A}` }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <E value={data.personal.name} onChange={v => setP({ name: v })} editing={editing} style={{ fontSize: 30, fontWeight: 900, color: "white", display: "block", marginBottom: 4 }} />
+                <E value={data.personal.name} onChange={v => setP({ name: v })} editing={editing} style={{ fontSize: 30, fontWeight: 900, color: CT, display: "block", marginBottom: 4 }} />
                 <E value={data.personal.subtitle} onChange={v => setP({ subtitle: v })} editing={editing} style={{ fontSize: 12, color: A, letterSpacing: "0.06em", display: "block" }} />
               </div>
               <div style={{ textAlign: "right" }}>
-                {[data.personal.email, data.personal.phone, data.personal.location, data.personal.website].map((v, i) => <E key={i} value={v} onChange={nv => setP([{ email: nv }, { phone: nv }, { location: nv }, { website: nv }][i])} editing={editing} style={{ fontSize: 10, color: "#9ca3af", display: "block", marginBottom: 2 }} />)}
+                {[data.personal.email, data.personal.phone, data.personal.location, data.personal.website].map((v, i) => <E key={i} value={v} onChange={nv => setP([{ email: nv }, { phone: nv }, { location: nv }, { website: nv }][i])} editing={editing} style={{ fontSize: 10, color: CM, display: "block", marginBottom: 2 }} />)}
               </div>
             </div>
           </div>
 
           {/* Body */}
-          <div style={{ padding: "36px 48px 48px", color: "#d1d5db" }}>
+          <div style={{ padding: "36px 48px 48px", color: CB }}>
             {/* Recipient + date */}
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 28 }}>
               <div>
-                {[data.recipient.company, data.recipient.street, data.recipient.cityZip, data.recipient.country].map((v, i) => <E key={i} value={v} onChange={nv => setR([{ company: nv }, { street: nv }, { cityZip: nv }, { country: nv }][i])} editing={editing} style={{ fontSize: 11, color: "#d1d5db", display: "block", lineHeight: 1.6 }} />)}
+                {[data.recipient.company, data.recipient.street, data.recipient.cityZip, data.recipient.country].map((v, i) => <E key={i} value={v} onChange={nv => setR([{ company: nv }, { street: nv }, { cityZip: nv }, { country: nv }][i])} editing={editing} style={{ fontSize: 11, color: CB, display: "block", lineHeight: 1.6 }} />)}
               </div>
-              <E value={data.date} onChange={v => setData(d => ({ ...d, date: v }))} editing={editing} style={{ fontSize: 11, color: "#9ca3af", fontStyle: "italic" }} />
+              <E value={data.date} onChange={v => setData(d => ({ ...d, date: v }))} editing={editing} style={{ fontSize: 11, color: CM, fontStyle: "italic" }} />
             </div>
 
             {/* Subject */}
@@ -112,20 +114,20 @@ export default function CL_Sakura() {
               <E value={data.subject} onChange={v => setData(d => ({ ...d, subject: v }))} editing={editing} style={{ fontSize: 13, fontWeight: 700, color: A }} />
             </div>
 
-            <E value={data.salutation} onChange={v => setData(d => ({ ...d, salutation: v }))} editing={editing} style={{ fontSize: 12, color: "#d1d5db", display: "block", marginBottom: 16 }} />
+            <E value={data.salutation} onChange={v => setData(d => ({ ...d, salutation: v }))} editing={editing} style={{ fontSize: 12, color: CB, display: "block", marginBottom: 16 }} />
 
             {data.bodyParagraphs.map((p, i) => (
               <div key={i} style={{ marginBottom: 12, display: "flex", gap: 8, alignItems: "flex-start" }}>
                 {editing && <button type="button" onClick={() => setData(d => ({ ...d, bodyParagraphs: d.bodyParagraphs.filter((_, j) => j !== i) }))} style={{ padding: "2px 4px", fontSize: 10, color: "#f87171", background: "none", border: "none", cursor: "pointer", marginTop: 2, flexShrink: 0 }}>✕</button>}
-                <E value={p} onChange={v => setData(d => ({ ...d, bodyParagraphs: d.bodyParagraphs.map((x, j) => j === i ? v : x) }))} editing={editing} multiline rows={4} style={{ fontSize: 11, color: "#9ca3af", lineHeight: 1.75, display: "block" }} />
+                <E value={p} onChange={v => setData(d => ({ ...d, bodyParagraphs: d.bodyParagraphs.map((x, j) => j === i ? v : x) }))} editing={editing} multiline rows={4} style={{ fontSize: 11, color: CM, lineHeight: 1.75, display: "block" }} />
               </div>
             ))}
             {editing && <button type="button" onClick={() => setData(d => ({ ...d, bodyParagraphs: [...d.bodyParagraphs, "Neuer Absatz..."] }))} style={{ fontSize: 11, color: A, background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 4, marginBottom: 16 }}><PlusIcon style={{ width: 12, height: 12 }} />Absatz hinzufügen</button>}
 
             <div style={{ marginTop: 24 }}>
-              <E value={data.closing} onChange={v => setData(d => ({ ...d, closing: v }))} editing={editing} style={{ fontSize: 11, color: "#d1d5db", display: "block", marginBottom: 28 }} />
+              <E value={data.closing} onChange={v => setData(d => ({ ...d, closing: v }))} editing={editing} style={{ fontSize: 11, color: CB, display: "block", marginBottom: 28 }} />
               <div style={{ width: 120, height: 1, backgroundColor: `${A}66`, marginBottom: 8 }} />
-              <E value={data.signatureName} onChange={v => setData(d => ({ ...d, signatureName: v }))} editing={editing} style={{ fontSize: 12, fontWeight: 700, color: "white" }} />
+              <E value={data.signatureName} onChange={v => setData(d => ({ ...d, signatureName: v }))} editing={editing} style={{ fontSize: 12, fontWeight: 700, color: CT }} />
             </div>
           </div>
         </div>
