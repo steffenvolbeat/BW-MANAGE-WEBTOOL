@@ -177,6 +177,7 @@ export default function CoverLetterNovoresume({
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
+          .cl-zoom-wrapper { zoom: 1 !important; width: 100% !important; height: 100% !important; min-height: unset !important; }
           .cl-header {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
@@ -237,7 +238,8 @@ export default function CoverLetterNovoresume({
       </div>
 
       {/* ── Document ────────────────────────────────────────────────────────── */}
-      <div className="cl-doc" style={{ maxWidth: 850, margin: "0 auto", fontFamily: fnt, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)", display: "flex", flexDirection: "column", minHeight: 1056, zoom: scale }}>
+      <div className="cl-doc" style={{ width: 850, margin: "0 auto", fontFamily: fnt, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)", overflow: "hidden" }}>
+        <div className="cl-zoom-wrapper" style={{ width: Math.round(850/scale), zoom: scale, display: "flex", flexDirection: "column", minHeight: Math.round(1056/scale) }}>
 
         {/* ── DUNKLER HEADER (volle Breite) ─────────────────────────────────── */}
         <div className="cl-header" style={{ backgroundColor: SBG, padding: "22px 40px", display: "flex", gap: 32, alignItems: "center" }}>
@@ -340,6 +342,7 @@ export default function CoverLetterNovoresume({
           </div>
 
         </div>{/* Ende Brief-Inhalt */}
+        </div>{/* end cl-zoom-wrapper */}
       </div>
     </div>
   );

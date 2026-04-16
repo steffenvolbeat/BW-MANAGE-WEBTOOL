@@ -29,13 +29,15 @@ const FONT_SIZES: { key:string; label:string; scale:number }[] = [
   { key:"lg", label:"L",  scale:1.08 },
   { key:"xl", label:"XL", scale:1.15 },
 ];
-const PHOTO_SHAPES: { key:string; label:string; br:string; w:number; h:number; clip?:string }[] = [
+const PHOTO_SHAPES: { key:string; label:string; br:string; w:number; h:number; clip?:string; shadow?:string }[] = [
   { key:"square",  label:"Quadrat",    br:"0px",  w:96,  h:112 },
   { key:"rounded", label:"Abgerundet", br:"8px",  w:96,  h:112 },
   { key:"pill",    label:"Stark rund", br:"24px", w:96,  h:112 },
   { key:"ellipse", label:"Ellipse",    br:"50%",  w:96,  h:112 },
   { key:"circle",  label:"Kreis",      br:"50%",  w:100, h:100  },
   { key:"diamond", label:"Diamant",    br:"0px",  w:90,  h:90,  clip:"polygon(50% 0%,100% 50%,50% 100%,0% 50%)" },
+  { key:"wuerfel", label:"Würfel",     br:"0px",  w:96,  h:96,  shadow:"6px 6px 0 #0f1e2e, 12px 12px 0 rgba(29,42,58,0.5)" },
+  { key:"kugel",   label:"Kugel",      br:"50%",  w:100, h:100, shadow:"inset -5px -5px 12px rgba(0,0,0,0.55), inset 4px 4px 8px rgba(255,255,255,0.18), 0 5px 15px rgba(0,0,0,0.25)" },
 ];
 
 const CT  = "#111827";
@@ -325,6 +327,7 @@ export default function LebenslaufTemplate() {
             print-color-adjust: exact !important;
           }
           /* Sidebar nur so hoch wie ihr Inhalt – kein dunkler Balken auf Seite 2 */
+          .cv-zoom-wrapper { zoom: 1 !important; width: 100% !important; }
           .cv-doc > div > div:first-child { align-items: flex-start !important; }
           .cv-ctrl { display: none !important; visibility: hidden !important; }
         }
@@ -384,7 +387,8 @@ export default function LebenslaufTemplate() {
       </div>
 
       {/* Document */}
-      <div className="cv-doc" style={{maxWidth:850,margin:"0 auto",fontFamily:fnt,backgroundColor:"white",boxShadow:"0 4px 32px rgba(0,0,0,0.14)",zoom:scale}}>
+      <div className="cv-doc" style={{width:850,margin:"0 auto",fontFamily:fnt,backgroundColor:"white",boxShadow:"0 4px 32px rgba(0,0,0,0.14)",overflow:"hidden"}}>
+        <div className="cv-zoom-wrapper" style={{width:Math.round(850/scale),zoom:scale}}>
         <div style={{display:"flex"}}>
 
           {/* ── LEFT COLUMN ──────────────────────────────────────────────────── */}
@@ -394,7 +398,7 @@ export default function LebenslaufTemplate() {
             <div style={{display:"flex",alignItems:"flex-start",gap:16,marginBottom:28,paddingBottom:24,borderBottom:"1px solid #f3f4f6"}}>
               {/* Photo */}
               <div
-                style={{width:curShape.w,height:curShape.h,borderRadius:curShape.br,clipPath:curShape.clip??"",overflow:"hidden",flexShrink:0,backgroundColor:"#e5e7eb",border:`2px solid ${A}`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",cursor:editing?"pointer":"default"}}
+                style={{width:curShape.w,height:curShape.h,borderRadius:curShape.br,clipPath:curShape.clip??"",overflow:"hidden",flexShrink:0,backgroundColor:"#e5e7eb",border:`2px solid ${A}`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",cursor:editing?"pointer":"default",boxShadow:curShape.shadow??""}}
                 onClick={()=>editing&&photoInputRef.current?.click()}
                 title={editing?"Klicken zum Foto hochladen":""}
               >
@@ -578,6 +582,7 @@ export default function LebenslaufTemplate() {
           <span>{new Date().toLocaleDateString("de-DE",{day:"2-digit",month:"long",year:"numeric"})}</span>
           <span style={{fontStyle:"italic"}}>{data.personal.name} · Lebenslauf</span>
         </div>
+        </div>{/* end cv-zoom-wrapper */}
       </div>
     </div>
   );
