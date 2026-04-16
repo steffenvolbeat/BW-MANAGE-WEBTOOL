@@ -97,9 +97,10 @@ export default function CV_Coral() {
         .${PFX}-doc, .${PFX}-doc * { font-family: ${fnt} !important; }
         @media print {
           @page { size: A4 portrait; margin: 0; }
+          *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           body * { visibility: hidden !important; }
           .${PFX}-doc, .${PFX}-doc * { visibility: visible !important; }
-          .${PFX}-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; box-shadow: none !important; margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .${PFX}-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 850px !important; max-height: 1202px !important; overflow: hidden !important; zoom: 0.934 !important; box-shadow: none !important; margin: 0 !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .${PFX}-zoom { zoom: 1 !important; width: 100% !important; }
           .${PFX}-ctrl { display: none !important; }
         }
