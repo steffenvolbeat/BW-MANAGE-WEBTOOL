@@ -150,26 +150,20 @@ export default function CoverLetterNovoresume({
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* Sidebar: nur so hoch wie Inhalt, nicht gestreckt */
-          .cl-inner {
-            min-height: 0 !important;
-            height: 297mm !important;
-            align-items: flex-start !important;
-          }
-          .cl-sidebar {
+          .cl-header {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           .cl-left {
-            padding: 26px 22px 26px 32px !important;
+            padding: 20px 32px !important;
           }
           .cl-para * {
-            font-size: 11.5px !important;
-            line-height: 1.45 !important;
+            font-size: 11px !important;
+            line-height: 1.42 !important;
           }
-          .cl-paras { gap: 8px !important; }
-          .cl-date  { margin-bottom: 18px !important; }
-          .cl-sig   { margin-top: 22px !important; }
+          .cl-paras { gap: 7px !important; }
+          .cl-date  { margin-bottom: 12px !important; }
+          .cl-sig   { margin-top: 16px !important; }
         }
       `}</style>
 
@@ -188,87 +182,24 @@ export default function CoverLetterNovoresume({
         {editing && <span style={{ alignSelf: "center", fontSize: 12, color: "#6b7280", fontStyle: "italic" }}>Alle Felder direkt bearbeitbar</span>}
       </div>
 
-      {/* ── Document (exakt wie PDF: links Inhalt, rechts dunkle Sidebar) ──── */}
-      <div className="cl-doc" style={{ maxWidth: 850, margin: "0 auto", fontFamily: FNT, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)" }}>
-        <div className="cl-inner" style={{ display: "flex", minHeight: 1056 }}>
+      {/* ── Document ────────────────────────────────────────────────────────── */}
+      <div className="cl-doc" style={{ maxWidth: 850, margin: "0 auto", fontFamily: FNT, backgroundColor: "white", boxShadow: "0 4px 32px rgba(0,0,0,0.14)", display: "flex", flexDirection: "column", minHeight: 1056 }}>
 
-          {/* ── LINKE SPALTE ─────────────────────────────────────────────────── */}
-          <div className="cl-left" style={{ flex: 1, backgroundColor: "white", padding: "40px 28px 40px 40px", minWidth: 0 }}>
-
-            {/* Name */}
+        {/* ── DUNKLER HEADER (volle Breite) ─────────────────────────────────── */}
+        <div className="cl-header" style={{ backgroundColor: SBG, padding: "22px 40px", display: "flex", gap: 32, alignItems: "center" }}>
+          {/* Name + Subtitle links */}
+          <div style={{ flex: "0 0 340px" }}>
             {editing
-              ? <input value={data.personal.name} onChange={e => setP({ name: e.target.value })} style={{ display: "block", fontSize: 42, fontWeight: 800, color: CT, lineHeight: 1.1, marginBottom: 4, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box" }} />
-              : <div style={{ fontSize: 42, fontWeight: 800, color: CT, lineHeight: 1.1, marginBottom: 4 }}>{data.personal.name}</div>
+              ? <input value={data.personal.name} onChange={e => setP({ name: e.target.value })} style={{ display: "block", fontSize: 36, fontWeight: 800, color: "white", lineHeight: 1.1, marginBottom: 5, fontFamily: FNT, background: "rgba(255,255,255,0.1)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box" }} />
+              : <div style={{ fontSize: 36, fontWeight: 800, color: "white", lineHeight: 1.1, marginBottom: 5 }}>{data.personal.name}</div>
             }
-            {/* Untertitel */}
             {editing
-              ? <input value={data.personal.subtitle} onChange={e => setP({ subtitle: e.target.value })} style={{ display: "block", fontSize: 15, fontWeight: 600, color: A, marginBottom: 28, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box" }} />
-              : <div style={{ fontSize: 15, fontWeight: 600, color: A, marginBottom: 28 }}>{data.personal.subtitle}</div>
+              ? <input value={data.personal.subtitle} onChange={e => setP({ subtitle: e.target.value })} style={{ display: "block", fontSize: 13, fontWeight: 600, color: A, fontFamily: FNT, background: "rgba(255,255,255,0.1)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box" }} />
+              : <div style={{ fontSize: 13, fontWeight: 600, color: A }}>{data.personal.subtitle}</div>
             }
-
-            {/* Empfänger */}
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 11, fontStyle: "italic", color: CM, marginBottom: 4 }}>An</div>
-              {editing
-                ? <input value={data.recipient.company} onChange={e => setR({ company: e.target.value })} style={{ display: "block", fontSize: 16, fontWeight: 700, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 3 }} />
-                : <div style={{ fontSize: 16, fontWeight: 700, color: CT, marginBottom: 3 }}>{data.recipient.company}</div>
-              }
-              {(["street", "cityZip", "country"] as const).map(k => (
-                editing
-                  ? <input key={k} value={data.recipient[k]} onChange={e => setR({ [k]: e.target.value })} style={{ display: "block", fontSize: 15, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }} />
-                  : <div key={k} style={{ fontSize: 15, color: CT, marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }}>{data.recipient[k]}</div>
-              ))}
-            </div>
-
-            {/* Datum */}
-            <div className="cl-date" style={{ marginBottom: 32 }}>
-              {editing
-                ? <input value={data.date} onChange={e => setData(d => ({ ...d, date: e.target.value }))} style={{ fontSize: 14, fontStyle: "italic", color: A, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", boxSizing: "border-box" }} />
-                : <div style={{ fontSize: 14, fontStyle: "italic", color: A }}>{data.date}</div>
-              }
-            </div>
-
-            {/* Brieftext – türkiser linker Rand */}
-            <div style={{ borderLeft: `4px solid ${A}`, paddingLeft: 18 }}>
-              {/* Betreff */}
-              <div style={{ marginBottom: 16 }}>
-                <E value={data.subject} onChange={v => setData(d => ({ ...d, subject: v }))} editing={editing} style={{ fontSize: 13, fontWeight: 600, color: CT, display: "block" }} />
-              </div>
-              {/* Anrede */}
-              <div style={{ marginBottom: 14 }}>
-                <E value={data.salutation} onChange={v => setData(d => ({ ...d, salutation: v }))} editing={editing} style={{ fontSize: 13, color: CT }} />
-              </div>
-              {/* Absätze */}
-              <div className="cl-paras" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {data.bodyParagraphs.map((para, i) => (
-                  <div key={i} className="cl-para" style={{ position: "relative", paddingRight: editing ? 22 : 0 }}>
-                    <E value={para} onChange={v => updatePara(i, v)} editing={editing} multiline rows={5} style={{ fontSize: 13, color: CB, lineHeight: 1.65, display: "block" }} />
-                    {editing && (
-                      <button type="button" onClick={() => removePara(i)} style={{ position: "absolute", top: 0, right: 0, background: "none", border: "none", cursor: "pointer", color: "#f87171", padding: 0 }}>
-                        <XMarkIcon style={{ width: 14, height: 14 }} />
-                      </button>
-                    )}
-                  </div>
-                ))}
-                {editing && (
-                  <button type="button" onClick={addPara} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#3b82f6", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, fontFamily: FNT }}>
-                    <PlusIcon style={{ width: 14, height: 14 }} />Absatz hinzufügen
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Unterschrift */}
-            <div className="cl-sig" style={{ marginTop: 40 }}>
-              <E value={data.closing} onChange={v => setData(d => ({ ...d, closing: v }))} editing={editing} style={{ fontSize: 13, color: CT, display: "block", marginBottom: 36 }} />
-              <div style={{ borderBottom: "1px solid #d1d5db", width: 180, marginBottom: 6 }} />
-              <E value={data.signatureName} onChange={v => setData(d => ({ ...d, signatureName: v }))} editing={editing} style={{ fontSize: 13, fontWeight: 700, color: CT }} />
-            </div>
-
-          </div>{/* Ende linke Spalte */}
-
-          {/* ── RECHTE SIDEBAR (dunkle Kontaktleiste) ───────────────────────── */}
-          <div className="cl-sidebar" style={{ width: 295, flexShrink: 0, backgroundColor: SBG, padding: "40px 22px", color: "white" }}>
+          </div>
+          {/* Kontakte rechts */}
+          <div style={{ flex: 1 }}>
             <CRow icon={<EnvelopeIcon style={{ width: 13, height: 13 }} />}
               value={data.personal.email} editing={editing} onChange={v => setP({ email: v })}
               hidden={hiddenContacts.has("email")} onDelete={() => toggleContact("email")} />
@@ -290,8 +221,71 @@ export default function CoverLetterNovoresume({
               value={data.personal.github} editing={editing} onChange={v => setP({ github: v })}
               hidden={hiddenContacts.has("github")} onDelete={() => toggleContact("github")} />
           </div>
-
         </div>
+
+        {/* ── BRIEF-INHALT (volle Dokumentbreite) ───────────────────────────── */}
+        <div className="cl-left" style={{ flex: 1, backgroundColor: "white", padding: "28px 40px 32px" }}>
+
+          {/* Empfänger */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 11, fontStyle: "italic", color: CM, marginBottom: 4 }}>An</div>
+            {editing
+              ? <input value={data.recipient.company} onChange={e => setR({ company: e.target.value })} style={{ display: "block", fontSize: 15, fontWeight: 700, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 3 }} />
+              : <div style={{ fontSize: 15, fontWeight: 700, color: CT, marginBottom: 3 }}>{data.recipient.company}</div>
+            }
+            {(["street", "cityZip", "country"] as const).map(k => (
+              editing
+                ? <input key={k} value={data.recipient[k]} onChange={e => setR({ [k]: e.target.value })} style={{ display: "block", fontSize: 14, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }} />
+                : <div key={k} style={{ fontSize: 14, color: CT, marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }}>{data.recipient[k]}</div>
+            ))}
+          </div>
+
+          {/* Datum */}
+          <div className="cl-date" style={{ marginBottom: 22 }}>
+            {editing
+              ? <input value={data.date} onChange={e => setData(d => ({ ...d, date: e.target.value }))} style={{ fontSize: 13, fontStyle: "italic", color: A, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", boxSizing: "border-box" }} />
+              : <div style={{ fontSize: 13, fontStyle: "italic", color: A }}>{data.date}</div>
+            }
+          </div>
+
+          {/* Brieftext – türkiser linker Rand */}
+          <div style={{ borderLeft: `4px solid ${A}`, paddingLeft: 18 }}>
+            {/* Betreff */}
+            <div style={{ marginBottom: 12 }}>
+              <E value={data.subject} onChange={v => setData(d => ({ ...d, subject: v }))} editing={editing} style={{ fontSize: 13, fontWeight: 600, color: CT, display: "block" }} />
+            </div>
+            {/* Anrede */}
+            <div style={{ marginBottom: 10 }}>
+              <E value={data.salutation} onChange={v => setData(d => ({ ...d, salutation: v }))} editing={editing} style={{ fontSize: 13, color: CT }} />
+            </div>
+            {/* Absätze */}
+            <div className="cl-paras" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {data.bodyParagraphs.map((para, i) => (
+                <div key={i} className="cl-para" style={{ position: "relative", paddingRight: editing ? 22 : 0 }}>
+                  <E value={para} onChange={v => updatePara(i, v)} editing={editing} multiline rows={5} style={{ fontSize: 13, color: CB, lineHeight: 1.65, display: "block" }} />
+                  {editing && (
+                    <button type="button" onClick={() => removePara(i)} style={{ position: "absolute", top: 0, right: 0, background: "none", border: "none", cursor: "pointer", color: "#f87171", padding: 0 }}>
+                      <XMarkIcon style={{ width: 14, height: 14 }} />
+                    </button>
+                  )}
+                </div>
+              ))}
+              {editing && (
+                <button type="button" onClick={addPara} style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "#3b82f6", background: "none", border: "none", cursor: "pointer", padding: 0, marginTop: 4, fontFamily: FNT }}>
+                  <PlusIcon style={{ width: 14, height: 14 }} />Absatz hinzufügen
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Unterschrift */}
+          <div className="cl-sig" style={{ marginTop: 28 }}>
+            <E value={data.closing} onChange={v => setData(d => ({ ...d, closing: v }))} editing={editing} style={{ fontSize: 13, color: CT, display: "block", marginBottom: 30 }} />
+            <div style={{ borderBottom: "1px solid #d1d5db", width: 180, marginBottom: 6 }} />
+            <E value={data.signatureName} onChange={v => setData(d => ({ ...d, signatureName: v }))} editing={editing} style={{ fontSize: 13, fontWeight: 700, color: CT }} />
+          </div>
+
+        </div>{/* Ende Brief-Inhalt */}
       </div>
     </div>
   );
