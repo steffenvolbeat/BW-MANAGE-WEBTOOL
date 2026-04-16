@@ -238,7 +238,7 @@ function CRow({ icon, value, editing, onChange, onDelete, hidden }: { icon:React
       <div style={{width:26,height:26,borderRadius:4,backgroundColor:hidden?"#6b7280":A,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
         <span style={{color:"white",display:"flex"}}>{icon}</span>
       </div>
-      <E value={value} onChange={onChange} editing={editing} style={{fontSize:12,color:"white",lineHeight:1.4,wordBreak:"break-all"}}/>
+      <E value={value} onChange={onChange} editing={editing} style={{fontSize:10.5,color:"white",lineHeight:1.4,whiteSpace:"nowrap"}}/>
       {editing && onDelete && (
         <button type="button" onClick={onDelete} title={hidden?"Wieder einblenden":"Ausblenden"}
           style={{background:hidden?"rgba(62,207,214,0.18)":"rgba(248,113,113,0.18)",border:`1px solid ${hidden?A:"#f87171"}`,borderRadius:4,cursor:"pointer",color:hidden?A:"#f87171",padding:"2px 4px",lineHeight:1,flexShrink:0,marginTop:2,display:"flex",alignItems:"center"}}>

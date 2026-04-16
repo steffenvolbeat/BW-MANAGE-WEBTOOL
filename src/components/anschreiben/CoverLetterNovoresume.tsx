@@ -90,7 +90,7 @@ function CRow({ icon, value, editing, onChange, onDelete, hidden }: {
         {editing
           ? <input value={value} onChange={e => onChange(e.target.value)}
               style={{ background: "rgba(255,255,255,0.12)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "1px 4px", outline: "none", color: "white", fontFamily: FNT, fontSize: 12, width: "100%", boxSizing: "border-box" }} />
-          : <span style={{ fontSize: 12, color: "white", lineHeight: 1.4, wordBreak: "break-all" }}>{value}</span>
+          : <span style={{ fontSize: 10.5, color: "white", lineHeight: 1.4, whiteSpace: "nowrap" }}>{value}</span>
         }
       </div>
       {editing && onDelete && (
