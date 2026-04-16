@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // ─── Typen ───────────────────────────────────────────────────────────────────
 interface Task {
@@ -8,6 +8,81 @@ interface Task {
   text: string;
   done: boolean;
 }
+
+interface AppWeekStat {
+  week: number;
+  count: number;
+  target: number;
+  statuses: { applied: number; interview: number; offer: number; rejected: number };
+  applications: { id: string; company: string; position: string; status: string; appliedAt: string }[];
+}
+
+interface ClassroomStats {
+  courseStart: string;
+  weekStats: AppWeekStat[];
+  total: number;
+  totalInterviews: number;
+  totalOffers: number;
+  totalRejected: number;
+}
+
+// Musterlösungen pro Woche
+const MUSTERLOESUNGEN: Record<number, { title: string; content: string }[]> = {
+  2: [
+    {
+      title: "Beispiel-Anschreiben (Junior Web Developer)",
+      content: `Max Mustermann · Musterstraße 1 · 10115 Berlin · max@example.com
+
+Tech GmbH
+z. Hd. Frau Schmidt
+Hauptstraße 42
+10178 Berlin
+
+Berlin, den ${new Date().toLocaleDateString("de-DE")}
+
+Bewerbung als Junior Web Developer (m/w/d)
+
+Sehr geehrte Frau Schmidt,
+
+als frisch ausgebildeter Full-Stack-Entwickler mit Schwerpunkt auf React und Node.js begeistert mich die Möglichkeit, bei Tech GmbH Teil eines innovativen Teams zu werden. Besonders Ihr Fokus auf nutzerzentrierte Softwarelösungen und agile Entwicklungsmethoden deckt sich vollständig mit meiner Arbeitsweise.
+
+Im Rahmen meiner Ausbildung beim Digital Career Institute habe ich eigenständig eine Bewerbungsmanagement-Anwendung mit Next.js, TypeScript und PostgreSQL entwickelt. Dabei habe ich nicht nur technische Kompetenz aufgebaut, sondern gelernt, komplexe Anforderungen strukturiert umzusetzen und selbstständig Lösungen zu finden.
+
+Ich bin überzeugt, dass ich mit meiner Lernbereitschaft und meinem technischen Fundament schnell einen echten Mehrwert in Ihrem Team liefern kann. Ich freue mich auf ein persönliches Gespräch.
+
+Mit freundlichen Grüßen
+Max Mustermann`,
+    },
+  ],
+  4: [
+    {
+      title: "Beispiel Elevator Pitch (Junior Developer)",
+      content: `„Guten Tag, mein Name ist Max Mustermann, und ich bewerbe mich als Junior Web Developer.
+
+In meiner Ausbildung beim Digital Career Institute habe ich in weniger als einem Jahr Full-Stack-Entwicklung mit React, Node.js und PostgreSQL gelernt und dabei eigenständig eine vollständige Webanwendung mit über 30 Features gebaut.
+
+Was mich besonders auszeichnet: Ich arbeite strukturiert, lerne extrem schnell und bringe frische Perspektiven aus einem Quereinstieg mit – ich weiß, wie man sich Dinge selbst beibringt und wie man unter Druck liefert.
+
+Ich würde mich sehr freuen, mehr über die offene Position bei Ihnen zu erfahren – haben Sie einen Moment Zeit?"
+
+— Dauer: ca. 35 Sekunden`,
+    },
+  ],
+  5: [
+    {
+      title: "Beispiel-Antworten auf typische Fragen",
+      content: `❓ „Erzählen Sie etwas über sich."
+→ „Ich bin Quereinsteiger in die IT und habe beim Digital Career Institute Full-Stack-Webentwicklung erlernt. Zuvor habe ich [X] Jahre in [Bereich] gearbeitet, was mir starke Kommunikations- und Problemlösungsfähigkeiten gegeben hat. Mein größtes Projekt war [kurz beschreiben]. Ich suche jetzt eine erste Stelle als Junior Developer, wo ich wachsen und echten Mehrwert liefern kann."
+
+❓ „Warum wechseln Sie in die IT?"
+→ „Ich habe mich schon lange für Technologie begeistert und gemerkt, dass meine stärksten Momente bei der Arbeit die waren, bei denen ich Probleme analytisch lösen musste. Die IT-Ausbildung hat das bestätigt – ich liebe es zu bauen und zu sehen, wie etwas funktioniert."
+
+❓ „Was ist Ihre größte Schwäche?"
+→ „Ich neige manchmal dazu, Dinge zu perfektionieren, bevor ich sie zeige. Ich arbeite aktiv daran, früher Feedback einzuholen – 'Done is better than perfect' ist mein Lernziel."`,
+    },
+  ],
+};
+
 
 interface WeekContent {
   week: number;
@@ -1022,6 +1097,15 @@ export default function DCIClassroom() {
   const [activeWeek, setActiveWeek] = useState(1);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const [stats, setStats] = useState<ClassroomStats | null>(null);
+  const [openMuster, setOpenMuster] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    fetch("/api/classroom/stats")
+      .then((r) => r.json())
+      .then((data: ClassroomStats) => setStats(data))
+      .catch(() => null);
+  }, []);
 
   const week = WEEKS[activeWeek - 1];
 
@@ -1033,11 +1117,41 @@ export default function DCIClassroom() {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const toggleMuster = (key: string) => {
+    setOpenMuster((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const exportCSV = () => {
+    const rows: string[] = [
+      "Woche;Titel;Aufgabenbereich;Checklistenpunkt;Ziel\u2028",
+    ];
+    WEEKS.forEach((w) => {
+      w.aufgaben.forEach((a) => {
+        a.items.forEach((item) => {
+          rows.push(
+            [w.week, `"${w.title}"`, `"${a.title}"`, `"${item}"`, `"${w.goal}"`].join(";") + "\r\n"
+          );
+        });
+      });
+    });
+    const csv = "\uFEFF" + rows.join("");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "DCI-Classroom-12-Wochen.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const checkedCount = week.checkliste.filter(
     (_, i) => checkedItems[`${activeWeek}-check-${i}`]
   ).length;
 
   const progress = Math.round((checkedCount / week.checkliste.length) * 100);
+
+  // Live-Bewerbungszahl für aktive Woche
+  const weekStat = stats?.weekStats?.find((s) => s.week === activeWeek) ?? null;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -1054,39 +1168,73 @@ export default function DCIClassroom() {
             12-Wochen ISP-Programm · Aufgaben, Wochenziele & Lernmaterialien
           </p>
         </div>
-        <a
-          href="https://docs.google.com/spreadsheets/d/1kk1JvZLwQsocXY-aEKfuSW_jtyYidvxLLK-QskSek54/edit?gid=776040445#gid=776040445"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition-colors shadow"
-        >
-          📊 Google Sheets öffnen
-        </a>
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={exportCSV}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow"
+          >
+            ⬇️ CSV Export
+          </button>
+          <a
+            href="https://docs.google.com/spreadsheets/d/1kk1JvZLwQsocXY-aEKfuSW_jtyYidvxLLK-QskSek54/edit?gid=776040445#gid=776040445"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition-colors shadow"
+          >
+            📊 Google Sheets öffnen
+          </a>
+        </div>
       </div>
 
       {/* ─── Bewerbungskurve ─────────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm">
         <h2 className="text-sm font-semibold text-gray-700 dark:text-slate-200 mb-3">
-          📈 Erwartete Bewerbungen / Woche (ISP-Kurve)
+          📈 Erwartete vs. tatsächliche Bewerbungen / Woche
         </h2>
         <div className="flex items-end gap-2 h-20">
-          {APP_CURVE.map((d) => (
-            <div
-              key={d.week}
-              className="flex flex-col items-center flex-1"
-            >
-              <div
-                className="w-full rounded-t-sm bg-blue-500 dark:bg-blue-600 transition-all"
-                style={{ height: `${(d.target / MAX_CURVE) * 64}px` }}
-              />
-              <div className="text-xs text-gray-400 mt-1">{d.week}</div>
-              <div className="text-xs font-bold text-blue-600 dark:text-blue-300">
-                {d.target}
+          {APP_CURVE.map((d) => {
+            const real = stats?.weekStats?.find((s) => s.week === Number(d.week))?.count ?? null;
+            return (
+              <div key={d.week} className="flex flex-col items-center flex-1 group relative">
+                {/* Ziel-Balken */}
+                <div className="w-full relative">
+                  <div
+                    className="w-full rounded-t-sm bg-blue-200 dark:bg-blue-900 transition-all"
+                    style={{ height: `${(d.target / MAX_CURVE) * 64}px` }}
+                  />
+                  {/* Echter Wert */}
+                  {real !== null && (
+                    <div
+                      className="absolute bottom-0 left-0 right-0 rounded-t-sm bg-green-500 dark:bg-green-400 transition-all"
+                      style={{ height: `${Math.min((real / MAX_CURVE) * 64, (d.target / MAX_CURVE) * 64)}px` }}
+                    />
+                  )}
+                </div>
+                <div className="text-xs text-gray-400 mt-1">{d.week}</div>
+                <div className="text-xs font-bold text-blue-600 dark:text-blue-300">
+                  {real !== null ? (
+                    <span>
+                      <span className="text-green-600 dark:text-green-400">{real}</span>
+                      <span className="text-gray-400">/{d.target}</span>
+                    </span>
+                  ) : (
+                    d.target
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
-        <p className="text-xs text-gray-400 mt-2">
+        <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-blue-200 inline-block"></span>Ziel</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-green-500 inline-block"></span>Echt</span>
+          {stats && (
+            <span className="ml-auto font-semibold text-gray-600 dark:text-slate-300">
+              Gesamt: {stats.total} · Interviews: {stats.totalInterviews} · Angebote: {stats.totalOffers}
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-gray-400 mt-1">
           ⚡ Durchschnitt: 15/Woche · Gesamtziel: mind. 80 Bewerbungen · Power- und Ruhephasen einplanen
         </p>
       </div>
@@ -1352,6 +1500,78 @@ export default function DCIClassroom() {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* ─── Musterlösungen ───────────────────────────────────────────── */}
+          {MUSTERLOESUNGEN[activeWeek] && (
+            <div className="mt-4 rounded-xl border border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 overflow-hidden">
+              <button
+                onClick={() => toggleMuster(`muster-${activeWeek}`)}
+                className="w-full flex items-center justify-between px-4 py-3 text-left"
+              >
+                <span className="font-semibold text-yellow-800 dark:text-yellow-300 text-sm">
+                  🎯 Musterlösung / Beispiel (Woche {activeWeek})
+                </span>
+                <span className="text-yellow-600 dark:text-yellow-400 text-xs">
+                  {openMuster[`muster-${activeWeek}`] ? "▲ Einklappen" : "▼ Anzeigen"}
+                </span>
+              </button>
+              {openMuster[`muster-${activeWeek}`] && (
+                <div className="px-4 pb-4 space-y-4">
+                  {MUSTERLOESUNGEN[activeWeek].map((m, mi) => (
+                    <div key={mi}>
+                      <h4 className="text-xs font-semibold text-yellow-700 dark:text-yellow-400 mb-2 uppercase tracking-wide">
+                        {m.title}
+                      </h4>
+                      <pre className="whitespace-pre-wrap text-xs text-gray-700 dark:text-slate-300 bg-white dark:bg-slate-800 rounded-lg p-3 border border-yellow-100 dark:border-slate-700 leading-relaxed font-sans">
+                        {m.content}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ─── Live-Bewerbungen dieser Woche ────────────────────────────── */}
+          {weekStat && (
+            <div className="mt-4 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-green-800 dark:text-green-300">
+                  📊 Deine Bewerbungen – Woche {activeWeek}
+                </span>
+                <span className={`text-sm font-bold ${weekStat.count >= weekStat.target ? "text-green-600" : "text-amber-600"}`}>
+                  {weekStat.count} / {weekStat.target} Ziel
+                </span>
+              </div>
+              {weekStat.applications.length > 0 ? (
+                <ul className="space-y-1">
+                  {weekStat.applications.map((app) => (
+                    <li key={app.id} className="flex items-center justify-between text-xs text-gray-600 dark:text-slate-400 bg-white dark:bg-slate-800 rounded px-3 py-1.5 border border-green-100 dark:border-slate-700">
+                      <span className="font-medium">{app.company}</span>
+                      <span className="text-gray-400">{app.position}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                        app.status === "INTERVIEW_SCHEDULED" || app.status === "INTERVIEWED" ? "bg-blue-100 text-blue-700" :
+                        app.status === "OFFER_RECEIVED" || app.status === "ACCEPTED" ? "bg-green-100 text-green-700" :
+                        app.status === "REJECTED" ? "bg-red-100 text-red-600" :
+                        "bg-gray-100 text-gray-600"
+                      }`}>
+                        {app.status === "APPLIED" ? "Beworben" :
+                         app.status === "REVIEWED" ? "Gesichtet" :
+                         app.status === "INTERVIEW_SCHEDULED" ? "Interview" :
+                         app.status === "INTERVIEWED" ? "Interviewt" :
+                         app.status === "OFFER_RECEIVED" ? "Angebot" :
+                         app.status === "ACCEPTED" ? "Angenommen" :
+                         app.status === "REJECTED" ? "Abgelehnt" :
+                         app.status}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-gray-400">Noch keine Bewerbungen diese Woche.</p>
+              )}
             </div>
           )}
         </div>
