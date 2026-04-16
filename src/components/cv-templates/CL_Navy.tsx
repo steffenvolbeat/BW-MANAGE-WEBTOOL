@@ -1,18 +1,19 @@
 "use client";
 // ─── Anschreiben Template: Navy ────────────────────────────────────────────
-import { useState } from "react";
+import { useState, useContext, createContext } from "react";
 import { PrinterIcon, PencilSquareIcon, CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FONTS, FONT_SIZES, CLData, DEFAULT_CL_DATA, uid } from "./shared";
 
-const A = "#3b82f6";
-const BG = "#1e3a5f";
-const S2 = "#1e40af";
+const DEFAULT_COLORS = { A:"#3b82f6", BG:"#1e3a5f", S2:"#1e40af" };
+const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
+const ColCtx = createContext(DEFAULT_COLORS);
 
 function E({ value, onChange, editing, multiline = false, style = {} as React.CSSProperties, placeholder = "...", rows = 4, inv = false }: {
   value: string; onChange: (v: string) => void; editing: boolean;
   multiline?: boolean; style?: React.CSSProperties; placeholder?: string; rows?: number; inv?: boolean;
 }) {
-  const base: React.CSSProperties = { ...style, background: inv ? "rgba(59,130,246,0.08)" : "rgba(59,130,246,0.06)", border: `1px dashed ${A}55`, borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", fontFamily: "inherit", fontSize: "inherit", color: "inherit", lineHeight: "inherit", fontWeight: "inherit", boxSizing: "border-box" };
+  const {A}=useContext(ColCtx);
+  const base: React.CSSProperties = { ...style, background: inv ? hex2rgba(A,0.08) : hex2rgba(A,0.06), border: `1px dashed ${A}55`, borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", fontFamily: "inherit", fontSize: "inherit", color: "inherit", lineHeight: "inherit", fontWeight: "inherit", boxSizing: "border-box" };
   if (!editing) return <span style={style}>{value || <span style={{ opacity: 0.3, fontStyle: "italic" }}>{placeholder}</span>}</span>;
   if (multiline) return <textarea style={{ ...base, resize: "vertical", display: "block" }} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows} />;
   return <input style={base} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />;
@@ -24,6 +25,8 @@ export default function CL_Navy() {
   const [fontKey, setFontKey] = useState("nunito");
   const [sizeKey, setSizeKey] = useState("md");
   const [showDesign, setShowDesign] = useState(false);
+  const [clrs, setClrs] = useState(DEFAULT_COLORS);
+  const {A,BG,S2} = clrs;
   const curFont = FONTS.find(f => f.key === fontKey) ?? FONTS[0];
   const curSize = FONT_SIZES.find(s => s.key === sizeKey) ?? FONT_SIZES[2];
   const fnt = curFont.family; const scale = curSize.scale;
@@ -31,6 +34,7 @@ export default function CL_Navy() {
   const setR = (p: Partial<CLData["recipient"]>) => setData(d => ({ ...d, recipient: { ...d.recipient, ...p } }));
 
   return (
+  <ColCtx.Provider value={clrs}>
     <div style={{ minHeight: "100vh", background: "#1e3a5f", padding: "24px 16px", fontFamily: fnt }}>
       <style>{`
         ${curFont.gf ? `@import url('https://fonts.googleapis.com/css2?family=${curFont.gf}&display=swap');` : ""}
@@ -58,10 +62,21 @@ export default function CL_Navy() {
         {showDesign && (
           <div style={{ width: "100%", background: S2, border: "1px solid #333", borderRadius: 10, padding: "14px 18px", display: "flex", gap: 24, flexWrap: "wrap" }}>
             <div><div style={{ fontSize: 10, fontWeight: 700, color: "#555", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.1em" }}>Schriftart</div>
-              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{FONTS.map(f => <button key={f.key} onClick={() => setFontKey(f.key)} style={{ padding: "3px 9px", borderRadius: 5, border: `1px solid ${fontKey === f.key ? A : "#333"}`, background: fontKey === f.key ? "rgba(59,130,246,0.1)" : "transparent", color: fontKey === f.key ? A : "#888", fontSize: 11, cursor: "pointer", fontFamily: f.family }}>{f.label}</button>)}</div>
+              <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{FONTS.map(f => <button key={f.key} onClick={() => setFontKey(f.key)} style={{ padding: "3px 9px", borderRadius: 5, border: `1px solid ${fontKey === f.key ? A : "#333"}`, background: fontKey === f.key ? hex2rgba(A,0.1) : "transparent", color: fontKey === f.key ? A : "#888", fontSize: 11, cursor: "pointer", fontFamily: f.family }}>{f.label}</button>)}</div>
             </div>
             <div><div style={{ fontSize: 10, fontWeight: 700, color: "#555", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.1em" }}>Schriftgröße</div>
-              <div style={{ display: "flex", gap: 5 }}>{FONT_SIZES.map(s => <button key={s.key} onClick={() => setSizeKey(s.key)} style={{ padding: "3px 12px", borderRadius: 5, border: `1px solid ${sizeKey === s.key ? A : "#333"}`, background: sizeKey === s.key ? "rgba(59,130,246,0.1)" : "transparent", color: sizeKey === s.key ? A : "#888", fontSize: 11, cursor: "pointer" }}>{s.label}</button>)}</div>
+              <div style={{ display: "flex", gap: 5 }}>{FONT_SIZES.map(s => <button key={s.key} onClick={() => setSizeKey(s.key)} style={{ padding: "3px 12px", borderRadius: 5, border: `1px solid ${sizeKey === s.key ? A : "#333"}`, background: sizeKey === s.key ? hex2rgba(A,0.1) : "transparent", color: sizeKey === s.key ? A : "#888", fontSize: 11, cursor: "pointer" }}>{s.label}</button>)}</div>
+            </div>
+            <div><div style={{ fontSize: 10, fontWeight: 700, color: "#555", marginBottom: 7, textTransform: "uppercase", letterSpacing: "0.1em" }}>Farben</div>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "flex-end" }}>
+                {([{k:"A" as const,l:"Akzent"},{k:"BG" as const,l:"Hintergrund"},{k:"S2" as const,l:"Sektion"}]).map(({k,l}) => (
+                  <label key={k} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3, cursor: "pointer" }}>
+                    <input type="color" value={clrs[k]} onChange={e => setClrs(c => ({ ...c, [k]: e.target.value }))} style={{ width: 32, height: 32, padding: 2, borderRadius: 6, border: "1px solid #444", cursor: "pointer", background: "none" }} />
+                    <span style={{ fontSize: 9, color: "#777" }}>{l}</span>
+                  </label>
+                ))}
+                <button onClick={() => setClrs(DEFAULT_COLORS)} style={{ padding: "4px 10px", borderRadius: 6, fontSize: 11, border: "1px solid #444", background: "transparent", color: "#888", cursor: "pointer", alignSelf: "center" }}>↺ Reset</button>
+              </div>
             </div>
           </div>
         )}
@@ -116,5 +131,6 @@ export default function CL_Navy() {
         </div>
       </div>
     </div>
+  </ColCtx.Provider>
   );
 }
