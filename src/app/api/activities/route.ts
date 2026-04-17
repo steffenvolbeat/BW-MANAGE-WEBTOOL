@@ -158,7 +158,7 @@ export async function PUT(request: Request) {
     const db = scopedPrisma(user.id);
 
     const data = await request.json();
-    const { id, userId, ...updateData } = data;
+    const { id, userId, ...raw } = data;
 
     if (!id) {
       return NextResponse.json(
@@ -181,18 +181,51 @@ export async function PUT(request: Request) {
       );
     }
 
-    // Convert date strings to Date objects if provided
-    if (updateData.dueDate) {
-      updateData.dueDate = new Date(updateData.dueDate);
+    // Validate date fields
+    let parsedDueDate: Date | undefined;
+    if (raw.dueDate !== undefined) {
+      parsedDueDate = new Date(raw.dueDate);
+      if (isNaN(parsedDueDate.getTime())) {
+        return NextResponse.json({ error: "Ungültiges dueDate-Format." }, { status: 400 });
+      }
+    }
+    let parsedCompletedAt: Date | undefined;
+    if (raw.completedAt !== undefined) {
+      parsedCompletedAt = new Date(raw.completedAt);
+      if (isNaN(parsedCompletedAt.getTime())) {
+        return NextResponse.json({ error: "Ungültiges completedAt-Format." }, { status: 400 });
+      }
     }
 
-    if (updateData.completedAt) {
-      updateData.completedAt = new Date(updateData.completedAt);
+    // Validate relation ownership if provided
+    if (raw.applicationId !== undefined && raw.applicationId !== null) {
+      const app = await db.application.findFirst({ where: { id: raw.applicationId } });
+      if (!app) return NextResponse.json({ error: "Application not found or access denied" }, { status: 404 });
     }
+    if (raw.contactId !== undefined && raw.contactId !== null) {
+      const cnt = await db.contact.findFirst({ where: { id: raw.contactId } });
+      if (!cnt) return NextResponse.json({ error: "Contact not found or access denied" }, { status: 404 });
+    }
+
+    // Whitelist: only allow explicitly permitted fields
+    const VALID_STATUSES = Object.values(ActivityStatus) as string[];
+    const VALID_PRIORITIES = Object.values(Priority) as string[];
+
+    const allowedUpdate: Record<string, unknown> = {
+      ...(raw.title      !== undefined && { title: String(raw.title).slice(0, 255) }),
+      ...(raw.description !== undefined && { description: raw.description }),
+      ...(raw.type       !== undefined && { type: raw.type }),
+      ...(parsedDueDate  !== undefined && { timestamp: parsedDueDate }),
+      ...(parsedCompletedAt !== undefined && { metadata: { completedAt: parsedCompletedAt.toISOString() } }),
+      ...(raw.applicationId !== undefined && { applicationId: raw.applicationId }),
+      ...(raw.contactId     !== undefined && { contactId: raw.contactId }),
+      ...(raw.status !== undefined && VALID_STATUSES.includes(raw.status as string) && { status: raw.status as ActivityStatus }),
+      ...(raw.priority !== undefined && VALID_PRIORITIES.includes(raw.priority as string) && { priority: raw.priority as Priority }),
+    };
 
     const updatedActivity = await db.activity.update({
       where: { id },
-      data: updateData,
+      data: allowedUpdate,
       include: {
         application: true,
         contact: true,

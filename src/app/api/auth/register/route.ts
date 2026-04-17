@@ -11,6 +11,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Name, E-Mail und Passwort sind erforderlich." }, { status: 400 });
     }
 
+    // E-Mail-Format und Länge validieren
+    const EMAIL_REGEX = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/;
+    if (!EMAIL_REGEX.test(email) || email.length > 254) {
+      return NextResponse.json({ error: "Ungültige E-Mail-Adresse." }, { status: 400 });
+    }
+    if (name.trim().length < 2 || name.length > 100) {
+      return NextResponse.json({ error: "Name muss 2–100 Zeichen lang sein." }, { status: 400 });
+    }
+    if (password.length > 128) {
+      return NextResponse.json({ error: "Passwort zu lang (max. 128 Zeichen)." }, { status: 400 });
+    }
+
     if (password.length < 8) {
       return NextResponse.json({ error: "Das Passwort muss mindestens 8 Zeichen lang sein." }, { status: 400 });
     }

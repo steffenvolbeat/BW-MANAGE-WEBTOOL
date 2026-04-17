@@ -13,7 +13,8 @@ const DEFAULT_FOLDERS = [
 async function seedDefaultFolders(userId: string) {
   const db = scopedPrisma(userId);
   for (const f of DEFAULT_FOLDERS) {
-    await db.fileFolder.create({ data: { name: f.name, color: f.color, icon: f.icon, userId } });
+    // .catch ignoriert Duplikate bei parallelen Requests (Race Condition)
+    await db.fileFolder.create({ data: { name: f.name, color: f.color, icon: f.icon, userId } }).catch(() => {});
   }
 }
 
@@ -49,10 +50,11 @@ export async function GET(req: NextRequest) {
 
     const breadcrumb: { id: string | null; name: string }[] = [{ id: null, name: "Alle Ordner" }];
     if (parentId) {
-      const buildPath = async (id: string): Promise<void> => {
+      const buildPath = async (id: string, depth = 0): Promise<void> => {
+        if (depth > 50) return; // Schutz vor tiefer Hierarchie und Zyklen
         const folder = await db.fileFolder.findFirst({ where: { id } });
         if (!folder) return;
-        if (folder.parentId) await buildPath(folder.parentId);
+        if (folder.parentId) await buildPath(folder.parentId, depth + 1);
         breadcrumb.push({ id: folder.id, name: folder.name });
       };
       await buildPath(parentId);
@@ -110,6 +112,25 @@ export async function PATCH(req: NextRequest) {
     if (!existing) return NextResponse.json({ error: "Nicht gefunden" }, { status: 404 });
 
     const body = await req.json() as { name?: string; color?: string; icon?: string; parentId?: string | null };
+
+    // Schutz vor zirkulärer Ordnerstruktur
+    if (body.parentId !== undefined && body.parentId !== null) {
+      if (body.parentId === id) {
+        return NextResponse.json({ error: "Ordner kann nicht sein eigener Überordner sein." }, { status: 400 });
+      }
+      // Zyklusprüfung: sicherstellen, dass id kein Vorfahre von parentId ist
+      let checkId: string | null = body.parentId;
+      let depth = 0;
+      while (checkId && depth < 50) {
+        if (checkId === id) {
+          return NextResponse.json({ error: "Zyklische Ordnerstruktur ist nicht erlaubt." }, { status: 400 });
+        }
+        const parent = await db.fileFolder.findFirst({ where: { id: checkId } });
+        checkId = parent?.parentId ?? null;
+        depth++;
+      }
+    }
+
     const folder = await db.fileFolder.update({
       where: { id },
       data: {

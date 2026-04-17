@@ -58,6 +58,11 @@ export async function PUT(req: NextRequest) {
 
     if (!id) return NextResponse.json({ error: "id erforderlich" }, { status: 400 });
 
+    // Leerer Titel nach trim() ist ungültig
+    if (title !== undefined && title.trim().length === 0) {
+      return NextResponse.json({ error: "Titel darf nicht leer sein." }, { status: 400 });
+    }
+
     const VALID_CARD_STATUSES = ["open", "in_progress", "done"];
     if (status !== undefined && !VALID_CARD_STATUSES.includes(status as string)) {
       return NextResponse.json(

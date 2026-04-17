@@ -27,6 +27,8 @@ export async function POST(request: Request) {
     });
 
     if (!user || !user.password) {
+      // Dummy-Vergleich, um Timing-Unterschied (E-Mail-Enumeration) zu verhindern
+      await bcrypt.compare(password, "$2a$12$dummydummydummydummydudummydummydummydummydummydumm");
       return NextResponse.json({ error: "Ungültige E-Mail-Adresse oder Passwort." }, { status: 401 });
     }
 

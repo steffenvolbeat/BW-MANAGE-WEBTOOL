@@ -84,8 +84,24 @@ export async function POST(request: Request) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
+    // Validate file size (max 25 MB)
+    const MAX_FILE_SIZE = 25 * 1024 * 1024;
+    if (buffer.length > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "Datei zu groß. Maximum: 25 MB." }, { status: 413 });
+    }
+
     // Sanitize filename
     const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
+
+    // Validate file extension whitelist
+    const ALLOWED_EXTENSIONS = new Set([
+      "pdf", "doc", "docx", "txt", "odt", "rtf",
+      "jpg", "jpeg", "png", "gif", "webp", "svg",
+      "xls", "xlsx", "csv", "ppt", "pptx", "zip",
+    ]);
+    if (!ALLOWED_EXTENSIONS.has(ext)) {
+      return NextResponse.json({ error: `Dateityp .${ext} ist nicht erlaubt.` }, { status: 415 });
+    }
     const baseName = file.name
       .replace(/\.[^.]+$/, "")
       .replace(/\s+/g, "_")
@@ -138,6 +154,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json(document, { status: 201 });
   } catch (error) {
+    const guardResponse = handleGuardError(error);
+    if (guardResponse.status !== 500) return guardResponse;
     console.error("Error creating document:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -166,11 +184,14 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Document not found or access denied" }, { status: 404 });
     }
 
+    const VALID_DOC_TYPES = Object.values(DocumentType);
     const allowedUpdate = {
       ...(updateData.name !== undefined && { name: updateData.name }),
       ...(updateData.description !== undefined && { description: updateData.description }),
       ...(updateData.tags !== undefined && { tags: updateData.tags }),
-      ...(updateData.type !== undefined && { type: updateData.type }),
+      ...(updateData.type !== undefined &&
+        VALID_DOC_TYPES.includes(updateData.type as DocumentType) &&
+        { type: updateData.type as DocumentType }),
     };
 
     const updatedDocument = await db.document.update({

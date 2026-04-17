@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest) {
           include: {
             cards: {
               orderBy: { createdAt: "desc" },
-              take: 100,
+              take: 500,
               include: {
                 assignee: { select: { id: true, name: true, email: true } },
               },

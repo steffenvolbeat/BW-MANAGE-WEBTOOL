@@ -492,8 +492,8 @@ Mit freundlichen Grüßen
       // Save cover letters
       if (coverLetters.length > 0) {
         await Promise.all(
-          coverLetters.map((cl) =>
-            fetch(`/api/applications/${newApp.id}/cover-letters`, {
+          coverLetters.map(async (cl) => {
+            const r = await fetch(`/api/applications/${newApp.id}/cover-letters`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
@@ -503,8 +503,12 @@ Mit freundlichen Grüßen
                 recipientAddress: cl.recipientAddress || null,
                 content: cl.content,
               }),
-            })
-          )
+            });
+            if (!r.ok) {
+              const err = await r.json().catch(() => ({}));
+              console.error("Cover-letter save failed:", err);
+            }
+          })
         );
       }
 

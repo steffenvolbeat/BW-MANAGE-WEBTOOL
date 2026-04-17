@@ -76,6 +76,11 @@ Nutzeranweisung / Stichpunkte: ${userPrompt}
 Antworte im Format: {"paragraphs": ["...", "...", "...", "..."]} ohne Codeblock.`;
 }
 
+// ─── Per-user rate limiter (in-memory; für Produktion: Redis/Upstash empfohlen) ─
+const rateStore = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 20;
+const RATE_WINDOW_MS = 60_000;
+
 // ─── Route Handler ────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
@@ -83,6 +88,16 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user.id) {
     return NextResponse.json({ error: "Nicht authentifiziert." }, { status: 401 });
+  }
+
+  // Rate limiting
+  const now = Date.now();
+  const entry = rateStore.get(user.id) ?? { count: 0, resetAt: now + RATE_WINDOW_MS };
+  if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + RATE_WINDOW_MS; }
+  entry.count++;
+  rateStore.set(user.id, entry);
+  if (entry.count > RATE_LIMIT) {
+    return NextResponse.json({ error: "Zu viele Anfragen. Bitte warte kurz." }, { status: 429 });
   }
 
   let body: {
@@ -108,9 +123,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Prompt darf nicht leer sein." }, { status: 400 });
   }
 
-  // Strip PII from prompt before sending to any external service
+  // Strip PII from prompt AND context fields before sending to any external service
   const sanitizedPrompt = stripPII(prompt.slice(0, 2000));
-  const fullPrompt = buildPrompt(mode, sanitizedPrompt, context);
+  const cleanContext = {
+    ...context,
+    subject:    context.subject    ? stripPII(context.subject.slice(0, 300))    : undefined,
+    salutation: context.salutation ? stripPII(context.salutation.slice(0, 100)) : undefined,
+    existing:   context.existing   ? stripPII(context.existing.slice(0, 2000))  : undefined,
+  };
+  const fullPrompt = buildPrompt(mode, sanitizedPrompt, cleanContext);
 
   // ── Try local LLM first (Ollama), fallback to OpenAI ──────────────────────
   const ollamaUrl = process.env.OLLAMA_URL ?? "http://localhost:11434";
