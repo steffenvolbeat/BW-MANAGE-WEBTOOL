@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { computeCurrentWeek } from "@/lib/classroom/schedule";
+import { computeCurrentWeek, getWeekStart } from "@/lib/classroom/schedule";
 
 // ─── Typen ───────────────────────────────────────────────────────────────────
 interface Task {
@@ -1187,6 +1187,20 @@ export default function DCIClassroom() {
 
   const week = WEEKS.find((w) => w.week === activeWeek) ?? WEEKS[0];
 
+  // Datums-Hilfsfunktionen für die aktive Woche
+  const activeWeekStart = getWeekStart(activeWeek);
+  const activeWeekEnd = new Date(activeWeekStart);
+  activeWeekEnd.setDate(activeWeekStart.getDate() + 4);
+  const fmtDate = (d: Date) =>
+    d.toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const fmtDayDate = (d: Date) =>
+    d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" });
+  const getTagDate = (dayIndex: number) => {
+    const d = new Date(activeWeekStart);
+    d.setDate(activeWeekStart.getDate() + dayIndex);
+    return d;
+  };
+
   const toggleCheck = (key: string) => {
     setCheckedItems((prev) => ({ ...prev, [key]: !prev[key] }));
   };
@@ -1385,6 +1399,9 @@ export default function DCIClassroom() {
                 <span className="text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">
                   Woche {week.week}
                 </span>
+                <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">
+                  {fmtDate(activeWeekStart)} – {fmtDate(activeWeekEnd)}
+                </span>
                 {week.applicationGoal && (
                   <span className="text-xs font-bold text-orange-600 bg-orange-100 dark:bg-orange-900/30 px-2 py-0.5 rounded-full">
                     🎯 {week.applicationGoal}
@@ -1449,8 +1466,11 @@ export default function DCIClassroom() {
                     key={i}
                     className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3"
                   >
-                    <div className="text-xs font-bold text-blue-700 dark:text-blue-300 mb-1">
+                    <div className="text-xs font-bold text-blue-700 dark:text-blue-300">
                       {t.day}
+                    </div>
+                    <div className="text-xs text-blue-500 dark:text-blue-400 mb-1">
+                      {fmtDayDate(getTagDate(i))}
                     </div>
                     <div className="text-xs text-gray-600 dark:text-slate-300 leading-relaxed">
                       {t.focus}
