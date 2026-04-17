@@ -1142,6 +1142,10 @@ const APP_CURVE = [
   { week: "W6", target: 15 },
   { week: "W7", target: 20 },
   { week: "W8", target: 15 },
+  { week: "W9", target: 10 },
+  { week: "W10", target: 10 },
+  { week: "W11", target: 15 },
+  { week: "W12", target: 5 },
 ];
 
 const MAX_CURVE = 25;
@@ -1154,7 +1158,11 @@ interface SyncResult {
 
 export default function DCIClassroom() {
   const [activeWeek, setActiveWeek] = useState(computeCurrentWeek);
-  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
+  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return {};
+    try { return JSON.parse(localStorage.getItem("dci-checklist") ?? "{}"); }
+    catch { return {}; }
+  });
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [stats, setStats] = useState<ClassroomStats | null>(null);
   const [openMuster, setOpenMuster] = useState<Record<string, boolean>>({});
@@ -1179,10 +1187,18 @@ export default function DCIClassroom() {
   };
 
   useEffect(() => {
-    fetch("/api/classroom/stats")
-      .then((r) => r.json())
+    const controller = new AbortController();
+    fetch("/api/classroom/stats", { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error(`Stats fetch failed: ${r.status}`);
+        return r.json();
+      })
       .then((data: ClassroomStats) => setStats(data))
-      .catch(() => null);
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        console.error("Classroom stats error:", err);
+      });
+    return () => controller.abort();
   }, []);
 
   const week = WEEKS.find((w) => w.week === activeWeek) ?? WEEKS[0];
@@ -1202,7 +1218,11 @@ export default function DCIClassroom() {
   };
 
   const toggleCheck = (key: string) => {
-    setCheckedItems((prev) => ({ ...prev, [key]: !prev[key] }));
+    setCheckedItems((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      try { localStorage.setItem("dci-checklist", JSON.stringify(next)); } catch { /* ignorieren */ }
+      return next;
+    });
   };
 
   const toggleSection = (key: string) => {

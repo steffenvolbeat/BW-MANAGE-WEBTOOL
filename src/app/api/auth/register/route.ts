@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         email: email.toLowerCase().trim(),
         name: name.trim(),
         password: hashedPassword,
-        emailVerified: true, // vereinfacht – ohne E-Mail-Verifizierungsschritt
+        emailVerified: false,
         role: "USER",
         status: "ACTIVE",
       },

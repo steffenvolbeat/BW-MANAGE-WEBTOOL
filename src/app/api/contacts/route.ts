@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     assertSameUser(requestedUserId, user.id);
 
     const contacts = await db.contact.findMany({
-      where: {},
+      where: { userId: user.id },
       include: {
         activities: {
           select: {
@@ -141,7 +141,18 @@ export async function PUT(request: Request) {
 
     const updatedContact = await db.contact.update({
       where: { id },
-      data: updateData,
+      data: {
+        ...(updateData.firstName !== undefined && { firstName: updateData.firstName }),
+        ...(updateData.lastName !== undefined && { lastName: updateData.lastName }),
+        ...(updateData.email !== undefined && { email: updateData.email }),
+        ...(updateData.phone !== undefined && { phone: updateData.phone }),
+        ...(updateData.company !== undefined && { company: updateData.company }),
+        ...(updateData.position !== undefined && { position: updateData.position }),
+        ...(updateData.linkedIn !== undefined && { linkedIn: updateData.linkedIn }),
+        ...(updateData.xing !== undefined && { xing: updateData.xing }),
+        ...(updateData.notes !== undefined && { notes: updateData.notes }),
+        ...(updateData.contactType !== undefined && { contactType: updateData.contactType }),
+      },
       include: {
         activities: true,
       },

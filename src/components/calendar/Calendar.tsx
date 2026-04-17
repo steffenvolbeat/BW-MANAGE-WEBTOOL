@@ -70,6 +70,7 @@ export default function Calendar() {
   useEffect(() => {
     if (!userId) return;
 
+    const controller = new AbortController();
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
@@ -83,7 +84,7 @@ export default function Calendar() {
           endDate: endOfMonth.toISOString(),
         });
 
-        const response = await fetch(`/api/events?${params.toString()}`);
+        const response = await fetch(`/api/events?${params.toString()}`, { signal: controller.signal });
         if (!response.ok) {
           throw new Error(`Event fetch failed (${response.status})`);
         }
@@ -91,6 +92,7 @@ export default function Calendar() {
         const data = (await response.json()) as CalendarEvent[];
         setEvents(data);
       } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
         console.error("Calendar events fetch failed", err);
         setError("Termine konnten nicht geladen werden.");
       } finally {
@@ -99,6 +101,7 @@ export default function Calendar() {
     };
 
     loadEvents();
+    return () => controller.abort();
   }, [userId, currentDate]);
   const eventTypeConfig = {
     INTERVIEW_PHONE: {
@@ -128,6 +131,10 @@ export default function Calendar() {
     },
   };
 
+  // Timezone-sicherer Datumsvergleich: ISO-String gegen lokales Datum
+  const localDateStr = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
   // Calendar logic
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
@@ -144,8 +151,7 @@ export default function Calendar() {
     // Previous month days
     while (startDate < firstDay) {
       const eventsForDay = events.filter(
-        (event) =>
-          new Date(event.date).toDateString() === startDate.toDateString()
+        (event) => event.date.slice(0, 10) === localDateStr(startDate)
       );
       days.push({
         date: new Date(startDate),
@@ -160,8 +166,7 @@ export default function Calendar() {
     for (let day = 1; day <= daysInMonth; day++) {
       const dayDate = new Date(year, month, day);
       const eventsForDay = events.filter(
-        (event) =>
-          new Date(event.date).toDateString() === dayDate.toDateString()
+        (event) => event.date.slice(0, 10) === localDateStr(dayDate)
       );
       days.push({
         date: dayDate,
@@ -176,8 +181,7 @@ export default function Calendar() {
     for (let i = 1; i <= remainingDays; i++) {
       const dayDate = new Date(year, month + 1, i);
       const eventsForDay = events.filter(
-        (event) =>
-          new Date(event.date).toDateString() === dayDate.toDateString()
+        (event) => event.date.slice(0, 10) === localDateStr(dayDate)
       );
       days.push({
         date: dayDate,
@@ -481,7 +485,7 @@ export default function Calendar() {
               </div>
               {(() => {
                 const dayEvents = events.filter(
-                  (e) => new Date(e.date).toDateString() === selectedDate.toDateString()
+                  (e) => e.date.slice(0, 10) === localDateStr(selectedDate)
                 );
                 if (dayEvents.length === 0) {
                   return (

@@ -58,6 +58,14 @@ export async function PUT(req: NextRequest) {
 
     if (!id) return NextResponse.json({ error: "id erforderlich" }, { status: 400 });
 
+    const VALID_CARD_STATUSES = ["open", "in_progress", "done"];
+    if (status !== undefined && !VALID_CARD_STATUSES.includes(status as string)) {
+      return NextResponse.json(
+        { error: `Ungültiger Status. Erlaubt: ${VALID_CARD_STATUSES.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     // Sicherstellen, dass Karte dem User gehört
     const existing = await prisma.card.findFirst({
       where: { id, board: { OR: [{ ownerId: user.id }, { members: { some: { userId: user.id } } }] } },

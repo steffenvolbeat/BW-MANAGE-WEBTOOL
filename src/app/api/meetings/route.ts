@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes, randomInt } from "crypto";
 import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
 import { MeetingPlatform, MeetingStatus } from "@prisma/client";
@@ -181,6 +182,9 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { title, scheduledAt, duration, description, notes, status, meetingUrl } = body;
 
+    const existingMeeting = await db.meeting.findFirst({ where: { id } });
+    if (!existingMeeting) return NextResponse.json({ error: "Meeting nicht gefunden" }, { status: 404 });
+
     const meeting = await db.meeting.update({
       where: { id },
       data: {
@@ -215,6 +219,9 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
 
+    const existingMeeting = await db.meeting.findFirst({ where: { id } });
+    if (!existingMeeting) return NextResponse.json({ error: "Meeting nicht gefunden" }, { status: 404 });
+
     await db.meeting.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -230,20 +237,20 @@ function generateMeetingUrl(
   apiKey: string,
   apiSecret: string
 ): { joinUrl: string } {
-  const meetingId = `${Math.floor(100_000_000 + Math.random() * 900_000_000)}`;
-  const password = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const meetingId = String(randomInt(100_000_000, 1_000_000_000));
+  const password = randomBytes(3).toString("hex").toUpperCase();
 
   switch (platform) {
     case "ZOOM":
       return { joinUrl: `https://zoom.us/j/${meetingId}?pwd=${password}` };
     case "TEAMS": {
-      const threadId = Math.random().toString(36).substring(2, 15);
+      const threadId = randomBytes(7).toString("hex");
       return {
         joinUrl: `https://teams.microsoft.com/l/meetup-join/19%3ameeting_${threadId}%40thread.v2/0?context=%7b%22Tid%22%3a%22${apiKey}%22%7d`,
       };
     }
     case "LOOM": {
-      const sessionId = Math.random().toString(36).substring(2, 15);
+      const sessionId = randomBytes(7).toString("hex");
       return { joinUrl: `https://www.loom.com/share/${sessionId}` };
     }
     default:

@@ -43,7 +43,7 @@ export async function GET(request: Request) {
     assertSameUser(requestedUserId, user.id);
 
     const applications = await db.application.findMany({
-      where: {},
+      where: { userId: user.id },
       include: {
         documents: true,
         activities: true,
@@ -201,9 +201,9 @@ export async function PUT(request: Request) {
 
     assertSameUser(userId, user.id);
 
-    // Verify the application belongs to the user
+    // Verify the application belongs to the user (explicit userId for defense-in-depth)
     const existingApplication = await db.application.findFirst({
-      where: { id },
+      where: { id, userId: user.id },
     });
 
     if (!existingApplication) {
@@ -265,9 +265,21 @@ export async function PUT(request: Request) {
       delete updateData.requirements;
     }
 
+    // Whitelist erlaubter Felder – verhindert Relation-Injection via updateData
+    const safeUpdate: Record<string, unknown> = {};
+    const allowedFields = [
+      "companyName", "position", "location", "street", "zip", "country",
+      "state", "isInland", "salary", "jobUrl", "companyUrl", "status",
+      "jobType", "priority", "appliedAt", "applicationDeadline", "responseAt",
+      "notesText", "requirements", "coverLetter", "itBereich",
+    ];
+    for (const field of allowedFields) {
+      if (field in updateData) safeUpdate[field] = updateData[field];
+    }
+
     const updatedApplication = await db.application.update({
       where: { id },
-      data: updateData,
+      data: safeUpdate,
       include: {
         documents: true,
         activities: true,

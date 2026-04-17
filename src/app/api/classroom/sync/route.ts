@@ -55,7 +55,7 @@ export async function POST() {
         const entry = ws.tagesplan[dayIndex];
         const eventDate = new Date(weekStart);
         eventDate.setDate(weekStart.getDate() + dayIndex);
-        eventDate.setHours(9, 0, 0, 0);
+        eventDate.setUTCHours(7, 0, 0, 0); // 09:00 MEZ = 07:00 UTC
 
         const dateStr = eventDate.toISOString().slice(0, 10);
         const title = `[W${ws.week}] ${entry.focus}`.slice(0, 120);

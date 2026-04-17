@@ -77,10 +77,10 @@ export async function GET() {
           date: fmtDate(dayStart),
           count: apps.length,
           statuses: {
-            applied: apps.filter((a) => a.status === "APPLIED" || a.status === "INITIATIVE" || a.status === "OTHER").length,
-            interview: apps.filter((a) => a.status === "INTERVIEW_SCHEDULED" || a.status === "INTERVIEWED").length,
-            offer: apps.filter((a) => a.status === "OFFER_RECEIVED" || a.status === "ACCEPTED").length,
-            rejected: apps.filter((a) => a.status === "REJECTED").length,
+            applied: apps.filter((a) => a.status === ApplicationStatus.APPLIED || a.status === ApplicationStatus.INITIATIVE || a.status === ApplicationStatus.OTHER).length,
+            interview: apps.filter((a) => a.status === ApplicationStatus.INTERVIEW_SCHEDULED || a.status === ApplicationStatus.INTERVIEWED).length,
+            offer: apps.filter((a) => a.status === ApplicationStatus.OFFER_RECEIVED || a.status === ApplicationStatus.ACCEPTED).length,
+            rejected: apps.filter((a) => a.status === ApplicationStatus.REJECTED).length,
           },
         };
       });
@@ -92,10 +92,10 @@ export async function GET() {
         count: weekApps.length,
         target: targets[i] ?? 10,
         statuses: {
-          applied: weekApps.filter((a) => a.status === "APPLIED" || a.status === "INITIATIVE" || a.status === "OTHER").length,
-          interview: weekApps.filter((a) => a.status === "INTERVIEW_SCHEDULED" || a.status === "INTERVIEWED").length,
-          offer: weekApps.filter((a) => a.status === "OFFER_RECEIVED" || a.status === "ACCEPTED").length,
-          rejected: weekApps.filter((a) => a.status === "REJECTED").length,
+          applied: weekApps.filter((a) => a.status === ApplicationStatus.APPLIED || a.status === ApplicationStatus.INITIATIVE || a.status === ApplicationStatus.OTHER).length,
+          interview: weekApps.filter((a) => a.status === ApplicationStatus.INTERVIEW_SCHEDULED || a.status === ApplicationStatus.INTERVIEWED).length,
+          offer: weekApps.filter((a) => a.status === ApplicationStatus.OFFER_RECEIVED || a.status === ApplicationStatus.ACCEPTED).length,
+          rejected: weekApps.filter((a) => a.status === ApplicationStatus.REJECTED).length,
         },
         dailyStats,
         applications: weekApps.map((a) => ({
@@ -111,12 +111,12 @@ export async function GET() {
     const typed = applications as AppRow[];
     const total = typed.length;
     const totalInterviews = typed.filter(
-      (a) => a.status === "INTERVIEW_SCHEDULED" || a.status === "INTERVIEWED"
+      (a) => a.status === ApplicationStatus.INTERVIEW_SCHEDULED || a.status === ApplicationStatus.INTERVIEWED
     ).length;
     const totalOffers = typed.filter(
-      (a) => a.status === "OFFER_RECEIVED" || a.status === "ACCEPTED"
+      (a) => a.status === ApplicationStatus.OFFER_RECEIVED || a.status === ApplicationStatus.ACCEPTED
     ).length;
-    const totalRejected = typed.filter((a) => a.status === "REJECTED").length;
+    const totalRejected = typed.filter((a) => a.status === ApplicationStatus.REJECTED).length;
 
     return NextResponse.json({
       courseStart: "2026-02-09",

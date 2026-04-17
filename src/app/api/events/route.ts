@@ -30,11 +30,15 @@ export async function GET(request: Request) {
       whereClause.date = {};
 
       if (startDate) {
-        whereClause.date.gte = new Date(startDate);
+        const parsed = new Date(startDate);
+        if (isNaN(parsed.getTime())) return NextResponse.json({ error: "Invalid startDate" }, { status: 400 });
+        whereClause.date.gte = parsed;
       }
 
       if (endDate) {
-        whereClause.date.lte = new Date(endDate);
+        const parsed = new Date(endDate);
+        if (isNaN(parsed.getTime())) return NextResponse.json({ error: "Invalid endDate" }, { status: 400 });
+        whereClause.date.lte = parsed;
       }
     }
 
@@ -70,7 +74,6 @@ export async function POST(request: Request) {
     const {
       userId,
       applicationId,
-      contactId,
       title,
       description,
       type,
@@ -91,6 +94,11 @@ export async function POST(request: Request) {
       );
     }
 
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
+
     // Verify applicationId belongs to user if provided
     if (applicationId) {
       const application = await db.application.findFirst({
@@ -105,27 +113,13 @@ export async function POST(request: Request) {
       }
     }
 
-    // Verify contactId belongs to user if provided
-    if (contactId) {
-      const contact = await db.contact.findFirst({
-        where: { id: contactId },
-      });
-
-      if (!contact) {
-        return NextResponse.json(
-          { error: "Contact not found or access denied" },
-          { status: 404 }
-        );
-      }
-    }
-
     const event = await db.event.create({
       data: {
         applicationId,
         title,
         company: company || null,
         type,
-        date: new Date(date),
+        date: parsedDate,
         time: time || "",
         duration: duration ?? null,
         location,

@@ -95,6 +95,9 @@ export async function PATCH(request: NextRequest) {
     const body = await request.json();
     const { title, description, dueAt, priority, isDone } = body;
 
+    const existingReminder = await db.reminder.findFirst({ where: { id } });
+    if (!existingReminder) return NextResponse.json({ error: "Erinnerung nicht gefunden" }, { status: 404 });
+
     const reminder = await db.reminder.update({
       where: { id },
       data: {
@@ -126,6 +129,9 @@ export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID required" }, { status: 400 });
+
+    const existingReminder = await db.reminder.findFirst({ where: { id } });
+    if (!existingReminder) return NextResponse.json({ error: "Erinnerung nicht gefunden" }, { status: 404 });
 
     await db.reminder.delete({ where: { id } });
     return NextResponse.json({ success: true });
