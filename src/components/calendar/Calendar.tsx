@@ -392,7 +392,9 @@ export default function Calendar() {
                 <div
                   key={dayIdx}
                   className={`min-h-30 p-3 border-r border-b border-slate-200 dark:border-(--border) ${
-                    !day.isCurrentMonth
+                    selectedDate?.toDateString() === day.date.toDateString()
+                      ? "bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-inset ring-indigo-400"
+                      : !day.isCurrentMonth
                       ? "bg-slate-50 text-slate-400 dark:bg-slate-900 dark:text-slate-600"
                       : day.isToday
                       ? "bg-blue-50 dark:bg-blue-900/40"
@@ -450,6 +452,81 @@ export default function Calendar() {
         </div>
           {/* Sidebar */}
           <div className="space-y-6">
+
+          {/* Selected Day Detail */}
+          {selectedDate && (
+            <div className="bg-(--card) rounded-lg border border-indigo-200 dark:border-indigo-700 p-5 shadow-sm transition-colors">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <CalendarDaysIcon className="w-5 h-5 text-indigo-600" />
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                    {selectedDate.toLocaleDateString("de-DE", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => { resetForm(); setShowCreate(true); }}
+                    className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
+                  >
+                    <PlusIcon className="w-3 h-3" /> Termin
+                  </button>
+                  <button
+                    onClick={() => setSelectedDate(null)}
+                    className="text-slate-400 hover:text-slate-600 transition"
+                    aria-label="Schließen"
+                  >
+                    <XMarkIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              {(() => {
+                const dayEvents = events.filter(
+                  (e) => new Date(e.date).toDateString() === selectedDate.toDateString()
+                );
+                if (dayEvents.length === 0) {
+                  return (
+                    <p className="text-sm text-slate-400 py-3 text-center">
+                      Keine Termine an diesem Tag.
+                    </p>
+                  );
+                }
+                return (
+                  <div className="space-y-2">
+                    {dayEvents.map((event) => {
+                      const config = eventTypeConfig[event.type];
+                      return (
+                        <div
+                          key={event.id}
+                          className={`rounded-lg border p-3 ${config.color}`}
+                        >
+                          <div className="flex items-center gap-2 mb-1">
+                            {getEventIcon(event.type)}
+                            <span className="text-xs font-semibold">{config.label}</span>
+                            <span className="ml-auto text-xs font-mono">{event.time}</span>
+                          </div>
+                          <p className="font-semibold text-sm">{event.title}</p>
+                          {(event.company || event.application?.companyName) && (
+                            <p className="text-xs mt-0.5 opacity-80">
+                              {event.company || event.application?.companyName}
+                            </p>
+                          )}
+                          {event.location && (
+                            <p className="text-xs mt-1 flex items-center gap-1 opacity-75">
+                              <MapPinIcon className="w-3 h-3" /> {event.location}
+                            </p>
+                          )}
+                          {event.notes && (
+                            <p className="text-xs mt-1 italic opacity-75">{event.notes}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
           {/* Upcoming Events */}
           <div className="bg-(--card) rounded-lg border border-slate-200 dark:border-(--border) p-6 shadow-sm transition-colors">
             <div className="flex items-center mb-4">
