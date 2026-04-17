@@ -9,11 +9,20 @@ interface Task {
   done: boolean;
 }
 
+interface DailyStatEntry {
+  date: string;
+  count: number;
+  statuses: { applied: number; interview: number; offer: number; rejected: number };
+}
+
 interface AppWeekStat {
   week: number;
+  weekStart?: string;
+  weekEnd?: string;
   count: number;
   target: number;
   statuses: { applied: number; interview: number; offer: number; rejected: number };
+  dailyStats?: DailyStatEntry[];
   applications: { id: string; company: string; position: string; status: string; appliedAt: string }[];
 }
 
@@ -100,6 +109,49 @@ interface WeekContent {
 
 // ─── Wochendaten (aus PDFs) ───────────────────────────────────────────────────
 const WEEKS: WeekContent[] = [
+  {
+    week: 0,
+    title: "Kick-Off & Orientierungswoche",
+    goal: "Den Start der ISP-Phase strukturieren, Tools einrichten und erste Ziele setzen",
+    applicationGoal: null,
+    tags: ["Kick-Off", "Orientierung", "Vorbereitung"],
+    tagesplan: [
+      { day: "Tag 1", focus: "Begrüßung & Kursüberblick: Was erwartet dich in den 12 Wochen?" },
+      { day: "Tag 2", focus: "Tools einrichten: Tracking-System, LinkedIn & Profil-Check" },
+      { day: "Tag 3", focus: "Ziele setzen: Was will ich am Ende der ISP-Phase erreicht haben?" },
+      { day: "Tag 4", focus: "Erste Stellenrecherche: Arbeitsmarkt erkunden, erste Wunschliste" },
+      { day: "Tag 5", focus: "Planung W1: Bewerbungsziel und Wochenstrategie für Woche 1 festlegen" },
+    ],
+    aufgaben: [
+      {
+        title: "Orientierungswoche – Vorbereitung",
+        items: [
+          "Kursüberblick 12 Wochen verstehen: Was passiert wann?",
+          "Bewerbungs-Tracking-Tool einrichten (z. B. BW-Manage, Teal, Google Sheets)",
+          "LinkedIn-Profil auf Vollständigkeit prüfen und optimieren",
+          "XING-Profil anlegen oder aktualisieren",
+          "Erste 5–10 Wunschunternehmen recherchieren",
+          "Erwartungsmanagement: mind. 80 Bewerbungen in der gesamten ISP-Phase",
+          "Power- und Ruhephasen für 12 Wochen einplanen",
+          "Bewerbungskurve verstehen: W1: 7, W2: 15, W3: 20, W4: 10, W5: 10, W6: 15, W7: 20, W8: 15",
+        ],
+      },
+    ],
+    checkliste: [
+      "Tracking-System (BW-Manage / Teal) eingerichtet",
+      "LinkedIn-Profil vollständig und aktuell",
+      "Kursplan (12 Wochen) bekannt und verstanden",
+      "Erste Wunschunternehmen / Stellen recherchiert",
+      "Wochenziel für Woche 1 definiert",
+    ],
+    tools: [
+      { name: "BW-Manage", url: "/applications", desc: "Internes Tracking-Tool" },
+      { name: "Teal", url: "https://www.tealhq.com", desc: "Bewerbungstracking" },
+      { name: "LinkedIn", url: "https://www.linkedin.com", desc: "Profil optimieren" },
+    ],
+    sheetLink:
+      "https://docs.google.com/spreadsheets/d/1kk1JvZLwQsocXY-aEKfuSW_jtyYidvxLLK-QskSek54/edit?gid=776040445#gid=776040445",
+  },
   {
     week: 1,
     title: "Aufbau deiner Struktur für die Zeit der Jobsuche",
@@ -1080,6 +1132,7 @@ const WEEKS: WeekContent[] = [
 
 // ─── Bewerbungskurve (aus Woche 1 PDF) ───────────────────────────────────────
 const APP_CURVE = [
+  { week: "W0", target: 0, label: "Kick-Off" },
   { week: "W1", target: 7 },
   { week: "W2", target: 15 },
   { week: "W3", target: 20 },
@@ -1090,11 +1143,19 @@ const APP_CURVE = [
   { week: "W8", target: 15 },
 ];
 
+// Berechne aktuelle Kurswoche basierend auf festem Startdatum 09.02.2026
+const computeCurrentWeek = () => {
+  const courseStart = new Date(2026, 1, 9);
+  const now = new Date();
+  const diffWeeks = Math.floor((now.getTime() - courseStart.getTime()) / (7 * 24 * 60 * 60 * 1000));
+  return Math.max(0, Math.min(12, diffWeeks));
+};
+
 const MAX_CURVE = 25;
 
 // ─── Komponente ───────────────────────────────────────────────────────────────
 export default function DCIClassroom() {
-  const [activeWeek, setActiveWeek] = useState(1);
+  const [activeWeek, setActiveWeek] = useState(computeCurrentWeek);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [stats, setStats] = useState<ClassroomStats | null>(null);
@@ -1107,7 +1168,7 @@ export default function DCIClassroom() {
       .catch(() => null);
   }, []);
 
-  const week = WEEKS[activeWeek - 1];
+  const week = WEEKS.find((w) => w.week === activeWeek) ?? WEEKS[0];
 
   const toggleCheck = (key: string) => {
     setCheckedItems((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -1193,7 +1254,7 @@ export default function DCIClassroom() {
         </h2>
         <div className="flex items-end gap-2 h-20">
           {APP_CURVE.map((d) => {
-            const real = stats?.weekStats?.find((s) => s.week === Number(d.week))?.count ?? null;
+            const real = stats?.weekStats?.find((s) => s.week === parseInt(d.week.replace("W", "")))?.count ?? null;
             return (
               <div key={d.week} className="flex flex-col items-center flex-1 group relative">
                 {/* Ziel-Balken */}
@@ -1537,14 +1598,63 @@ export default function DCIClassroom() {
           {/* ─── Live-Bewerbungen dieser Woche ────────────────────────────── */}
           {weekStat && (
             <div className="mt-4 rounded-xl border border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 p-4">
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-semibold text-green-800 dark:text-green-300">
                   📊 Deine Bewerbungen – Woche {activeWeek}
                 </span>
-                <span className={`text-sm font-bold ${weekStat.count >= weekStat.target ? "text-green-600" : "text-amber-600"}`}>
+                <span className={`text-sm font-bold ${weekStat.count >= weekStat.target && weekStat.target > 0 ? "text-green-600" : "text-amber-600"}`}>
                   {weekStat.count} / {weekStat.target} Ziel
                 </span>
               </div>
+
+              {/* Tages-Ergebnisse Mo–So */}
+              {weekStat.dailyStats && (
+                <div className="mb-3">
+                  <div className="text-xs font-semibold text-green-700 dark:text-green-400 mb-2">
+                    📅 Tages-Ergebnisse
+                  </div>
+                  <div className="grid grid-cols-7 gap-1.5">
+                    {["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"].map((dayName, i) => {
+                      const day = weekStat.dailyStats?.[i];
+                      const count = day?.count ?? 0;
+                      return (
+                        <div
+                          key={i}
+                          className={`rounded-lg p-2 text-center ${
+                            count > 0
+                              ? "bg-green-100 dark:bg-green-900/40 border border-green-300 dark:border-green-700"
+                              : "bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700"
+                          }`}
+                        >
+                          <div className="text-[10px] font-bold text-gray-500 dark:text-slate-400">{dayName}</div>
+                          <div
+                            className={`text-base font-bold mt-0.5 ${
+                              count > 0 ? "text-green-700 dark:text-green-300" : "text-gray-300 dark:text-slate-600"
+                            }`}
+                          >
+                            {count}
+                          </div>
+                          {day && count > 0 && (
+                            <div className="mt-0.5 space-y-0.5">
+                              {day.statuses.interview > 0 && (
+                                <div className="text-[9px] text-blue-600 dark:text-blue-400">📞{day.statuses.interview}</div>
+                              )}
+                              {day.statuses.offer > 0 && (
+                                <div className="text-[9px] text-yellow-600 dark:text-yellow-400">🏆{day.statuses.offer}</div>
+                              )}
+                              {day.statuses.rejected > 0 && (
+                                <div className="text-[9px] text-red-500">✗{day.statuses.rejected}</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Bewerbungsliste */}
               {weekStat.applications.length > 0 ? (
                 <ul className="space-y-1">
                   {weekStat.applications.map((app) => (
