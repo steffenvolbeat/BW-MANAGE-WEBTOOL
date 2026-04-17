@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { computeCurrentWeek } from "@/lib/classroom/schedule";
 
 // ─── Typen ───────────────────────────────────────────────────────────────────
 interface Task {
@@ -1143,23 +1144,39 @@ const APP_CURVE = [
   { week: "W8", target: 15 },
 ];
 
-// Berechne aktuelle Kurswoche basierend auf festem Startdatum 09.02.2026
-const computeCurrentWeek = () => {
-  const courseStart = new Date(2026, 1, 9);
-  const now = new Date();
-  const diffWeeks = Math.floor((now.getTime() - courseStart.getTime()) / (7 * 24 * 60 * 60 * 1000));
-  return Math.max(0, Math.min(12, diffWeeks));
-};
-
 const MAX_CURVE = 25;
 
 // ─── Komponente ───────────────────────────────────────────────────────────────
+interface SyncResult {
+  calendar: { created: number; skipped: number };
+  kanban: { created: number; skipped: number; board: string };
+}
+
 export default function DCIClassroom() {
   const [activeWeek, setActiveWeek] = useState(computeCurrentWeek);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>({});
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
   const [stats, setStats] = useState<ClassroomStats | null>(null);
   const [openMuster, setOpenMuster] = useState<Record<string, boolean>>({});
+  const [syncing, setSyncing] = useState(false);
+  const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
+  const [syncError, setSyncError] = useState<string | null>(null);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncResult(null);
+    setSyncError(null);
+    try {
+      const res = await fetch("/api/classroom/sync", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error ?? "Sync fehlgeschlagen");
+      setSyncResult(data);
+    } catch (e) {
+      setSyncError(e instanceof Error ? e.message : "Sync fehlgeschlagen");
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     fetch("/api/classroom/stats")
@@ -1244,8 +1261,34 @@ export default function DCIClassroom() {
           >
             📊 Google Sheets öffnen
           </a>
+          <button
+            onClick={handleSync}
+            disabled={syncing}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors shadow disabled:opacity-60"
+          >
+            {syncing ? "⏳ Sync läuft…" : "🔄 Sync Kalender & Kanban"}
+          </button>
         </div>
       </div>
+
+      {/* ─── Sync-Ergebnis ───────────────────────────────────────────────────── */}
+      {syncResult && (
+        <div className="rounded-xl border border-green-300 bg-green-50 dark:bg-green-900/20 dark:border-green-700 p-4 text-sm text-green-800 dark:text-green-200 flex items-start gap-3">
+          <span className="text-lg">✅</span>
+          <div>
+            <p className="font-semibold mb-1">Sync erfolgreich!</p>
+            <p>📅 Kalender: <strong>{syncResult.calendar.created}</strong> neue Termine erstellt, {syncResult.calendar.skipped} übersprungen.</p>
+            <p>🗂️ Kanban (<em>{syncResult.kanban.board}</em>): <strong>{syncResult.kanban.created}</strong> neue Karten erstellt, {syncResult.kanban.skipped} übersprungen.</p>
+          </div>
+          <button onClick={() => setSyncResult(null)} className="ml-auto text-green-600 hover:text-green-800">✕</button>
+        </div>
+      )}
+      {syncError && (
+        <div className="rounded-xl border border-red-300 bg-red-50 dark:bg-red-900/20 dark:border-red-700 p-4 text-sm text-red-800 dark:text-red-200 flex items-center gap-3">
+          <span>❌ {syncError}</span>
+          <button onClick={() => setSyncError(null)} className="ml-auto text-red-600 hover:text-red-800">✕</button>
+        </div>
+      )}
 
       {/* ─── Bewerbungskurve ─────────────────────────────────────────────────── */}
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 shadow-sm">
