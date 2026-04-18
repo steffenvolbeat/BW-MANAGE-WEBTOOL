@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { computeCurrentWeek, getWeekStart } from "@/lib/classroom/schedule";
 
 // ─── Typen ───────────────────────────────────────────────────────────────────
@@ -1170,6 +1170,57 @@ export default function DCIClassroom() {
   const [syncResult, setSyncResult] = useState<SyncResult | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
 
+  // ─── Classroom-Notizen (Tag/Woche) ──────────────────────────────────────
+  type EntryKey = string; // Format: `${week}-${day ?? "w"}-${type}`
+  const [entries, setEntries] = useState<Record<EntryKey, string>>({});
+  const [entrySaving, setEntrySaving] = useState<Record<EntryKey, boolean>>({});
+
+  const entryKey = (week: number, day: number | null, type: string) =>
+    `${week}-${day ?? "w"}-${type}`;
+
+  const loadEntries = useCallback(async (week: number) => {
+    try {
+      const res = await fetch(`/api/classroom/entries?week=${week}`);
+      if (!res.ok) return;
+      const data = await res.json() as Array<{ week: number; day: number | null; type: string; content: string; title?: string }>;
+      setEntries((prev) => {
+        const next = { ...prev };
+        for (const e of data) {
+          next[entryKey(e.week, e.day, e.type)] = e.content;
+        }
+        return next;
+      });
+    } catch { /* ignorieren */ }
+  }, []);
+
+  const saveEntry = async (week: number, day: number | null, type: string, content: string) => {
+    const key = entryKey(week, day, type);
+    setEntrySaving((prev) => ({ ...prev, [key]: true }));
+    try {
+      await fetch("/api/classroom/entries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ week, day, type, content }),
+      });
+    } catch { /* ignorieren */ } finally {
+      setEntrySaving((prev) => ({ ...prev, [key]: false }));
+    }
+  };
+
+  const deleteEntry = async (week: number, day: number | null, type: string) => {
+    const key = entryKey(week, day, type);
+    // Suche entry-id: wir haben es nicht im State, also fetch alle und lösche
+    try {
+      const res = await fetch(`/api/classroom/entries?week=${week}`);
+      if (!res.ok) return;
+      const data = await res.json() as Array<{ id: string; day: number | null; type: string }>;
+      const entry = data.find((e) => e.day === day && e.type === type);
+      if (!entry) return;
+      await fetch(`/api/classroom/entries/${entry.id}`, { method: "DELETE" });
+      setEntries((prev) => { const next = { ...prev }; delete next[key]; return next; });
+    } catch { /* ignorieren */ }
+  };
+
   const handleSync = async () => {
     setSyncing(true);
     setSyncResult(null);
@@ -1185,6 +1236,10 @@ export default function DCIClassroom() {
       setSyncing(false);
     }
   };
+
+  useEffect(() => {
+    loadEntries(activeWeek);
+  }, [activeWeek, loadEntries]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -1492,8 +1547,53 @@ export default function DCIClassroom() {
                     <div className="text-xs text-blue-500 dark:text-blue-400 mb-1">
                       {fmtDayDate(getTagDate(i))}
                     </div>
-                    <div className="text-xs text-gray-600 dark:text-slate-300 leading-relaxed">
+                    <div className="text-xs text-gray-600 dark:text-slate-300 leading-relaxed mb-3">
                       {t.focus}
+                    </div>
+                    {/* Tages-Notizen */}
+                    <div className="space-y-2 mt-2 border-t border-blue-200 dark:border-blue-700 pt-2">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-blue-700 dark:text-blue-300 mb-1">📝 Tages-Notizen</label>
+                        <textarea
+                          className="w-full text-xs rounded border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-2 py-1.5 resize-none focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                          rows={3}
+                          placeholder="Was habe ich heute gelernt / gearbeitet?"
+                          value={entries[entryKey(activeWeek, i + 1, "DAY_NOTE")] ?? ""}
+                          onChange={(e) => {
+                            const k = entryKey(activeWeek, i + 1, "DAY_NOTE");
+                            setEntries((prev) => ({ ...prev, [k]: e.target.value }));
+                          }}
+                          onBlur={(e) => {
+                            const val = e.target.value.trim();
+                            if (val) saveEntry(activeWeek, i + 1, "DAY_NOTE", val);
+                            else deleteEntry(activeWeek, i + 1, "DAY_NOTE");
+                          }}
+                        />
+                        {entrySaving[entryKey(activeWeek, i + 1, "DAY_NOTE")] && (
+                          <span className="text-[10px] text-blue-400">Speichert…</span>
+                        )}
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-blue-700 dark:text-blue-300 mb-1">📋 Tages-Zusammenfassung</label>
+                        <textarea
+                          className="w-full text-xs rounded border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-2 py-1.5 resize-none focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                          rows={3}
+                          placeholder="Zusammenfassung des Tages…"
+                          value={entries[entryKey(activeWeek, i + 1, "DAY_SUMMARY")] ?? ""}
+                          onChange={(e) => {
+                            const k = entryKey(activeWeek, i + 1, "DAY_SUMMARY");
+                            setEntries((prev) => ({ ...prev, [k]: e.target.value }));
+                          }}
+                          onBlur={(e) => {
+                            const val = e.target.value.trim();
+                            if (val) saveEntry(activeWeek, i + 1, "DAY_SUMMARY", val);
+                            else deleteEntry(activeWeek, i + 1, "DAY_SUMMARY");
+                          }}
+                        />
+                        {entrySaving[entryKey(activeWeek, i + 1, "DAY_SUMMARY")] && (
+                          <span className="text-[10px] text-blue-400">Speichert…</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1767,6 +1867,60 @@ export default function DCIClassroom() {
               )}
             </div>
           )}
+          {/* ─── Wochenzusammenfassung ────────────────────────────────────────── */}
+          <div className="mt-4 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 p-4">
+            <h3 className="text-sm font-semibold text-purple-800 dark:text-purple-300 mb-3 flex items-center gap-2">
+              📓 Wochenzusammenfassung – Woche {activeWeek}
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                  Recherche & Notizen der Woche
+                </label>
+                <textarea
+                  className="w-full text-sm rounded-lg border border-purple-200 dark:border-purple-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-3 py-2 resize-none focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                  rows={4}
+                  placeholder="Was habe ich diese Woche recherchiert? Welche Ressourcen, Links, Konzepte sind wichtig?"
+                  value={entries[entryKey(activeWeek, null, "RESEARCH")] ?? ""}
+                  onChange={(e) => {
+                    const k = entryKey(activeWeek, null, "RESEARCH");
+                    setEntries((prev) => ({ ...prev, [k]: e.target.value }));
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    if (val) saveEntry(activeWeek, null, "RESEARCH", val);
+                    else deleteEntry(activeWeek, null, "RESEARCH");
+                  }}
+                />
+                {entrySaving[entryKey(activeWeek, null, "RESEARCH")] && (
+                  <span className="text-[10px] text-purple-400">Speichert…</span>
+                )}
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                  Zusammenfassung der Woche
+                </label>
+                <textarea
+                  className="w-full text-sm rounded-lg border border-purple-200 dark:border-purple-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-3 py-2 resize-none focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                  rows={5}
+                  placeholder="Was habe ich diese Woche gelernt und gemacht? Was lief gut, was schwer?"
+                  value={entries[entryKey(activeWeek, null, "WEEK_SUMMARY")] ?? ""}
+                  onChange={(e) => {
+                    const k = entryKey(activeWeek, null, "WEEK_SUMMARY");
+                    setEntries((prev) => ({ ...prev, [k]: e.target.value }));
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    if (val) saveEntry(activeWeek, null, "WEEK_SUMMARY", val);
+                    else deleteEntry(activeWeek, null, "WEEK_SUMMARY");
+                  }}
+                />
+                {entrySaving[entryKey(activeWeek, null, "WEEK_SUMMARY")] && (
+                  <span className="text-[10px] text-purple-400">Speichert…</span>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

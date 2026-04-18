@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useAppUser } from "@/hooks/useAppUser";
+import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import {
   PlusIcon,
   TrashIcon,
@@ -60,6 +61,7 @@ export function TrustedKanban() {
   const [editDesc, setEditDesc] = useState("");
   const [editColId, setEditColId] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
+  const [cardTab, setCardTab] = useState<"edit" | "timeline">("edit");
 
   const selectedBoard = useMemo(
     () => boards.find((b) => b.id === selectedBoardId) ?? null,
@@ -155,6 +157,7 @@ export function TrustedKanban() {
     setEditTitle(card.title);
     setEditDesc(card.description ?? "");
     setEditColId(card.columnId);
+    setCardTab("edit");
   }
 
   async function handleSaveEdit() {
@@ -461,57 +464,99 @@ export function TrustedKanban() {
       {/* Modal: Karte bearbeiten */}
       {editCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <PencilSquareIcon className="w-5 h-5 text-blue-600" />
-              Karte bearbeiten
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
-                <input
-                  autoFocus
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung</label>
-                <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                  value={editDesc}
-                  onChange={(e) => setEditDesc(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Spalte</label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                  value={editColId}
-                  onChange={(e) => setEditColId(e.target.value)}
-                >
-                  {sortedColumns.map((c) => (
-                    <option key={c.id} value={c.id}>{c.title}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="flex gap-3 mt-5">
-              <button
-                onClick={handleSaveEdit}
-                disabled={savingEdit || !editTitle.trim()}
-                className="flex-1 rounded-lg bg-blue-600 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
-              >
-                {savingEdit ? "Speichere…" : "Speichern"}
-              </button>
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-lg flex flex-col max-h-[80vh]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <PencilSquareIcon className="w-5 h-5 text-blue-600" />
+                {editCard.title}
+              </h3>
               <button
                 onClick={() => setEditCard(null)}
-                className="px-4 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50"
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500"
               >
-                Abbrechen
+                <XMarkIcon className="w-5 h-5" />
               </button>
+            </div>
+            {/* Tabs */}
+            <div className="flex border-b border-gray-200 dark:border-gray-700 px-5">
+              <button
+                onClick={() => setCardTab("edit")}
+                className={`py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                  cardTab === "edit"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                }`}
+              >
+                Bearbeiten
+              </button>
+              {editCard.metadata?.applicationId && (
+                <button
+                  onClick={() => setCardTab("timeline")}
+                  className={`py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                    cardTab === "timeline"
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400"
+                  }`}
+                >
+                  Timeline
+                </button>
+              )}
+            </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              {cardTab === "timeline" && editCard.metadata?.applicationId ? (
+                <ApplicationTimeline
+                  applicationId={editCard.metadata.applicationId}
+                  applicationName={editCard.title}
+                />
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Titel</label>
+                    <input
+                      autoFocus
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Beschreibung</label>
+                    <textarea
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm resize-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      rows={3}
+                      value={editDesc}
+                      onChange={(e) => setEditDesc(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spalte</label>
+                    <select
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      value={editColId}
+                      onChange={(e) => setEditColId(e.target.value)}
+                    >
+                      {sortedColumns.map((c) => (
+                        <option key={c.id} value={c.id}>{c.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex gap-3 mt-2">
+                    <button
+                      onClick={handleSaveEdit}
+                      disabled={savingEdit || !editTitle.trim()}
+                      className="flex-1 rounded-lg bg-blue-600 py-2 text-sm text-white hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {savingEdit ? "Speichere…" : "Speichern"}
+                    </button>
+                    <button
+                      onClick={() => setEditCard(null)}
+                      className="px-4 rounded-lg border border-gray-300 dark:border-gray-600 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

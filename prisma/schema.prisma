@@ -51,9 +51,11 @@ model User {
   mentoringAsmentor MentoringSession[] @relation("MentorSession")
   peerReviews       PeerReview[]       @relation("ReviewAuthor")
   peerReviewsReceived PeerReview[]     @relation("ReviewTarget")
-  followUps         FollowUp[]
-  portfolioProfile  PortfolioProfile?
-  fileFolders       FileFolder[]
+  followUps           FollowUp[]
+  portfolioProfile    PortfolioProfile?
+  fileFolders         FileFolder[]
+  applicationTimelines ApplicationTimeline[]
+  classroomEntries    ClassroomEntry[]
 
   @@map("users")
 }
@@ -91,6 +93,7 @@ model Application {
   meetings        Meeting[]
   reminders       Reminder[]
   coverLetters    CoverLetter[]
+  timelines       ApplicationTimeline[]
 
   @@map("applications")
 }
@@ -730,3 +733,71 @@ model FileFolder {
 
   @@map("file_folders")
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE: UNIVERSAL APPLICATION TIMELINE
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum TimelineEntryType {
+  STATUS_CHANGE
+  NOTE
+  COVER_LETTER
+  CV_UPDATE
+  ACTIVITY
+  CALENDAR_EVENT
+  MANUAL
+}
+
+model ApplicationTimeline {
+  id            String            @id @default(cuid())
+  applicationId String
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          TimelineEntryType @default(MANUAL)
+  title         String
+  content       String?
+  status        String?           // ApplicationStatus-Wert als String-Snapshot
+  itBereich     String?
+  week          Int?              // Kalender-/ISP-Woche (optional)
+  date          DateTime          @default(now())
+  noteId        String?           // Optionale Referenz auf Note
+  coverId       String?           // Optionale Referenz auf CoverLetter
+  eventId       String?           // Optionale Referenz auf Event
+  activityId    String?           // Optionale Referenz auf Activity
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([applicationId])
+  @@index([userId])
+  @@map("application_timelines")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FEATURE: DCI CLASSROOM – TAGES- & WOCHENZUSAMMENFASSUNG
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ClassroomEntryType {
+  DAY_NOTE
+  DAY_SUMMARY
+  WEEK_SUMMARY
+  RESEARCH
+}
+
+model ClassroomEntry {
+  id        String              @id @default(cuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  week      Int                 // Woche 0-12
+  day       Int?                // Tag 1-5, null = Wocheneintrag
+  type      ClassroomEntryType
+  title     String?
+  content   String
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@unique([userId, week, day, type])
+  @@index([userId, week])
+  @@map("classroom_entries")
+}
+

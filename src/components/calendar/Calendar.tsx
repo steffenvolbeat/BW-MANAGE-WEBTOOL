@@ -2,6 +2,7 @@
 import { useAppUser } from "@/hooks/useAppUser";
 
 import { useEffect, useState, type ReactNode } from "react";
+import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -33,6 +34,7 @@ interface CalendarEvent {
   notes?: string;
   duration?: number; // in minutes
   isInland: boolean;
+  applicationId?: string | null;
   application?: {
     companyName?: string | null;
     position?: string | null;
@@ -55,6 +57,7 @@ export default function Calendar() {
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [expandedTimeline, setExpandedTimeline] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     company: "",
@@ -521,6 +524,24 @@ export default function Calendar() {
                           )}
                           {event.notes && (
                             <p className="text-xs mt-1 italic opacity-75">{event.notes}</p>
+                          )}
+                          {event.applicationId && (
+                            <div className="mt-2 border-t border-black/10 pt-2">
+                              <button
+                                onClick={() => setExpandedTimeline(expandedTimeline === event.id ? null : event.id)}
+                                className="text-xs font-medium underline underline-offset-2"
+                              >
+                                {expandedTimeline === event.id ? "▲ Timeline ausblenden" : "▼ Bewerbungs-Timeline"}
+                              </button>
+                              {expandedTimeline === event.id && (
+                                <div className="mt-2">
+                                  <ApplicationTimeline
+                                    applicationId={event.applicationId}
+                                    applicationName={event.company ?? event.application?.companyName ?? event.title}
+                                  />
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       );

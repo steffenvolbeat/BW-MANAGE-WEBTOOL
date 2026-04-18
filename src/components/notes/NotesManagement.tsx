@@ -3,6 +3,7 @@ import { useAppUser } from "@/hooks/useAppUser";
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import {
   DocumentPlusIcon,
   PlusIcon,
@@ -44,6 +45,7 @@ export default function NotesManagement() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expandedTimeline, setExpandedTimeline] = useState<string | null>(null);
 
   const categories = useMemo(
     () => [
@@ -463,6 +465,25 @@ export default function NotesManagement() {
                           {tag}
                         </span>
                       ))}
+                    </div>
+                  )}
+
+                  {note.applicationId && (
+                    <div className="mt-3 border-t border-gray-100 pt-3">
+                      <button
+                        onClick={() => setExpandedTimeline(expandedTimeline === note.id ? null : note.id)}
+                        className="text-xs font-medium text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      >
+                        {expandedTimeline === note.id ? "▲ Timeline ausblenden" : "▼ Bewerbungs-Timeline anzeigen"}
+                      </button>
+                      {expandedTimeline === note.id && (
+                        <div className="mt-3">
+                          <ApplicationTimeline
+                            applicationId={note.applicationId}
+                            applicationName={note.application?.companyName ?? "Bewerbung"}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

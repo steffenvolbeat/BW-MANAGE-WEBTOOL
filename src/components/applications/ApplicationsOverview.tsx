@@ -1,5 +1,6 @@
 "use client";
 import { useAppUser } from "@/hooks/useAppUser";
+import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 
 import { useEffect, useRef, useState, type ChangeEvent, Fragment } from "react";
 import {
@@ -103,6 +104,7 @@ export default function ApplicationsOverview() {
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [detailApp, setDetailApp] = useState<Application | null>(null);
+  const [detailTab, setDetailTab] = useState<"info" | "timeline">("info");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -396,6 +398,7 @@ export default function ApplicationsOverview() {
   const closeDetail = () => {
     setShowDetail(false);
     setDetailApp(null);
+    setDetailTab("info");
   };
 
   const closeEdit = () => {
@@ -2139,7 +2142,39 @@ export default function ApplicationsOverview() {
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
+            {/* Tabs */}
+            <div className="flex border-b border-gray-200 dark:border-slate-700 px-6">
+              <button
+                onClick={() => setDetailTab("info")}
+                className={`py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                  detailTab === "info"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
+                }`}
+              >
+                Informationen
+              </button>
+              <button
+                onClick={() => setDetailTab("timeline")}
+                className={`py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                  detailTab === "timeline"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200"
+                }`}
+              >
+                Timeline
+              </button>
+            </div>
             <div className="flex-1 overflow-y-auto px-6 py-6">
+              {detailTab === "timeline" ? (
+                <ApplicationTimeline
+                  applicationId={detailApp.id}
+                  applicationName={`${detailApp.position} @ ${detailApp.companyName}`}
+                  itBereich={detailApp.itBereich}
+                  currentStatus={detailApp.status}
+                />
+              ) : (
+                <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <div className="text-sm text-gray-700 dark:text-slate-200">
@@ -2306,6 +2341,8 @@ export default function ApplicationsOverview() {
                   </div>
                 )}
               </div>
+                </>
+            )}
             </div>
 
             <div className="px-6 py-4 border-t border-gray-200 dark:border-slate-700 flex justify-end">

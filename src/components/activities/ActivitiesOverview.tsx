@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppUser } from "@/hooks/useAppUser";
+import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import {
   ClockIcon,
   BriefcaseIcon,
@@ -69,6 +70,7 @@ export default function ActivitiesOverview() {
 
   // Detail-Modal
   const [detailActivity, setDetailActivity] = useState<Activity | null>(null);
+  const [detailTab, setDetailTab] = useState<"info" | "timeline">("info");
 
   // Edit-Modal
   const [editActivity, setEditActivity] = useState<Activity | null>(null);
@@ -640,12 +642,13 @@ export default function ActivitiesOverview() {
       {detailActivity && (
         <div
           className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
-          onClick={() => setDetailActivity(null)}
+          onClick={() => { setDetailActivity(null); setDetailTab("info"); }}
         >
           <div
-            className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4"
+            className="bg-white rounded-xl shadow-xl max-w-lg w-full flex flex-col max-h-[85vh]"
             onClick={(e) => e.stopPropagation()}
           >
+            <div className="p-6 pb-0 space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${activityTypes[detailActivity.type]?.color.replace("text-", "bg-").replace("-800", "-100")}`}>
@@ -656,11 +659,40 @@ export default function ActivitiesOverview() {
                   {getTypeBadge(detailActivity.type)}
                 </div>
               </div>
-              <button onClick={() => setDetailActivity(null)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => { setDetailActivity(null); setDetailTab("info"); }} className="text-gray-400 hover:text-gray-600">
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
-
+            </div>
+            {/* Tabs */}
+            <div className="flex border-b border-gray-200 px-6 mt-3">
+              <button
+                onClick={() => setDetailTab("info")}
+                className={`py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                  detailTab === "info" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                Details
+              </button>
+              {detailActivity.applicationId && (
+                <button
+                  onClick={() => setDetailTab("timeline")}
+                  className={`py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                    detailTab === "timeline" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  Timeline
+                </button>
+              )}
+            </div>
+            <div className="flex-1 overflow-y-auto p-6">
+            {detailTab === "timeline" && detailActivity.applicationId ? (
+              <ApplicationTimeline
+                applicationId={detailActivity.applicationId}
+                applicationName={detailActivity.application?.companyName ?? detailActivity.metadata?.company as string ?? "Bewerbung"}
+              />
+            ) : (
+              <>
             <p className="text-sm text-gray-700">{detailActivity.description}</p>
 
             <dl className="grid grid-cols-2 gap-2 text-sm">
@@ -709,17 +741,20 @@ export default function ActivitiesOverview() {
 
             <div className="flex gap-2 pt-2">
               <button
-                onClick={() => { setDetailActivity(null); openEdit(detailActivity); }}
+                onClick={() => { setDetailActivity(null); setDetailTab("info"); openEdit(detailActivity); }}
                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
               >
                 <PencilIcon className="w-4 h-4" /> Bearbeiten
               </button>
               <button
-                onClick={() => setDetailActivity(null)}
+                onClick={() => { setDetailActivity(null); setDetailTab("info"); }}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
               >
                 Schließen
               </button>
+            </div>
+              </>
+            )}
             </div>
           </div>
         </div>
