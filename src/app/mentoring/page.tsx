@@ -66,23 +66,28 @@ export default function MentoringPage() {
 
   async function saveProfile() {
     setSaving(true);
-    const res = await fetch("/api/mentoring", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        headline: form.headline,
-        bio: form.bio,
-        skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
-        industries: form.industries.split(",").map((s) => s.trim()).filter(Boolean),
-        hourlyRate: form.hourlyRate ? Number(form.hourlyRate) : null,
-        isAvailable: form.isAvailable,
-      }),
-    });
-    if (res.ok) {
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+    try {
+      const res = await fetch("/api/mentoring", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          headline: form.headline,
+          bio: form.bio,
+          skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
+          industries: form.industries.split(",").map((s) => s.trim()).filter(Boolean),
+          hourlyRate: form.hourlyRate ? Number(form.hourlyRate) : null,
+          isAvailable: form.isAvailable,
+        }),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch {
+      // Speichern fehlgeschlagen
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   if (loading) {

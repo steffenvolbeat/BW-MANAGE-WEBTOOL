@@ -60,7 +60,6 @@ export default function FollowUpsPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- load() ruft setState via useCallback auf (valides async-Pattern)
   useEffect(() => { load(); }, [load]);
 
   const markDone = async (id: string) => {
@@ -79,44 +78,54 @@ export default function FollowUpsPage() {
 
   const generateDraft = async (id: string) => {
     setDrafting(id);
-    const f = followUps.find((f) => f.id === id);
-    if (!f) { setDrafting(null); return; }
-    const res = await fetch("/api/follow-ups", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: f.type, subject: f.subject, dueAt: f.dueAt,
-        generateDraft: true,
-        applicationId: f.applicationId,
-        contactId: f.contactId,
-      }),
-    });
-    const data = await res.json();
-    if (data.draft) {
-      await fetch(`/api/follow-ups/${id}`, {
-        method: "PATCH",
+    try {
+      const f = followUps.find((f) => f.id === id);
+      if (!f) return;
+      const res = await fetch("/api/follow-ups", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ aiDraft: data.draft }),
+        body: JSON.stringify({
+          type: f.type, subject: f.subject, dueAt: f.dueAt,
+          generateDraft: true,
+          applicationId: f.applicationId,
+          contactId: f.contactId,
+        }),
       });
-      setFollowUps((prev) => prev.map((fu) => fu.id === id ? { ...fu, aiDraft: data.draft } : fu));
+      const data = await res.json();
+      if (data.draft) {
+        await fetch(`/api/follow-ups/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ aiDraft: data.draft }),
+        });
+        setFollowUps((prev) => prev.map((fu) => fu.id === id ? { ...fu, aiDraft: data.draft } : fu));
+      }
+    } catch {
+      // KI-Entwurf konnte nicht generiert werden
+    } finally {
+      setDrafting(null);
     }
-    setDrafting(null);
   };
 
   const create = async () => {
     setCreating(true);
-    const res = await fetch("/api/follow-ups", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    if (data.followUp) {
-      setFollowUps((prev) => [data.followUp, ...prev]);
-      setShowCreate(false);
-      setForm({ type: "EMAIL", subject: "", dueAt: "", generateDraft: false });
+    try {
+      const res = await fetch("/api/follow-ups", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (data.followUp) {
+        setFollowUps((prev) => [data.followUp, ...prev]);
+        setShowCreate(false);
+        setForm({ type: "EMAIL", subject: "", dueAt: "", generateDraft: false });
+      }
+    } catch {
+      // Erstellen fehlgeschlagen
+    } finally {
+      setCreating(false);
     }
-    setCreating(false);
   };
 
   const groups = groupFollowUps(followUps);

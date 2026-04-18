@@ -82,25 +82,30 @@ export default function PortfolioPage() {
 
   async function save() {
     setSaving(true);
-    const res = await fetch("/api/portfolio", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
-        githubUrl: form.githubUrl || null,
-        linkedinUrl: form.linkedinUrl || null,
-        websiteUrl: form.websiteUrl || null,
-        slug: form.slug || undefined,
-      }),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      setProfile(data.profile);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+    try {
+      const res = await fetch("/api/portfolio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...form,
+          skills: form.skills.split(",").map((s) => s.trim()).filter(Boolean),
+          githubUrl: form.githubUrl || null,
+          linkedinUrl: form.linkedinUrl || null,
+          websiteUrl: form.websiteUrl || null,
+          slug: form.slug || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setProfile(data.profile);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch {
+      // Speichern fehlgeschlagen
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   const publicUrl = profile ? `${typeof window !== "undefined" ? window.location.origin : ""}/portfolio/${profile.slug}` : "";

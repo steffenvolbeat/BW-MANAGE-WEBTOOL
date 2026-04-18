@@ -66,44 +66,53 @@ export default function PeerReviewsPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect -- load() ruft setState via useCallback auf (valides async-Pattern)
   useEffect(() => { load(); }, [load]);
 
   const submitRequest = async () => {
     if (!form.documentText.trim()) return;
     setSubmitting(true);
-    await fetch("/api/peer-reviews", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "request", ...form }),
-    });
-    setSubmitted(true);
-    setSubmitting(false);
-    setForm({ documentType: "CV", documentText: "", isAnonymous: true });
-    load();
+    try {
+      await fetch("/api/peer-reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "request", ...form }),
+      });
+      setSubmitted(true);
+      setForm({ documentType: "CV", documentText: "", isAnonymous: true });
+      load();
+    } catch {
+      // Anfrage konnte nicht gesendet werden
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const sendFeedback = async (reviewId: string) => {
     const fb = feedbackMap[reviewId];
     if (!fb?.text) return;
     setSendingFeedback(reviewId);
-    await fetch("/api/peer-reviews", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "feedback",
-        reviewId,
-        feedback: fb.text,
-        rating: fb.rating ?? 3,
-      }),
-    });
-    setSendingFeedback(null);
-    setFeedbackMap((prev) => {
-      const next = { ...prev };
-      delete next[reviewId];
-      return next;
-    });
-    load();
+    try {
+      await fetch("/api/peer-reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "feedback",
+          reviewId,
+          feedback: fb.text,
+          rating: fb.rating ?? 3,
+        }),
+      });
+      setFeedbackMap((prev) => {
+        const next = { ...prev };
+        delete next[reviewId];
+        return next;
+      });
+      load();
+    } catch {
+      // Feedback konnte nicht gesendet werden
+    } finally {
+      setSendingFeedback(null);
+    }
   };
 
   const updateFeedback = (id: string, field: "text" | "rating", value: string | number) => {

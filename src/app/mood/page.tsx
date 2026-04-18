@@ -50,31 +50,40 @@ export default function StimmungsBarometerPage() {
   const [saved, setSaved] = useState(false);
 
   const load = async () => {
-    const res = await fetch("/api/mood");
-    const data = await res.json();
-    setEntries(data.entries ?? []);
-    setAverages(data.averages);
-    setBurnoutWarning(data.burnoutWarning ?? false);
-    setLoading(false);
+    try {
+      const res = await fetch("/api/mood");
+      const data = await res.json();
+      setEntries(data.entries ?? []);
+      setAverages(data.averages);
+      setBurnoutWarning(data.burnoutWarning ?? false);
+    } catch {
+      // Stimmungsdaten konnten nicht geladen werden
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, []);
 
   async function submit() {
     setSaving(true);
-    const res = await fetch("/api/mood", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ mood, energy, stress, note: note || undefined }),
-    });
-    if (res.ok) {
-      setSaved(true);
-      setNote("");
-      await load();
-      setTimeout(() => setSaved(false), 3000);
+    try {
+      const res = await fetch("/api/mood", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mood, energy, stress, note: note || undefined }),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setNote("");
+        await load();
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch {
+      // Speichern fehlgeschlagen
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
   }
 
   return (

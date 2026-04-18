@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     const portal = searchParams.get("portal");
     const keyword = searchParams.get("keyword") || "";
     const location = searchParams.get("location") || "";
-    const limit = parseInt(searchParams.get("limit") || "10");
+    const limit = parseInt(searchParams.get("limit") || "10", 10);
 
     if (
       !portal ||
