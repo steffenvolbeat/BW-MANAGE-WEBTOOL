@@ -1939,6 +1939,7 @@ export default function ApplicationsOverview() {
                             onClick={() => {
                               setDetailApp(application);
                               setDetailTab("timeline");
+                              setShowDetail(true);
                             }}
                           >
                             <ClockIcon className="w-4 h-4" />

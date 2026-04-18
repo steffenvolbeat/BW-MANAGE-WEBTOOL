@@ -231,6 +231,9 @@ export function TrustedKanban() {
           <h2 className="text-2xl font-bold text-gray-900">Kanban Board</h2>
           {boards.length > 1 && (
             <select
+              id="kanban-board-select"
+              name="kanban-board-select"
+              aria-label="Board auswählen"
               className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm bg-white text-gray-800 focus:ring-2 focus:ring-blue-500"
               value={selectedBoardId ?? ""}
               onChange={(e) => setSelectedBoardId(e.target.value)}
@@ -376,6 +379,9 @@ export function TrustedKanban() {
                   <div className="p-2 border-t border-gray-200 bg-white rounded-b-xl">
                     <input
                       autoFocus
+                      id="kanban-new-card-title"
+                      name="kanban-new-card-title"
+                      aria-label="Titel der Karte"
                       className="w-full mb-1.5 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
                       placeholder="Titel der Karte"
                       value={newCardTitle}
@@ -386,6 +392,9 @@ export function TrustedKanban() {
                       }}
                     />
                     <textarea
+                      id="kanban-new-card-desc"
+                      name="kanban-new-card-desc"
+                      aria-label="Beschreibung der Karte"
                       className="w-full mb-2 px-2 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
                       placeholder="Beschreibung (optional)"
                       rows={2}
@@ -430,6 +439,9 @@ export function TrustedKanban() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Neues Board erstellen</h3>
             <input
               autoFocus
+              id="kanban-new-board-name"
+              name="kanban-new-board-name"
+              aria-label="Board-Name"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-4 focus:ring-2 focus:ring-blue-500"
               placeholder="Board-Name, z.B. Meine Bewerbungen"
               value={newBoardName}
@@ -511,17 +523,21 @@ export function TrustedKanban() {
               ) : (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Titel</label>
+                    <label htmlFor="kanban-edit-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Titel</label>
                     <input
                       autoFocus
+                      id="kanban-edit-title"
+                      name="kanban-edit-title"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Beschreibung</label>
+                    <label htmlFor="kanban-edit-desc" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Beschreibung</label>
                     <textarea
+                      id="kanban-edit-desc"
+                      name="kanban-edit-desc"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm resize-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       rows={3}
                       value={editDesc}
@@ -529,8 +545,10 @@ export function TrustedKanban() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spalte</label>
+                    <label htmlFor="kanban-edit-col" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spalte</label>
                     <select
+                      id="kanban-edit-col"
+                      name="kanban-edit-col"
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                       value={editColId}
                       onChange={(e) => setEditColId(e.target.value)}

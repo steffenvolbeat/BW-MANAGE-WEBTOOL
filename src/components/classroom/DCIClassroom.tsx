@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { computeCurrentWeek, getWeekStart } from "@/lib/classroom/schedule";
+import GlobalApplicationTimeline from "@/components/timeline/GlobalApplicationTimeline";
 
 // ─── Typen ───────────────────────────────────────────────────────────────────
 interface Task {
@@ -1174,6 +1175,7 @@ export default function DCIClassroom() {
   type EntryKey = string; // Format: `${week}-${day ?? "w"}-${type}`
   const [entries, setEntries] = useState<Record<EntryKey, string>>({});
   const [entrySaving, setEntrySaving] = useState<Record<EntryKey, boolean>>({});
+  const [showTimeline, setShowTimeline] = useState(false);
 
   const entryKey = (week: number, day: number | null, type: string) =>
     `${week}-${day ?? "w"}-${type}`;
@@ -1356,6 +1358,12 @@ export default function DCIClassroom() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-violet-600 text-white text-sm font-semibold hover:bg-violet-700 transition-colors shadow disabled:opacity-60"
           >
             {syncing ? "⏳ Sync läuft…" : "🔄 Sync Kalender & Kanban"}
+          </button>
+          <button
+            onClick={() => setShowTimeline(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors shadow"
+          >
+            🕐 Gesamter Verlauf
           </button>
         </div>
       </div>
@@ -1553,8 +1561,10 @@ export default function DCIClassroom() {
                     {/* Tages-Notizen */}
                     <div className="space-y-2 mt-2 border-t border-blue-200 dark:border-blue-700 pt-2">
                       <div>
-                        <label className="block text-[11px] font-semibold text-blue-700 dark:text-blue-300 mb-1">📝 Tages-Notizen</label>
+                        <label htmlFor={`dc-day-note-${activeWeek}-${i + 1}`} className="block text-[11px] font-semibold text-blue-700 dark:text-blue-300 mb-1">📝 Tages-Notizen</label>
                         <textarea
+                          id={`dc-day-note-${activeWeek}-${i + 1}`}
+                          name={`dc-day-note-${activeWeek}-${i + 1}`}
                           className="w-full text-xs rounded border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-2 py-1.5 resize-none focus:ring-1 focus:ring-blue-400 focus:outline-none"
                           rows={3}
                           placeholder="Was habe ich heute gelernt / gearbeitet?"
@@ -1574,8 +1584,10 @@ export default function DCIClassroom() {
                         )}
                       </div>
                       <div>
-                        <label className="block text-[11px] font-semibold text-blue-700 dark:text-blue-300 mb-1">📋 Tages-Zusammenfassung</label>
+                        <label htmlFor={`dc-day-summary-${activeWeek}-${i + 1}`} className="block text-[11px] font-semibold text-blue-700 dark:text-blue-300 mb-1">📋 Tages-Zusammenfassung</label>
                         <textarea
+                          id={`dc-day-summary-${activeWeek}-${i + 1}`}
+                          name={`dc-day-summary-${activeWeek}-${i + 1}`}
                           className="w-full text-xs rounded border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-2 py-1.5 resize-none focus:ring-1 focus:ring-blue-400 focus:outline-none"
                           rows={3}
                           placeholder="Zusammenfassung des Tages…"
@@ -1874,10 +1886,12 @@ export default function DCIClassroom() {
             </h3>
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                <label htmlFor={`dc-research-${activeWeek}`} className="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
                   Recherche & Notizen der Woche
                 </label>
                 <textarea
+                  id={`dc-research-${activeWeek}`}
+                  name={`dc-research-${activeWeek}`}
                   className="w-full text-sm rounded-lg border border-purple-200 dark:border-purple-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-3 py-2 resize-none focus:ring-2 focus:ring-purple-400 focus:outline-none"
                   rows={4}
                   placeholder="Was habe ich diese Woche recherchiert? Welche Ressourcen, Links, Konzepte sind wichtig?"
@@ -1897,10 +1911,12 @@ export default function DCIClassroom() {
                 )}
               </div>
               <div>
-                <label className="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
+                <label htmlFor={`dc-week-summary-${activeWeek}`} className="block text-xs font-medium text-purple-700 dark:text-purple-300 mb-1">
                   Zusammenfassung der Woche
                 </label>
                 <textarea
+                  id={`dc-week-summary-${activeWeek}`}
+                  name={`dc-week-summary-${activeWeek}`}
                   className="w-full text-sm rounded-lg border border-purple-200 dark:border-purple-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-3 py-2 resize-none focus:ring-2 focus:ring-purple-400 focus:outline-none"
                   rows={5}
                   placeholder="Was habe ich diese Woche gelernt und gemacht? Was lief gut, was schwer?"
@@ -1979,6 +1995,27 @@ export default function DCIClassroom() {
           })}
         </div>
       </div>
+
+      {/* ─── Global Timeline Modal ───────────────────────────────────────────── */}
+      {showTimeline && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto pt-6 pb-12">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl mx-4">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <span className="text-lg font-bold text-gray-900 dark:text-white">🕐 Gesamter Bewerbungsverlauf</span>
+              <button
+                onClick={() => setShowTimeline(false)}
+                className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 text-xl font-bold"
+                aria-label="Schließen"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6">
+              <GlobalApplicationTimeline />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -386,14 +386,14 @@ export default function KanbanAutomations() {
             <div className="space-y-5">
               {/* Name */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Name *</label>
-                <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="z.B. Interview-Termin automatisch erstellen" className={inputCls} />
+                <label htmlFor="ka-form-name" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Name *</label>
+                <input id="ka-form-name" name="ka-form-name" type="text" value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="z.B. Interview-Termin automatisch erstellen" className={inputCls} />
               </div>
 
               {/* Trigger */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Auslöser (Trigger)</label>
-                <select value={formTrigger} onChange={(e) => { setFormTrigger(e.target.value as AutomationTrigger); setFormTriggerConfig({}); }} className={inputCls}>
+                <label htmlFor="ka-form-trigger" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Auslöser (Trigger)</label>
+                <select id="ka-form-trigger" name="ka-form-trigger" value={formTrigger} onChange={(e) => { setFormTrigger(e.target.value as AutomationTrigger); setFormTriggerConfig({}); }} className={inputCls}>
                   {(Object.entries(TRIGGER_LABELS) as [AutomationTrigger, string][]).map(([k, v]) => (
                     <option key={k} value={k}>{TRIGGER_ICONS[k]} {v}</option>
                   ))}
@@ -403,8 +403,8 @@ export default function KanbanAutomations() {
               {/* Trigger Config */}
               {formTrigger === "STATUS_CHANGED" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Neuer Status</label>
-                  <select value={formTriggerConfig.newStatus ?? ""} onChange={(e) => setFormTriggerConfig({ newStatus: e.target.value })} className={inputCls}>
+                  <label htmlFor="ka-trigger-status" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Neuer Status</label>
+                  <select id="ka-trigger-status" name="ka-trigger-status" value={formTriggerConfig.newStatus ?? ""} onChange={(e) => setFormTriggerConfig({ newStatus: e.target.value })} className={inputCls}>
                     <option value="">— wählen —</option>
                     {["APPLIED", "SCREENING", "INTERVIEW", "OFFER", "REJECTED", "ACCEPTED"].map(s => <option key={s} value={s}>{s}</option>)}
                   </select>
@@ -412,21 +412,21 @@ export default function KanbanAutomations() {
               )}
               {formTrigger === "CARD_MOVED" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Ziel-Spalte</label>
-                  <input type="text" value={formTriggerConfig.columnName ?? ""} onChange={(e) => setFormTriggerConfig({ columnName: e.target.value })} placeholder="z.B. Interview" className={inputCls} />
+                  <label htmlFor="ka-trigger-column" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Ziel-Spalte</label>
+                  <input id="ka-trigger-column" name="ka-trigger-column" type="text" value={formTriggerConfig.columnName ?? ""} onChange={(e) => setFormTriggerConfig({ columnName: e.target.value })} placeholder="z.B. Interview" className={inputCls} />
                 </div>
               )}
               {formTrigger === "DUE_DATE_APPROACHING" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Tage vorher</label>
-                  <input type="number" min={1} max={30} value={formTriggerConfig.daysBefore ?? "1"} onChange={(e) => setFormTriggerConfig({ daysBefore: e.target.value })} className={inputCls} />
+                  <label htmlFor="ka-trigger-daysbefore" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Tage vorher</label>
+                  <input id="ka-trigger-daysbefore" name="ka-trigger-daysbefore" type="number" min={1} max={30} value={formTriggerConfig.daysBefore ?? "1"} onChange={(e) => setFormTriggerConfig({ daysBefore: e.target.value })} className={inputCls} />
                 </div>
               )}
 
               {/* Action */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Aktion</label>
-                <select value={formAction} onChange={(e) => { setFormAction(e.target.value as AutomationAction); setFormActionConfig({}); }} className={inputCls}>
+                <label htmlFor="ka-form-action" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Aktion</label>
+                <select id="ka-form-action" name="ka-form-action" value={formAction} onChange={(e) => { setFormAction(e.target.value as AutomationAction); setFormActionConfig({}); }} className={inputCls}>
                   {(Object.entries(ACTION_LABELS) as [AutomationAction, string][]).map(([k, v]) => (
                     <option key={k} value={k}>{ACTION_ICONS[k]} {v}</option>
                   ))}
@@ -437,31 +437,31 @@ export default function KanbanAutomations() {
               {(formAction === "CREATE_REMINDER" || formAction === "CREATE_EVENT") && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Titel</label>
-                    <input type="text" value={formActionConfig.title ?? ""} onChange={(e) => setFormActionConfig({ ...formActionConfig, title: e.target.value })} placeholder="z.B. Vorbereitung Gespräch" className={inputCls} />
+                    <label htmlFor="ka-action-title" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Titel</label>
+                    <input id="ka-action-title" name="ka-action-title" type="text" value={formActionConfig.title ?? ""} onChange={(e) => setFormActionConfig({ ...formActionConfig, title: e.target.value })} placeholder="z.B. Vorbereitung Gespräch" className={inputCls} />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Tage vorher anlegen</label>
-                    <input type="number" min={0} max={30} value={formActionConfig.daysBefore ?? "1"} onChange={(e) => setFormActionConfig({ ...formActionConfig, daysBefore: e.target.value })} className={inputCls} />
+                    <label htmlFor="ka-action-daysbefore" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Tage vorher anlegen</label>
+                    <input id="ka-action-daysbefore" name="ka-action-daysbefore" type="number" min={0} max={30} value={formActionConfig.daysBefore ?? "1"} onChange={(e) => setFormActionConfig({ ...formActionConfig, daysBefore: e.target.value })} className={inputCls} />
                   </div>
                 </div>
               )}
               {formAction === "SEND_NOTIFICATION" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Nachricht</label>
-                  <input type="text" value={formActionConfig.message ?? ""} onChange={(e) => setFormActionConfig({ message: e.target.value })} placeholder="Deine Nachricht…" className={inputCls} />
+                  <label htmlFor="ka-action-message" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Nachricht</label>
+                  <input id="ka-action-message" name="ka-action-message" type="text" value={formActionConfig.message ?? ""} onChange={(e) => setFormActionConfig({ message: e.target.value })} placeholder="Deine Nachricht…" className={inputCls} />
                 </div>
               )}
               {formAction === "MOVE_CARD" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Ziel-Spalte</label>
-                  <input type="text" value={formActionConfig.targetColumn ?? ""} onChange={(e) => setFormActionConfig({ targetColumn: e.target.value })} placeholder="Spaltenname" className={inputCls} />
+                  <label htmlFor="ka-action-targetcol" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Ziel-Spalte</label>
+                  <input id="ka-action-targetcol" name="ka-action-targetcol" type="text" value={formActionConfig.targetColumn ?? ""} onChange={(e) => setFormActionConfig({ targetColumn: e.target.value })} placeholder="Spaltenname" className={inputCls} />
                 </div>
               )}
               {formAction === "CHANGE_PRIORITY" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Neue Priorität</label>
-                  <select value={formActionConfig.priority ?? "MEDIUM"} onChange={(e) => setFormActionConfig({ priority: e.target.value })} className={inputCls}>
+                  <label htmlFor="ka-action-priority" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Neue Priorität</label>
+                  <select id="ka-action-priority" name="ka-action-priority" value={formActionConfig.priority ?? "MEDIUM"} onChange={(e) => setFormActionConfig({ priority: e.target.value })} className={inputCls}>
                     <option value="LOW">Niedrig</option>
                     <option value="MEDIUM">Mittel</option>
                     <option value="HIGH">Hoch</option>
@@ -471,8 +471,8 @@ export default function KanbanAutomations() {
               )}
               {formAction === "ADD_TAG" && (
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Tag</label>
-                  <input type="text" value={formActionConfig.tag ?? ""} onChange={(e) => setFormActionConfig({ tag: e.target.value })} placeholder="z.B. Priorität" className={inputCls} />
+                  <label htmlFor="ka-action-tag" className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">Tag</label>
+                  <input id="ka-action-tag" name="ka-action-tag" type="text" value={formActionConfig.tag ?? ""} onChange={(e) => setFormActionConfig({ tag: e.target.value })} placeholder="z.B. Priorität" className={inputCls} />
                 </div>
               )}
 
