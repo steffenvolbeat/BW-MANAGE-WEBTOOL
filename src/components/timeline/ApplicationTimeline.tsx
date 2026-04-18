@@ -15,7 +15,13 @@ import {
   ArrowPathIcon as Loader2,
   ChevronDownIcon as ChevronDown,
   ChevronUpIcon as ChevronUp,
+  BookmarkIcon,
+  BellAlertIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
+  ExclamationTriangleIcon,
+  PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
+import { BookmarkIcon as BookmarkSolid } from "@heroicons/react/24/solid";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -38,12 +44,20 @@ interface TimelineEntry {
   itBereich?: string | null;
   week?: number | null;
   date: string;
+  pinned: boolean;
   noteId?: string | null;
   coverId?: string | null;
   eventId?: string | null;
   activityId?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+interface TimelineComment {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: { name: string | null; email: string };
 }
 
 interface ApplicationTimelineProps {
@@ -190,6 +204,20 @@ export default function ApplicationTimeline({
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Comments
+  const [commentsById, setCommentsById] = useState<Record<string, TimelineComment[]>>({});
+  const [commentsOpenId, setCommentsOpenId] = useState<string | null>(null);
+  const [commentLoadingId, setCommentLoadingId] = useState<string | null>(null);
+  const [newComment, setNewComment] = useState<Record<string, string>>({});
+  const [commentSavingId, setCommentSavingId] = useState<string | null>(null);
+
+  // Reminder
+  const [reminderEntryId, setReminderEntryId] = useState<string | null>(null);
+  const [reminderTitle, setReminderTitle] = useState("");
+  const [reminderDate, setReminderDate] = useState("");
+  const [reminderSaving, setReminderSaving] = useState(false);
+  const [reminderSuccess, setReminderSuccess] = useState(false);
+
   // Add form state
   const [addForm, setAddForm] = useState({
     type: "MANUAL" as TimelineEntryType,
@@ -228,6 +256,121 @@ export default function ApplicationTimeline({
   useEffect(() => {
     fetchEntries();
   }, [fetchEntries]);
+
+  // ── Pin ──────────────────────────────────────────────────────────────────
+  async function handlePin(id: string) {
+    try {
+      const res = await fetch(`/api/timeline/${id}/pin`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setEntries((prev) => prev.map((e) => e.id === id ? { ...e, pinned: updated.pinned } : e));
+    } catch {
+      setError("Pin konnte nicht geändert werden.");
+    }
+  }
+
+  // ── Comments ────────────────────────────────────────────────────────────────
+  async function loadComments(id: string) {
+    if (commentsById[id]) return;
+    setCommentLoadingId(id);
+    try {
+      const res = await fetch(`/api/timeline/${id}/comments`);
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setCommentsById((prev) => ({ ...prev, [id]: data }));
+    } catch {
+      setError("Kommentare konnten nicht geladen werden.");
+    } finally {
+      setCommentLoadingId(null);
+    }
+  }
+
+  async function toggleComments(id: string) {
+    if (commentsOpenId === id) {
+      setCommentsOpenId(null);
+    } else {
+      setCommentsOpenId(id);
+      await loadComments(id);
+    }
+  }
+
+  async function submitComment(entryId: string) {
+    const content = (newComment[entryId] ?? "").trim();
+    if (!content) return;
+    setCommentSavingId(entryId);
+    try {
+      const res = await fetch(`/api/timeline/${entryId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content }),
+      });
+      if (!res.ok) throw new Error();
+      const c = await res.json();
+      setCommentsById((prev) => ({ ...prev, [entryId]: [...(prev[entryId] ?? []), c] }));
+      setNewComment((prev) => ({ ...prev, [entryId]: "" }));
+    } catch {
+      setError("Kommentar konnte nicht gespeichert werden.");
+    } finally {
+      setCommentSavingId(null);
+    }
+  }
+
+  async function deleteComment(entryId: string, cid: string) {
+    if (!confirm("Kommentar löschen?")) return;
+    try {
+      await fetch(`/api/timeline/${entryId}/comments/${cid}`, { method: "DELETE" });
+      setCommentsById((prev) => ({
+        ...prev,
+        [entryId]: (prev[entryId] ?? []).filter((c) => c.id !== cid),
+      }));
+    } catch {
+      setError("Kommentar konnte nicht gelöscht werden.");
+    }
+  }
+
+  // ── Follow-up Reminder ────────────────────────────────────────────────────
+  async function createReminder() {
+    if (!reminderTitle.trim() || !reminderDate) return;
+    setReminderSaving(true);
+    try {
+      const res = await fetch("/api/reminders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: reminderTitle.trim(),
+          dueAt: new Date(reminderDate).toISOString(),
+          applicationId,
+          priority: "MEDIUM",
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setReminderSuccess(true);
+      setTimeout(() => {
+        setReminderEntryId(null);
+        setReminderTitle("");
+        setReminderDate("");
+        setReminderSuccess(false);
+      }, 1500);
+    } catch {
+      setError("Erinnerung konnte nicht erstellt werden.");
+    } finally {
+      setReminderSaving(false);
+    }
+  }
+
+  // ── Staleness ───────────────────────────────────────────────────────────────
+  const daysSinceUpdate = entries.length > 0
+    ? Math.floor((Date.now() - new Date(entries[0].date).getTime()) / 86400000)
+    : null;
+  const isStale = daysSinceUpdate !== null && daysSinceUpdate >= 14;
+  const isOpenStatus = currentStatus && !["ACCEPTED", "REJECTED", "WITHDRAWN", "GHOSTING"].includes(currentStatus);
+
+  // ── Sort: Pinned first ──────────────────────────────────────────────────────
+  const sortedEntries = [...entries].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
 
   async function handleAdd() {
     if (!addForm.title.trim()) return;
@@ -333,6 +476,67 @@ export default function ApplicationTimeline({
           Eintrag hinzufügen
         </button>
       </div>
+
+      {/* Staleness-Warnung */}
+      {isStale && isOpenStatus && (
+        <div className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-xl text-sm">
+          <ExclamationTriangleIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <span className="font-semibold text-amber-800 dark:text-amber-300">Kein Update seit {daysSinceUpdate} Tagen!</span>
+            <p className="text-amber-700 dark:text-amber-400 text-xs mt-0.5">Sende ein Follow-up, um deinen Status zu aktualisieren.</p>
+          </div>
+          <button
+            onClick={() => {
+              setReminderEntryId("stale");
+              setReminderTitle(`Follow-up an ${applicationName} senden`);
+              const d = new Date(); d.setDate(d.getDate() + 1);
+              setReminderDate(d.toISOString().slice(0, 16));
+            }}
+            className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1 bg-amber-600 hover:bg-amber-700 text-white text-xs rounded-lg font-medium"
+          >
+            <BellAlertIcon className="w-3.5 h-3.5" />
+            Erinnerung
+          </button>
+        </div>
+      )}
+
+      {/* Reminder Modal */}
+      {reminderEntryId && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-xl space-y-3">
+          <h3 className="font-semibold text-blue-900 dark:text-blue-200 text-sm flex items-center gap-2">
+            <BellAlertIcon className="w-4 h-4" />
+            Follow-up Erinnerung erstellen
+          </h3>
+          {reminderSuccess ? (
+            <div className="flex items-center gap-2 text-green-700 dark:text-green-300 text-sm">
+              <Check className="w-4 h-4" /> Erinnerung erstellt!
+            </div>
+          ) : (
+            <>
+              <div>
+                <label htmlFor="tl-reminder-title" className="block text-xs text-blue-700 dark:text-blue-300 mb-1">Titel</label>
+                <input id="tl-reminder-title" name="tl-reminder-title" type="text" value={reminderTitle}
+                  onChange={(e) => setReminderTitle(e.target.value)}
+                  className="w-full text-sm border border-blue-200 dark:border-blue-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white" />
+              </div>
+              <div>
+                <label htmlFor="tl-reminder-date" className="block text-xs text-blue-700 dark:text-blue-300 mb-1">Fälligkeitsdatum</label>
+                <input id="tl-reminder-date" name="tl-reminder-date" type="datetime-local" value={reminderDate}
+                  onChange={(e) => setReminderDate(e.target.value)}
+                  className="w-full text-sm border border-blue-200 dark:border-blue-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white" />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button onClick={() => setReminderEntryId(null)} className="px-3 py-1.5 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">Abbrechen</button>
+                <button onClick={createReminder} disabled={!reminderTitle.trim() || !reminderDate || reminderSaving}
+                  className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm rounded-lg">
+                  {reminderSaving ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                  Erstellen
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Error */}
       {error && (
@@ -486,23 +690,29 @@ export default function ApplicationTimeline({
       )}
 
       {/* Zeitstrahl */}
-      {!loading && entries.length > 0 && (
+      {!loading && sortedEntries.length > 0 && (
         <div className="relative">
-          {/* Achslinie – von Mitte erstem Node bis Mitte letztem Node */}
           <div className="absolute left-[21px] top-[22px] bottom-[22px] w-0.5 bg-gradient-to-b from-blue-400 via-blue-200 to-gray-200 dark:from-blue-500 dark:via-blue-900 dark:to-gray-700" />
 
           <div className="space-y-5">
-            {entries.map((entry) => {
+            {sortedEntries.map((entry) => {
               const isEditing = editId === entry.id;
               const isExpanded = expandedId === entry.id;
+              const commentsOpen = commentsOpenId === entry.id;
+              const entryComments = commentsById[entry.id] ?? [];
 
               return (
                 <div key={entry.id} className="relative flex items-start gap-4">
-                  {/* Node – großer farbiger Kreis mit Icon */}
+                  {/* Node */}
                   <div
-                    className={`relative z-10 flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-md text-white ${dotColor(entry.type)}`}
+                    className={`relative z-10 flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-md text-white ${dotColor(entry.type)} ${entry.pinned ? "ring-2 ring-amber-400 ring-offset-1" : ""}`}
                   >
                     {typeIcon(entry.type)}
+                    {entry.pinned && (
+                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-400 rounded-full border border-white flex items-center justify-center">
+                        <BookmarkSolid className="w-2 h-2 text-white" />
+                      </span>
+                    )}
                   </div>
 
                   {/* Karte */}
@@ -512,7 +722,7 @@ export default function ApplicationTimeline({
                       {formatDate(entry.date)}
                     </p>
 
-                    <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
+                    <div className={`bg-white dark:bg-gray-800 border rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow ${entry.pinned ? "border-amber-300 dark:border-amber-700" : "border-gray-100 dark:border-gray-700"}`}>
                       {isEditing ? (
                         // ── Bearbeitungsmodus ──
                         <div className="space-y-2">
@@ -614,6 +824,35 @@ export default function ApplicationTimeline({
                                   {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                                 </button>
                               )}
+                              {/* Kommentare */}
+                              <button
+                                onClick={() => toggleComments(entry.id)}
+                                title="Kommentare"
+                                className={`p-1 rounded transition-colors ${commentsOpen ? "text-blue-600" : "text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"}`}
+                              >
+                                <ChatBubbleOvalLeftEllipsisIcon className="w-3.5 h-3.5" />
+                              </button>
+                              {/* Follow-up Reminder */}
+                              <button
+                                onClick={() => {
+                                  setReminderEntryId(entry.id);
+                                  setReminderTitle(`Follow-up: ${entry.title}`);
+                                  const d = new Date(); d.setDate(d.getDate() + 3);
+                                  setReminderDate(d.toISOString().slice(0, 16));
+                                }}
+                                title="Follow-up Erinnerung"
+                                className="p-1 text-gray-400 hover:text-amber-600 dark:hover:text-amber-400 rounded"
+                              >
+                                <BellAlertIcon className="w-3.5 h-3.5" />
+                              </button>
+                              {/* Pin */}
+                              <button
+                                onClick={() => handlePin(entry.id)}
+                                title={entry.pinned ? "Anpinnen aufheben" : "Anpinnen"}
+                                className={`p-1 rounded transition-colors ${entry.pinned ? "text-amber-500" : "text-gray-400 hover:text-amber-500"}`}
+                              >
+                                {entry.pinned ? <BookmarkSolid className="w-3.5 h-3.5" /> : <BookmarkIcon className="w-3.5 h-3.5" />}
+                              </button>
                               <button
                                 onClick={() => startEdit(entry)}
                                 title="Bearbeiten"
@@ -650,6 +889,60 @@ export default function ApplicationTimeline({
                                   {entry.content}
                                 </p>
                               )}
+                            </div>
+                          )}
+
+                          {/* Comment Thread */}
+                          {commentsOpen && (
+                            <div className="mt-3 border-t border-gray-100 dark:border-gray-700 pt-3 space-y-2">
+                              {commentLoadingId === entry.id && (
+                                <div className="flex justify-center py-2">
+                                  <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                                </div>
+                              )}
+                              {entryComments.map((c) => (
+                                <div key={c.id} className="flex items-start gap-2 text-xs">
+                                  <div className="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold flex-shrink-0">
+                                    {(c.user.name ?? c.user.email)[0].toUpperCase()}
+                                  </div>
+                                  <div className="flex-1 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-2.5 py-1.5">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="font-medium text-gray-700 dark:text-gray-300">{c.user.name ?? c.user.email}</span>
+                                      <div className="flex items-center gap-1 text-gray-400">
+                                        <span>{new Date(c.createdAt).toLocaleDateString("de-DE")}</span>
+                                        <button onClick={() => deleteComment(entry.id, c.id)} className="hover:text-red-500 ml-1">
+                                          <X className="w-3 h-3" />
+                                        </button>
+                                      </div>
+                                    </div>
+                                    <p className="text-gray-600 dark:text-gray-300 mt-0.5">{c.content}</p>
+                                  </div>
+                                </div>
+                              ))}
+                              {entryComments.length === 0 && commentLoadingId !== entry.id && (
+                                <p className="text-xs text-gray-400 text-center py-1">Noch keine Kommentare</p>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <input
+                                  id={`tl-comment-${entry.id}`}
+                                  name={`tl-comment-${entry.id}`}
+                                  type="text"
+                                  value={newComment[entry.id] ?? ""}
+                                  onChange={(e) => setNewComment((prev) => ({ ...prev, [entry.id]: e.target.value }))}
+                                  onKeyDown={(e) => { if (e.key === "Enter") submitComment(entry.id); }}
+                                  placeholder="Kommentar schreiben…"
+                                  className="flex-1 text-xs border border-gray-200 dark:border-gray-600 rounded-lg px-2.5 py-1.5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                                />
+                                <button
+                                  onClick={() => submitComment(entry.id)}
+                                  disabled={commentSavingId === entry.id || !(newComment[entry.id] ?? "").trim()}
+                                  className="p-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg"
+                                >
+                                  {commentSavingId === entry.id
+                                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                                    : <PaperAirplaneIcon className="w-3 h-3" />}
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>

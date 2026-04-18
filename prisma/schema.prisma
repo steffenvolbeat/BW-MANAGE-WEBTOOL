@@ -55,6 +55,8 @@ model User {
   portfolioProfile    PortfolioProfile?
   fileFolders         FileFolder[]
   applicationTimelines ApplicationTimeline[]
+  timelineComments     TimelineComment[]
+  timelineShares       TimelineShare[]
   classroomEntries    ClassroomEntry[]
 
   @@map("users")
@@ -765,12 +767,43 @@ model ApplicationTimeline {
   coverId       String?           // Optionale Referenz auf CoverLetter
   eventId       String?           // Optionale Referenz auf Event
   activityId    String?           // Optionale Referenz auf Activity
+  pinned        Boolean           @default(false)
+  attachments   String[]          @default([])
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
+
+  comments      TimelineComment[]
 
   @@index([applicationId])
   @@index([userId])
   @@map("application_timelines")
+}
+
+model TimelineComment {
+  id         String              @id @default(cuid())
+  timelineId String
+  timeline   ApplicationTimeline @relation(fields: [timelineId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content    String
+  createdAt  DateTime            @default(now())
+
+  @@index([timelineId])
+  @@map("timeline_comments")
+}
+
+model TimelineShare {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token         String    @unique @default(cuid())
+  companyFilter String?
+  typeFilter    String?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([userId])
+  @@map("timeline_shares")
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
