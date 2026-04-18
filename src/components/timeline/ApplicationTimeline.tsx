@@ -350,10 +350,12 @@ export default function ApplicationTimeline({
           </h3>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <label htmlFor="tl-add-type" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                 Typ
               </label>
               <select
+                id="tl-add-type"
+                name="tl-add-type"
                 value={addForm.type}
                 onChange={(e) =>
                   setAddForm((f) => ({ ...f, type: e.target.value as TimelineEntryType }))
@@ -368,10 +370,12 @@ export default function ApplicationTimeline({
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <label htmlFor="tl-add-status" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                 Status (optional)
               </label>
               <select
+                id="tl-add-status"
+                name="tl-add-status"
                 value={addForm.status}
                 onChange={(e) => setAddForm((f) => ({ ...f, status: e.target.value }))}
                 className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
@@ -386,10 +390,12 @@ export default function ApplicationTimeline({
             </div>
           </div>
           <div>
-            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+            <label htmlFor="tl-add-title" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
               Titel *
             </label>
             <input
+              id="tl-add-title"
+              name="tl-add-title"
               type="text"
               value={addForm.title}
               onChange={(e) => setAddForm((f) => ({ ...f, title: e.target.value }))}
@@ -398,10 +404,12 @@ export default function ApplicationTimeline({
             />
           </div>
           <div>
-            <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+            <label htmlFor="tl-add-content" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
               Beschreibung (optional)
             </label>
             <textarea
+              id="tl-add-content"
+              name="tl-add-content"
               value={addForm.content}
               onChange={(e) => setAddForm((f) => ({ ...f, content: e.target.value }))}
               placeholder="Details, Notizen, Recherche..."
@@ -411,10 +419,12 @@ export default function ApplicationTimeline({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <label htmlFor="tl-add-itbereich" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                 IT-Bereich (optional)
               </label>
               <input
+                id="tl-add-itbereich"
+                name="tl-add-itbereich"
                 type="text"
                 value={addForm.itBereich}
                 onChange={(e) => setAddForm((f) => ({ ...f, itBereich: e.target.value }))}
@@ -423,10 +433,12 @@ export default function ApplicationTimeline({
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+              <label htmlFor="tl-add-date" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                 Datum
               </label>
               <input
+                id="tl-add-date"
+                name="tl-add-date"
                 type="datetime-local"
                 value={addForm.date}
                 onChange={(e) => setAddForm((f) => ({ ...f, date: e.target.value }))}
@@ -495,8 +507,10 @@ export default function ApplicationTimeline({
                       <div className="space-y-2">
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="block text-xs text-gray-500 mb-1">Typ</label>
+                            <label htmlFor="tl-edit-type" className="block text-xs text-gray-500 mb-1">Typ</label>
                             <select
+                              id="tl-edit-type"
+                              name="tl-edit-type"
                               value={editForm.type}
                               onChange={(e) =>
                                 setEditForm((f) => ({
@@ -514,8 +528,10 @@ export default function ApplicationTimeline({
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs text-gray-500 mb-1">Status</label>
+                            <label htmlFor="tl-edit-status" className="block text-xs text-gray-500 mb-1">Status</label>
                             <select
+                              id="tl-edit-status"
+                              name="tl-edit-status"
                               value={editForm.status}
                               onChange={(e) =>
                                 setEditForm((f) => ({ ...f, status: e.target.value }))
@@ -532,37 +548,49 @@ export default function ApplicationTimeline({
                           </div>
                         </div>
                         <input
+                          id="tl-edit-title"
+                          name="tl-edit-title"
                           type="text"
                           value={editForm.title}
                           onChange={(e) =>
                             setEditForm((f) => ({ ...f, title: e.target.value }))
                           }
+                          aria-label="Titel"
                           className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                         />
                         <textarea
+                          id="tl-edit-content"
+                          name="tl-edit-content"
                           value={editForm.content}
                           onChange={(e) =>
                             setEditForm((f) => ({ ...f, content: e.target.value }))
                           }
                           rows={3}
+                          aria-label="Beschreibung"
                           className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white resize-none"
                         />
                         <div className="grid grid-cols-2 gap-2">
                           <input
+                            id="tl-edit-itbereich"
+                            name="tl-edit-itbereich"
                             type="text"
                             value={editForm.itBereich}
                             onChange={(e) =>
                               setEditForm((f) => ({ ...f, itBereich: e.target.value }))
                             }
                             placeholder="IT-Bereich"
+                            aria-label="IT-Bereich"
                             className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                           />
                           <input
+                            id="tl-edit-date"
+                            name="tl-edit-date"
                             type="datetime-local"
                             value={editForm.date}
                             onChange={(e) =>
                               setEditForm((f) => ({ ...f, date: e.target.value }))
                             }
+                            aria-label="Datum"
                             className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                           />
                         </div>

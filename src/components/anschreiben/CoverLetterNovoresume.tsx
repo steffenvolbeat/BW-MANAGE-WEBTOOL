@@ -90,8 +90,8 @@ function E({ value, onChange, editing, multiline = false, style = {} as React.CS
     fontStyle: "inherit", boxSizing: "border-box",
   };
   if (!editing) return <span style={style}>{value || <span style={{ opacity: 0.28, fontStyle: "italic" }}>{placeholder}</span>}</span>;
-  if (multiline) return <textarea style={{ ...s, resize: "vertical", display: "block" }} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows} />;
-  return <input style={s} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />;
+  if (multiline) return <textarea name="cl-field" aria-label={placeholder} style={{ ...s, resize: "vertical", display: "block" }} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows} />;
+  return <input name="cl-field" aria-label={placeholder} autoComplete="off" style={s} value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} />;
 }
 
 // ─── Sidebar contact row ──────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ function CRow({ icon, value, editing, onChange, onDelete, hidden }: {
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         {editing
-          ? <input value={value} onChange={e => onChange(e.target.value)}
+          ? <input name="cl-contact" aria-label="Kontakt" autoComplete="off" value={value} onChange={e => onChange(e.target.value)}
               style={{ background: "rgba(255,255,255,0.12)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "1px 4px", outline: "none", color: "white", fontFamily: FNT, fontSize: 12, width: "100%", boxSizing: "border-box" }} />
           : <span style={{ fontSize: 10.5, color: "white", lineHeight: 1.4, whiteSpace: "nowrap" }}>{value}</span>
         }
@@ -263,11 +263,11 @@ export default function CoverLetterNovoresume({
           {/* Name + Subtitle links */}
           <div style={{ flex: "0 0 340px" }}>
             {editing
-              ? <input value={data.personal.name} onChange={e => setP({ name: e.target.value })} style={{ display: "block", fontSize: 36, fontWeight: 800, color: "white", lineHeight: 1.1, marginBottom: 5, fontFamily: FNT, background: "rgba(255,255,255,0.1)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box" }} />
+              ? <input name="cl-name" aria-label="Name" autoComplete="name" value={data.personal.name} onChange={e => setP({ name: e.target.value })} style={{ display: "block", fontSize: 36, fontWeight: 800, color: "white", lineHeight: 1.1, marginBottom: 5, fontFamily: FNT, background: "rgba(255,255,255,0.1)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box" }} />
               : <div style={{ fontSize: 36, fontWeight: 800, color: "white", lineHeight: 1.1, marginBottom: 5 }}>{data.personal.name}</div>
             }
             {editing
-              ? <input value={data.personal.subtitle} onChange={e => setP({ subtitle: e.target.value })} style={{ display: "block", fontSize: 13, fontWeight: 600, color: A, fontFamily: FNT, background: "rgba(255,255,255,0.1)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box" }} />
+              ? <input name="cl-subtitle" aria-label="Untertitel / Berufsbezeichnung" autoComplete="organization-title" value={data.personal.subtitle} onChange={e => setP({ subtitle: e.target.value })} style={{ display: "block", fontSize: 13, fontWeight: 600, color: A, fontFamily: FNT, background: "rgba(255,255,255,0.1)", border: "1px dashed rgba(255,255,255,0.4)", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box" }} />
               : <div style={{ fontSize: 13, fontWeight: 600, color: A }}>{data.personal.subtitle}</div>
             }
           </div>
@@ -303,12 +303,12 @@ export default function CoverLetterNovoresume({
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontStyle: "italic", color: CM, marginBottom: 4 }}>An</div>
             {editing
-              ? <input value={data.recipient.company} onChange={e => setR({ company: e.target.value })} style={{ display: "block", fontSize: 15, fontWeight: 700, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 3 }} />
+              ? <input name="cl-recipient-company" aria-label="Unternehmen Empfänger" autoComplete="off" value={data.recipient.company} onChange={e => setR({ company: e.target.value })} style={{ display: "block", fontSize: 15, fontWeight: 700, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 3 }} />
               : <div style={{ fontSize: 15, fontWeight: 700, color: CT, marginBottom: 3 }}>{data.recipient.company}</div>
             }
             {(["street", "cityZip", "country"] as const).map(k => (
               editing
-                ? <input key={k} value={data.recipient[k]} onChange={e => setR({ [k]: e.target.value })} style={{ display: "block", fontSize: 14, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }} />
+                ? <input key={k} name={`cl-recipient-${k}`} aria-label={k} autoComplete="off" value={data.recipient[k]} onChange={e => setR({ [k]: e.target.value })} style={{ display: "block", fontSize: 14, color: CT, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", width: "100%", boxSizing: "border-box", marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }} />
                 : <div key={k} style={{ fontSize: 14, color: CT, marginBottom: 2, fontWeight: k === "country" ? 600 : 400 }}>{data.recipient[k]}</div>
             ))}
           </div>
@@ -316,7 +316,7 @@ export default function CoverLetterNovoresume({
           {/* Datum */}
           <div className="cl-date" style={{ marginBottom: 22 }}>
             {editing
-              ? <input value={data.date} onChange={e => setData(d => ({ ...d, date: e.target.value }))} style={{ fontSize: 13, fontStyle: "italic", color: A, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", boxSizing: "border-box" }} />
+              ? <input name="cl-date" aria-label="Datum" autoComplete="off" value={data.date} onChange={e => setData(d => ({ ...d, date: e.target.value }))} style={{ fontSize: 13, fontStyle: "italic", color: A, fontFamily: FNT, background: "rgba(219,234,254,0.35)", border: "1px dashed #93c5fd", borderRadius: 3, padding: "2px 4px", outline: "none", boxSizing: "border-box" }} />
               : <div style={{ fontSize: 13, fontStyle: "italic", color: A }}>{data.date}</div>
             }
           </div>
