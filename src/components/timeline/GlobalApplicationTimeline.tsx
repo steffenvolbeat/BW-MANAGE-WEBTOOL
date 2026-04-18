@@ -47,6 +47,7 @@ interface GlobalEntry {
     position: string;
     status: string;
     itBereich?: string | null;
+    appliedAt?: string | null;
   };
 }
 
@@ -345,7 +346,14 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
   const ganttRange = ganttMax - ganttMin || 1;
 
   // ── Heatmap ─────────────────────────────────────────────────────────────────
-  const heatmapData = stats?.heatmap ?? {};
+  // Direkt aus entries gebaut – kein Stats-API nötig, kein Timezone-Bug
+  const heatmapData: Record<string, number> = {};
+  for (const e of entries) {
+    // Datum lokal interpretieren (nicht UTC) um Timezone-Verschiebung zu vermeiden
+    const d = new Date(e.date);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    heatmapData[key] = (heatmapData[key] ?? 0) + 1;
+  }
   const heatmapMax = Math.max(...Object.values(heatmapData), 1);
 
   function heatCell(count: number) {
@@ -376,10 +384,10 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
 
   const TABS: { id: ViewTab; label: string }[] = [
     { id: "zeitstrahl", label: "Zeitstrahl" },
-    { id: "funnel", label: "Funnel" },
-    { id: "heatmap", label: "Aktivität" },
-    { id: "gantt", label: "Gantt" },
-    { id: "statistiken", label: "Statistiken" },
+    { id: "funnel", label: "Status-Übersicht" },
+    { id: "heatmap", label: "Aktivitätskalender" },
+    { id: "gantt", label: "Zeitübersicht" },
+    { id: "statistiken", label: "Auswertung" },
   ];
 
   return (
@@ -526,6 +534,9 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
                                   </div>
                                   <p className="mt-1 text-xs text-gray-500 dark:text-slate-400">
                                     {entry.application.position}
+                                    {entry.application.appliedAt && (
+                                      <> · Beworben am <span className="font-medium">{new Date(entry.application.appliedAt).toLocaleDateString("de-DE", { day: "2-digit", month: "2-digit", year: "numeric" })}</span></>
+                                    )}
                                     {entry.status && <> · <span className="font-medium">{STATUS_LABELS[entry.status] ?? entry.status}</span></>}
                                   </p>
                                   {entry.content && (
@@ -551,47 +562,87 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
       {/* ─── TAB: FUNNEL ─────────────────────────────────────────────────────── */}
       {activeTab === "funnel" && (
         <div className="space-y-4">
-          <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-            <ChartBarIcon className="w-5 h-5 text-indigo-500" /> Bewerbungs-Trichter
-          </h3>
-          {statsLoading ? (
+          <div>
+            <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <ChartBarIcon className="w-5 h-5 text-indigo-500" /> Status-Übersicht
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Wie viele Bewerbungen befinden sich aktuell in welchem Status? Jede Bewerbung wird nur einmal gezählt.
+            </p>
+          </div>
+          {loading ? (
             <div className="flex justify-center py-8"><ArrowPathIcon className="w-6 h-6 animate-spin text-indigo-400" /></div>
-          ) : stats ? (
-            <div className="space-y-2">
-              {FUNNEL_ORDER.filter((s) => (stats.funnel[s] ?? 0) > 0).map((status, i, arr) => {
-                const count = stats.funnel[status] ?? 0;
-                const maxCount = stats.funnel[arr[0]] || 1;
-                const width = Math.max(20, Math.round((count / maxCount) * 100));
-                return (
-                  <div key={status} className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500 dark:text-gray-400 w-36 text-right flex-shrink-0">
-                      {STATUS_LABELS[status] ?? status}
-                    </span>
-                    <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-6 overflow-hidden">
-                      <div className={`h-full rounded-full flex items-center justify-end pr-2 transition-all ${FUNNEL_COLORS[status] ?? "bg-indigo-400"}`}
-                        style={{ width: `${width}%` }}>
-                        <span className="text-white text-xs font-bold">{count}</span>
+          ) : (() => {
+            // Direkt aus entries gebaut – jede Bewerbung einmal, aktueller Status
+            const seenApps = new Set<string>();
+            const counts: Record<string, number> = {};
+            for (const e of entries) {
+              if (!seenApps.has(e.applicationId)) {
+                seenApps.add(e.applicationId);
+                const s = e.application.status;
+                counts[s] = (counts[s] ?? 0) + 1;
+              }
+            }
+            const sortedStatuses = FUNNEL_ORDER.filter((s) => counts[s] > 0);
+            // Auch Status die nicht in FUNNEL_ORDER sind anzeigen
+            for (const s of Object.keys(counts)) {
+              if (!FUNNEL_ORDER.includes(s)) sortedStatuses.push(s);
+            }
+            const maxCount = Math.max(...Object.values(counts), 1);
+            return sortedStatuses.length === 0 ? (
+              <div className="text-center py-12 text-gray-400">
+                <ChartBarIcon className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <p>Noch keine Bewerbungen vorhanden.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sortedStatuses.map((status) => {
+                  const count = counts[status] ?? 0;
+                  const width = Math.max(8, Math.round((count / maxCount) * 100));
+                  return (
+                    <div key={status} className="flex items-center gap-3">
+                      <span className="text-xs text-gray-600 dark:text-gray-300 w-40 text-right flex-shrink-0 font-medium">
+                        {STATUS_LABELS[status] ?? status}
+                      </span>
+                      <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-7 overflow-hidden">
+                        <div
+                          className={`h-full rounded-full flex items-center justify-end pr-3 transition-all ${FUNNEL_COLORS[status] ?? "bg-slate-400"}`}
+                          style={{ width: `${width}%` }}
+                        >
+                          <span className="text-white text-xs font-bold">{count}</span>
+                        </div>
                       </div>
+                      <span className="text-xs text-gray-400 w-6 text-right flex-shrink-0">{count}</span>
                     </div>
-                  </div>
-                );
-              })}
-              {FUNNEL_ORDER.every((s) => !stats.funnel[s]) && (
-                <p className="text-gray-400 text-sm text-center py-8">Noch keine Daten vorhanden.</p>
-              )}
-            </div>
-          ) : null}
+                  );
+                })}
+                <p className="text-xs text-gray-400 dark:text-gray-500 pt-2">
+                  Gesamt: {seenApps.size} Bewerbung{seenApps.size !== 1 ? "en" : ""}
+                </p>
+              </div>
+            );
+          })()}
         </div>
       )}
 
       {/* ─── TAB: HEATMAP ────────────────────────────────────────────────────── */}
       {activeTab === "heatmap" && (
         <div className="space-y-4">
-          <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-            <CalendarDaysIcon className="w-5 h-5 text-green-500" /> Aktivitäts-Kalender (letztes Jahr)
-          </h3>
-          {statsLoading ? (
+          <div>
+            <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <CalendarDaysIcon className="w-5 h-5 text-green-500" /> Aktivitätskalender
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Jedes Kästchen entspricht einem Tag. Je dunkler, desto mehr Bewerbungsaktivitäten (Einträge, Statusänderungen, Notizen) fanden statt.
+            </p>
+          </div>
+          {loading ? (
             <div className="flex justify-center py-8"><ArrowPathIcon className="w-6 h-6 animate-spin text-indigo-400" /></div>
+          ) : entries.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">
+              <CalendarDaysIcon className="w-10 h-10 mx-auto mb-2 opacity-30" />
+              <p>Noch keine Aktivitäten vorhanden.</p>
+            </div>
           ) : (
             <div className="overflow-x-auto pb-2">
               <div className="flex gap-1" style={{ minWidth: "max-content" }}>
@@ -621,9 +672,14 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
       {/* ─── TAB: GANTT ──────────────────────────────────────────────────────── */}
       {activeTab === "gantt" && (
         <div className="space-y-4">
-          <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
-            <BoltIcon className="w-5 h-5 text-amber-500" /> Bewerbungs-Zeitplan
-          </h3>
+          <div>
+            <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <BoltIcon className="w-5 h-5 text-amber-500" /> Zeitübersicht
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Jede Zeile ist eine Bewerbung. Der Balken zeigt den Zeitraum vom ersten bis zum letzten Aktivitätseintrag. Farbe = aktueller Status.
+            </p>
+          </div>
           {loading ? (
             <div className="flex justify-center py-8"><ArrowPathIcon className="w-6 h-6 animate-spin text-indigo-400" /></div>
           ) : ganttApps.length === 0 ? (
@@ -672,10 +728,24 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
       {/* ─── TAB: STATISTIKEN ────────────────────────────────────────────────── */}
       {activeTab === "statistiken" && (
         <div className="space-y-6">
+          <div>
+            <h3 className="font-semibold text-gray-800 dark:text-white flex items-center gap-2">
+              <ChartBarIcon className="w-5 h-5 text-indigo-500" /> Auswertung
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Kennzahlen, Fortschritt je Bewerbung, Warnungen bei veralteten Bewerbungen, Erfolgsquoten und KI-Analyse.
+            </p>
+          </div>
           {statsLoading ? (
             <div className="flex justify-center py-8"><ArrowPathIcon className="w-6 h-6 animate-spin text-indigo-400" /></div>
-          ) : stats ? (
-            <>
+          ) : !stats ? (
+            <div className="text-center py-8">
+              <button onClick={loadStats} className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
+                Auswertung laden
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
               {/* Kennzahlen */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {[
@@ -779,8 +849,8 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
                   <p className="text-xs text-violet-600 dark:text-violet-400">Klicke auf &ldquo;Analyse starten&rdquo;, um eine KI-Zusammenfassung und Verbesserungsvorschläge zu erhalten.</p>
                 ) : null}
               </div>
-            </>
-          ) : null}
+            </div>
+          )}
         </div>
       )}
     </div>
