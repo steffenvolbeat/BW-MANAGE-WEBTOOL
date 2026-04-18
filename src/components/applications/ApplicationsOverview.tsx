@@ -1,6 +1,7 @@
 "use client";
 import { useAppUser } from "@/hooks/useAppUser";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
+import GlobalApplicationTimeline from "@/components/timeline/GlobalApplicationTimeline";
 
 import { useEffect, useRef, useState, type ChangeEvent, Fragment } from "react";
 import {
@@ -105,6 +106,7 @@ export default function ApplicationsOverview() {
   const [showDetail, setShowDetail] = useState(false);
   const [detailApp, setDetailApp] = useState<Application | null>(null);
   const [detailTab, setDetailTab] = useState<"info" | "timeline">("info");
+  const [showGlobalTimeline, setShowGlobalTimeline] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -937,14 +939,23 @@ export default function ApplicationsOverview() {
           )}
           {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
         </div>
-        <button
-          onClick={() => (window.location.href = "/applications/new")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          disabled={!userId}
-        >
-          <PlusIcon className="w-4 h-4 mr-2" />
-          Neue Bewerbung
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowGlobalTimeline(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors"
+          >
+            <ClockIcon className="w-4 h-4" />
+            Gesamter Verlauf
+          </button>
+          <button
+            onClick={() => (window.location.href = "/applications/new")}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={!userId}
+          >
+            <PlusIcon className="w-4 h-4 mr-2" />
+            Neue Bewerbung
+          </button>
+        </div>
       </div>
 
       {undoDoc && (
@@ -2653,6 +2664,42 @@ export default function ApplicationsOverview() {
         <div className="text-sm text-gray-600 text-center">
           {filteredApplications.length} von {applications.length} Bewerbungen
           angezeigt
+        </div>
+      )}
+
+      {/* Globale Timeline – Vollbild-Modal */}
+      {showGlobalTimeline && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 overflow-y-auto pt-6 pb-12">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-3xl mx-4 min-h-[60vh] flex flex-col">
+            {/* Modal-Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-2">
+                <ClockIcon className="w-5 h-5 text-indigo-600" />
+                <span className="font-bold text-gray-900 dark:text-white text-lg">Gesamter Bewerbungsverlauf</span>
+              </div>
+              <button
+                onClick={() => setShowGlobalTimeline(false)}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Schließen"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            {/* Modal-Body */}
+            <div className="p-6 overflow-y-auto">
+              <GlobalApplicationTimeline
+                onOpenApplication={(applicationId) => {
+                  const app = applications.find((a) => a.id === applicationId);
+                  if (app) {
+                    setShowGlobalTimeline(false);
+                    setDetailApp(app);
+                    setDetailTab("timeline");
+                    setShowDetail(true);
+                  }
+                }}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -488,10 +488,8 @@ export default function ApplicationTimeline({
       {/* Zeitstrahl */}
       {!loading && entries.length > 0 && (
         <div className="relative">
-          {/* Achslinie – läuft von Mitte erstem Node bis Mitte letztem Node */}
-          <div className="absolute left-[21px] top-[22px] w-0.5 bg-gradient-to-b from-blue-400 via-blue-200 to-gray-200 dark:from-blue-500 dark:via-blue-900 dark:to-gray-700"
-            style={{ height: `calc(100% - 44px)` }}
-          />
+          {/* Achslinie – von Mitte erstem Node bis Mitte letztem Node */}
+          <div className="absolute left-[21px] top-[22px] bottom-[22px] w-0.5 bg-gradient-to-b from-blue-400 via-blue-200 to-gray-200 dark:from-blue-500 dark:via-blue-900 dark:to-gray-700" />
 
           <div className="space-y-5">
             {entries.map((entry) => {
