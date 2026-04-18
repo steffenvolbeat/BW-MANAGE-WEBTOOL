@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 import { prisma } from "@/lib/database";
 import { signToken, COOKIE_NAME, MAX_AGE } from "@/lib/auth/jwt";
+import { rateLimitSignin, getClientIp, recordFailedAuth, clearFailedAuth } from "@/lib/security/rateLimit";
 
 const MFA_COOKIE = "bw_mfa";
 const MFA_MAX_AGE = 5 * 60; // 5 Minuten
@@ -19,6 +20,15 @@ export async function POST(request: Request) {
 
     if (!email || !password) {
       return NextResponse.json({ error: "E-Mail und Passwort sind erforderlich." }, { status: 400 });
+    }
+
+    const ip = getClientIp(request);
+    const rl = await rateLimitSignin(ip, email);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Zu viele Anmeldeversuche. Bitte später erneut versuchen." },
+        { status: 429, headers: { "Retry-After": String(Math.ceil(rl.retryAfterMs / 1000)) } }
+      );
     }
 
     const user = await prisma.user.findUnique({
@@ -38,8 +48,11 @@ export async function POST(request: Request) {
 
     const passwordValid = await bcrypt.compare(password, user.password);
     if (!passwordValid) {
+      recordFailedAuth(`lockout:${email.toLowerCase()}`);
       return NextResponse.json({ error: "Ungültige E-Mail-Adresse oder Passwort." }, { status: 401 });
     }
+
+    clearFailedAuth(`lockout:${email.toLowerCase()}`);
 
     // ── MFA aktiv: temporäres Pending-Token ausgeben ──────────────────────
     if (user.mfaEnabled) {

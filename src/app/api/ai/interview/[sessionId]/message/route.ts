@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
 import { prisma } from "@/lib/database";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 import {
   analyzeMessage,
   generateFeedback,
@@ -13,6 +14,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
+  const rl = enforceRateLimit(req, "ai:interview-message", { max: 60, windowMs: 60 * 60_000 });
+  if (rl) return rl;
+
   let user;
   try {
     user = await getCurrentUser();

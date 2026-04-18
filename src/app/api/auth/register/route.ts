@@ -2,8 +2,12 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/database";
 import { signToken, COOKIE_NAME, MAX_AGE } from "@/lib/auth/jwt";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 export async function POST(request: Request) {
+  const rl = enforceRateLimit(request, "auth:register", { max: 5, windowMs: 60 * 60_000 });
+  if (rl) return rl;
+
   try {
     const { email, password, name } = await request.json();
 

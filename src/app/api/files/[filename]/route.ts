@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
 import { requireActiveUser } from "@/lib/security/guard";
+import { prisma } from "@/lib/database";
 
 // Serves uploaded files from /tmp/uploads on Vercel (where public/ is read-only)
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ filename: string }> }
 ) {
+  let user;
   try {
-    await requireActiveUser();
+    user = await requireActiveUser();
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -20,6 +22,12 @@ export async function GET(
   const safeName = path.basename(filename);
   if (!safeName || safeName !== filename) {
     return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
+  }
+
+  // IDOR-Schutz: Prüfe ob die Datei einem anderen User gehört
+  const doc = await prisma.document.findFirst({ where: { fileName: safeName } });
+  if (doc && doc.userId !== user.id) {
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 
   const filePath = path.join("/tmp", "uploads", safeName);

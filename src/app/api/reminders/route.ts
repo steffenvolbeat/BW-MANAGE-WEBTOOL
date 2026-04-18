@@ -59,11 +59,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const parsedDueAt = new Date(dueAt);
+    if (isNaN(parsedDueAt.getTime())) {
+      return NextResponse.json({ error: "Ungültiges Datumsformat für dueAt" }, { status: 400 });
+    }
+
+    const validPriorities = Object.values(Priority);
+    if (priority !== undefined && !validPriorities.includes(priority as Priority)) {
+      return NextResponse.json(
+        { error: `Ungültige priority. Erlaubt: ${validPriorities.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     const reminder = await db.reminder.create({
       data: {
         title,
         description: description ?? null,
-        dueAt: new Date(dueAt),
+        dueAt: parsedDueAt,
         priority: (priority as Priority) ?? Priority.MEDIUM,
         isDone: false,
         applicationId: applicationId ?? null,

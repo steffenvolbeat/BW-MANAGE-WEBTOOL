@@ -50,6 +50,25 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Eigene Rolle/Status kann nicht geändert werden." }, { status: 400 });
     }
 
+    // Letzten aktiven Admin schützen
+    if (role === "USER" || status === "INACTIVE" || status === "SUSPENDED") {
+      const targetUser = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { role: true, status: true },
+      });
+      if (targetUser?.role === "ADMIN" && targetUser.status === "ACTIVE") {
+        const activeAdminCount = await prisma.user.count({
+          where: { role: "ADMIN", status: "ACTIVE" },
+        });
+        if (activeAdminCount <= 1) {
+          return NextResponse.json(
+            { error: "Kann nicht den letzten aktiven Admin sperren oder degradieren." },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     // Runtime enum validation
     if (role !== undefined && !VALID_ROLES.includes(role as typeof VALID_ROLES[number])) {
       return NextResponse.json({ error: "Ungültige Rolle." }, { status: 400 });
