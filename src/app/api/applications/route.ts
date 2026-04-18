@@ -163,6 +163,22 @@ export async function POST(request: Request) {
       });
     } catch (_) { /* nicht-kritisch */ }
 
+    // Timeline-Eintrag: Neue Bewerbung angelegt
+    try {
+      await prisma.applicationTimeline.create({
+        data: {
+          applicationId: application.id,
+          userId: user.id,
+          type: "STATUS_CHANGE",
+          title: `Bewerbung angelegt – ${companyName}`,
+          content: `Position: ${position}${location ? ` | Ort: ${location}` : ""}`,
+          status,
+          itBereich: data.itBereich || null,
+          date: application.appliedAt,
+        },
+      });
+    } catch (_) { /* nicht-kritisch */ }
+
     // Kanban-Sync: Karte im ersten Board des Users erstellen
     try {
       const firstBoard = await prisma.board.findFirst({
@@ -352,6 +368,21 @@ export async function PUT(request: Request) {
               oldStatus: existingApplication.status,
               newStatus: updateData.status,
             },
+          },
+        });
+      } catch (_) { /* nicht-kritisch */ }
+
+      // Timeline-Eintrag: Statusänderung
+      try {
+        await prisma.applicationTimeline.create({
+          data: {
+            applicationId: id,
+            userId: user.id,
+            type: "STATUS_CHANGE",
+            title: `Status: ${statusLabels[updateData.status] ?? updateData.status}`,
+            content: `${statusLabels[existingApplication.status] ?? existingApplication.status} → ${statusLabels[updateData.status] ?? updateData.status}`,
+            status: updateData.status,
+            itBereich: existingApplication.itBereich,
           },
         });
       } catch (_) { /* nicht-kritisch */ }

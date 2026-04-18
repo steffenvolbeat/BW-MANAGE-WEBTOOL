@@ -64,6 +64,21 @@ export async function POST(req: Request, { params }: Params) {
       },
     });
 
+    // Timeline-Eintrag: Anschreiben erstellt
+    try {
+      await prisma.applicationTimeline.create({
+        data: {
+          applicationId,
+          userId: user.id,
+          type: "COVER_LETTER",
+          title: `Anschreiben: ${(typeof title === "string" && title.trim()) || "Anschreiben"}`,
+          content: app.position ? `Position: ${app.position}` : null,
+          itBereich: (typeof itBereich === "string" ? itBereich : null) || app.itBereich || null,
+          coverId: coverLetter.id,
+        },
+      });
+    } catch (_) { /* nicht-kritisch */ }
+
     return NextResponse.json(coverLetter, { status: 201 });
   } catch (e) {
     console.error("POST cover-letters error:", e);

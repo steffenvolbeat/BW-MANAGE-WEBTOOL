@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { scopedPrisma } from "@/lib/security/scope";
+import { prisma } from "@/lib/database";
 import {
   ActivityStatus,
   Priority,
@@ -137,6 +138,22 @@ export async function POST(request: Request) {
         contact: true,
       },
     });
+
+    // Timeline-Eintrag: Aktivität einer Bewerbung zugeordnet
+    if (applicationId) {
+      try {
+        await prisma.applicationTimeline.create({
+          data: {
+            applicationId,
+            userId: user.id,
+            type: "ACTIVITY",
+            title: `Aktivität: ${title}`,
+            content: description || null,
+            activityId: activity.id,
+          },
+        });
+      } catch (_) { /* nicht-kritisch */ }
+    }
 
     return NextResponse.json(activity, { status: 201 });
   } catch (error) {

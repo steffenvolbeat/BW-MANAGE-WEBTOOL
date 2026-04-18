@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { scopedPrisma } from "@/lib/security/scope";
+import { prisma } from "@/lib/database";
 import { requireActiveUser, assertSameUser } from "@/lib/security/guard";
 
 function handleGuardError(error: unknown) {
@@ -124,6 +125,22 @@ export async function POST(request: Request) {
         contactId,
       },
     });
+
+    // Timeline-Eintrag: Notiz einer Bewerbung zugeordnet
+    if (applicationId) {
+      try {
+        await prisma.applicationTimeline.create({
+          data: {
+            applicationId,
+            userId: user.id,
+            type: "NOTE",
+            title: `Notiz: ${title}`,
+            content: content.length > 300 ? content.slice(0, 300) + "…" : content,
+            noteId: note.id,
+          },
+        });
+      } catch (_) { /* nicht-kritisch */ }
+    }
 
     return NextResponse.json(note, { status: 201 });
   } catch (error) {
