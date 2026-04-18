@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
 import { prisma } from "@/lib/database";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 async function callClaude(prompt: string, imageBase64?: string, imageMediaType?: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -27,7 +28,10 @@ async function callClaude(prompt: string, imageBase64?: string, imageMediaType?:
 }
 
 
-export async function GET() {
+export async function GET(request: Request) {
+  const rl = enforceRateLimit(request, "ai:rejection-analysis", { max: 5, windowMs: 60_000 });
+  if (rl) return rl;
+
   try {
     const user = await getCurrentUser();
 
@@ -45,8 +49,6 @@ export async function GET() {
         location: true,
         country: true,
         priority: true,
-        requirements: true,
-        notesText: true,
       },
     });
 

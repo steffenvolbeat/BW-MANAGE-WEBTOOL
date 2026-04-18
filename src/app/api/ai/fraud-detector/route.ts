@@ -6,6 +6,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
 
+function sanitizeForPrompt(value: string | undefined, maxLen = 200): string {
+  if (!value) return "";
+  return value.replace(/[\n\r`<>]/g, " ").trim().slice(0, maxLen);
+}
+
 async function callClaude(prompt: string, imageBase64?: string, imageMediaType?: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
@@ -35,11 +40,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Text zu kurz oder fehlt" }, { status: 400 });
     }
 
+    const safeUrl = sanitizeForPrompt(url, 300);
+    const safeCompany = sanitizeForPrompt(company, 200);
+
     const prompt = `Du bist ein Experte für Job-Fraud-Erkennung. Analysiere diese Stellenanzeige auf Betrugs-Indikatoren.
 
 Stellenanzeige:
-${url ? `URL: ${url}` : ""}
-${company ? `Firma: ${company}` : ""}
+${safeUrl ? `URL: ${safeUrl}` : ""}
+${safeCompany ? `Firma: ${safeCompany}` : ""}
 
 <text>
 ${text.slice(0, 4000)}

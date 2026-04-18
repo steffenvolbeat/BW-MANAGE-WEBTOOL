@@ -56,13 +56,17 @@ export async function POST(req: NextRequest) {
     const def = ACHIEVEMENT_DEFINITIONS.find((d) => d.type === type);
     if (!def) return NextResponse.json({ error: "Unbekanntes Achievement" }, { status: 400 });
 
-    const existing = await prisma.achievement.findUnique({
-      where: { userId_type: { userId: user.id, type } },
-    });
-    if (existing) return NextResponse.json({ alreadyUnlocked: true, achievement: existing });
+    // Serverseitige Voraussetzungs-Prüfung – kein Self-Service für Achievements
+    const eligible = await checkAchievementEligibility(user.id, type);
+    if (!eligible) {
+      return NextResponse.json({ error: "Voraussetzungen nicht erfüllt" }, { status: 403 });
+    }
 
-    const achievement = await prisma.achievement.create({
-      data: { userId: user.id, type, title: def.title, description: def.description, icon: def.icon, xp: def.xp },
+    // Atomar via upsert – verhindert auch Race-Condition P2002
+    const achievement = await prisma.achievement.upsert({
+      where: { userId_type: { userId: user.id, type } },
+      create: { userId: user.id, type, title: def.title, description: def.description, icon: def.icon, xp: def.xp },
+      update: {},
     });
 
     return NextResponse.json({ newlyUnlocked: true, achievement }, { status: 201 });
@@ -71,5 +75,64 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
     }
     return NextResponse.json({ error: "Fehler" }, { status: 500 });
+  }
+}
+
+async function checkAchievementEligibility(userId: string, type: string): Promise<boolean> {
+  switch (type) {
+    case "FIRST_APPLICATION": {
+      const count = await prisma.application.count({ where: { userId } });
+      return count >= 1;
+    }
+    case "TEN_APPLICATIONS": {
+      const count = await prisma.application.count({ where: { userId } });
+      return count >= 10;
+    }
+    case "FIFTY_APPLICATIONS": {
+      const count = await prisma.application.count({ where: { userId } });
+      return count >= 50;
+    }
+    case "FIRST_INTERVIEW": {
+      const count = await prisma.application.count({
+        where: { userId, status: { in: ["INTERVIEW_SCHEDULED", "INTERVIEWED", "OFFER_RECEIVED", "ACCEPTED"] } },
+      });
+      return count >= 1;
+    }
+    case "FIRST_OFFER": {
+      const count = await prisma.application.count({
+        where: { userId, status: { in: ["OFFER_RECEIVED", "ACCEPTED"] } },
+      });
+      return count >= 1;
+    }
+    case "FIRST_CONTACT": {
+      const count = await prisma.contact.count({ where: { userId } });
+      return count >= 1;
+    }
+    case "FIVE_CONTACTS": {
+      const count = await prisma.contact.count({ where: { userId } });
+      return count >= 5;
+    }
+    case "FIRST_NOTE": {
+      const count = await prisma.note.count({ where: { userId } });
+      return count >= 1;
+    }
+    case "FIRST_DOCUMENT": {
+      const count = await prisma.document.count({ where: { userId } });
+      return count >= 1;
+    }
+    case "MOOD_TRACKER_7": {
+      const count = await prisma.moodEntry.count({ where: { userId } });
+      return count >= 7;
+    }
+    case "FIRST_INTERVIEW_SESSION": {
+      const count = await prisma.interviewSession.count({ where: { userId } });
+      return count >= 1;
+    }
+    case "PROFILE_COMPLETE": {
+      const u = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, email: true } });
+      return !!(u?.name && u?.email);
+    }
+    default:
+      return false;
   }
 }

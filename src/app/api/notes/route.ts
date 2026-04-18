@@ -87,7 +87,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Ownership checks
+    if (typeof title !== "string" || title.length < 1 || title.length > 500) {
+      return NextResponse.json({ error: "Titel muss 1-500 Zeichen haben" }, { status: 400 });
+    }
+    if (typeof content !== "string" || content.length > 100_000) {
+      return NextResponse.json({ error: "Inhalt darf maximal 100.000 Zeichen haben" }, { status: 400 });
+    }
+    if (!Array.isArray(tags) || tags.length > 50 || tags.some((t: unknown) => typeof t !== "string" || t.length > 100)) {
+      return NextResponse.json({ error: "Tags: maximal 50 Tags, jeder max. 100 Zeichen" }, { status: 400 });
+    }
     if (applicationId) {
       const application = await db.application.findFirst({
         where: { id: applicationId },
@@ -152,6 +160,19 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "Note not found or access denied" }, { status: 404 });
     }
 
+    if (updateData.title !== undefined && (typeof updateData.title !== "string" || updateData.title.length < 1 || updateData.title.length > 500)) {
+      return NextResponse.json({ error: "Titel muss zwischen 1 und 500 Zeichen lang sein" }, { status: 400 });
+    }
+    if (updateData.content !== undefined && typeof updateData.content === "string" && updateData.content.length > 100000) {
+      return NextResponse.json({ error: "Inhalt darf maximal 100.000 Zeichen haben" }, { status: 400 });
+    }
+    if (Array.isArray(updateData.tags)) {
+      if (updateData.tags.length > 50) return NextResponse.json({ error: "Maximal 50 Tags erlaubt" }, { status: 400 });
+      if (updateData.tags.some((t: unknown) => typeof t !== "string" || (t as string).length > 100)) {
+        return NextResponse.json({ error: "Jeder Tag darf maximal 100 Zeichen haben" }, { status: 400 });
+      }
+    }
+
     // Ownership checks for relations
     if (updateData.applicationId) {
       const application = await db.application.findFirst({
@@ -172,6 +193,22 @@ export async function PUT(request: Request) {
     }
 
     // Nur erlaubte Felder weitergeben
+    if (updateData.title !== undefined) {
+      if (typeof updateData.title !== "string" || updateData.title.length < 1 || updateData.title.length > 500) {
+        return NextResponse.json({ error: "Titel muss 1-500 Zeichen haben" }, { status: 400 });
+      }
+    }
+    if (updateData.content !== undefined) {
+      if (typeof updateData.content !== "string" || updateData.content.length > 100_000) {
+        return NextResponse.json({ error: "Inhalt darf maximal 100.000 Zeichen haben" }, { status: 400 });
+      }
+    }
+    if (updateData.tags !== undefined) {
+      if (!Array.isArray(updateData.tags) || updateData.tags.length > 50 || updateData.tags.some((t: unknown) => typeof t !== "string" || t.length > 100)) {
+        return NextResponse.json({ error: "Tags: maximal 50 Tags, jeder max. 100 Zeichen" }, { status: 400 });
+      }
+    }
+
     const allowedUpdate = {
       ...(updateData.title !== undefined && { title: updateData.title }),
       ...(updateData.content !== undefined && { content: updateData.content }),

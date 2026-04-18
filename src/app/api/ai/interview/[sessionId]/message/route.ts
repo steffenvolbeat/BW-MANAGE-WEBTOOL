@@ -13,8 +13,10 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ sessionId: string }> }
 ) {
-  const user = await getCurrentUser();
-  if (!user.id) {
+  let user;
+  try {
+    user = await getCurrentUser();
+  } catch {
     return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
   }
 

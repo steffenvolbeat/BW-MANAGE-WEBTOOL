@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
 import { prisma } from "@/lib/database";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 async function callClaude(prompt: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -52,8 +53,10 @@ export async function GET() {
   }
 }
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const rl = enforceRateLimit(request, "ai:career-twin", { max: 5, windowMs: 60_000 });
+    if (rl) return rl;
     const user = await getCurrentUser();
 
     const applications = await prisma.application.findMany({

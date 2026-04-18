@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
+import { prisma } from "@/lib/database";
 
 function coalesce<T>(a: T | null | undefined, b: T | null | undefined): T | null | undefined {
   return a ?? b;
@@ -57,30 +58,24 @@ export async function POST(request: Request) {
     requirements: coalesce(primary.requirements, duplicate.requirements),
   };
 
-  // Relations auf primary verschieben
-  await Promise.all([
-    db.raw.activity.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
-    db.raw.note.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
-    db.raw.meeting.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
-    db.raw.reminder.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
-    db.raw.event.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
-    db.raw.applicationDocument.updateMany({ where: { applicationId: duplicateId }, data: { applicationId: primaryId } }),
-  ]);
-
-  const updated = await db.application.update({
-    where: { id: primaryId },
-    data: mergedData,
-    include: {
-      documents: true,
-      activities: true,
-      events: true,
-      notes: true,
-      meetings: true,
-      reminders: true,
-    },
+  // Relations auf primary verschieben (atomar)
+  const updated = await prisma.$transaction(async (tx) => {
+    await Promise.all([
+      tx.activity.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
+      tx.note.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
+      tx.meeting.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
+      tx.reminder.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
+      tx.event.updateMany({ where: { applicationId: duplicateId, userId: user.id }, data: { applicationId: primaryId } }),
+      tx.applicationDocument.updateMany({ where: { applicationId: duplicateId }, data: { applicationId: primaryId } }),
+    ]);
+    const result = await tx.application.update({
+      where: { id: primaryId },
+      data: mergedData,
+      include: { documents: true, activities: true, events: true, notes: true, meetings: true, reminders: true },
+    });
+    await tx.application.delete({ where: { id: duplicateId } });
+    return result;
   });
-
-  await db.application.delete({ where: { id: duplicateId } });
 
   return NextResponse.json({ merged: updated, removedId: duplicateId });
 }

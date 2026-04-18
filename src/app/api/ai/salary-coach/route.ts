@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 async function callClaude(prompt: string, imageBase64?: string, imageMediaType?: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -28,11 +29,25 @@ async function callClaude(prompt: string, imageBase64?: string, imageMediaType?:
 
 export async function POST(req: NextRequest) {
   try {
+    const rl = enforceRateLimit(req, "ai:salary-coach", { max: 5, windowMs: 60_000 });
+    if (rl) return rl;
     const user = await getCurrentUser();
     const body = await req.json();
     const { position, currentSalary, targetSalary, yearsXP, skills = [], region = "Deutschland", company, industry, offerReceived } = body;
 
     if (!position) return NextResponse.json({ error: "Position fehlt" }, { status: 400 });
+
+    // Input length validation
+    if (typeof position !== "string" || position.length > 200)
+      return NextResponse.json({ error: "position: maximal 200 Zeichen" }, { status: 400 });
+    if (region !== undefined && (typeof region !== "string" || region.length > 100))
+      return NextResponse.json({ error: "region: maximal 100 Zeichen" }, { status: 400 });
+    if (company !== undefined && (typeof company !== "string" || company.length > 100))
+      return NextResponse.json({ error: "company: maximal 100 Zeichen" }, { status: 400 });
+    if (industry !== undefined && (typeof industry !== "string" || industry.length > 100))
+      return NextResponse.json({ error: "industry: maximal 100 Zeichen" }, { status: 400 });
+    if (!Array.isArray(skills) || skills.length > 20 || skills.some((s: unknown) => typeof s !== "string" || s.length > 50))
+      return NextResponse.json({ error: "skills: maximal 20 Eintr\u00e4ge, jeder max. 50 Zeichen" }, { status: 400 });
 
     const prompt = `Du bist ein erfahrener Gehaltsverhandlungs-Coach für IT-Profis in Deutschland.
 

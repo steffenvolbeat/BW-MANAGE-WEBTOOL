@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
 import { prisma } from "@/lib/database";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 export async function GET() {
   try {
@@ -40,6 +41,9 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const rl = enforceRateLimit(req, "mood:create", { max: 20, windowMs: 60_000 });
+    if (rl) return rl;
+
     const user = await getCurrentUser();
     const { mood, energy, stress, note } = await req.json();
 
@@ -49,6 +53,12 @@ export async function POST(req: NextRequest) {
       typeof stress !== "number" || stress < 1 || stress > 5
     ) {
       return NextResponse.json({ error: "Ungültige Werte (1-5 erforderlich)" }, { status: 400 });
+    }
+
+    if (note !== undefined && note !== null) {
+      if (typeof note !== "string" || note.length > 1000) {
+        return NextResponse.json({ error: "Notiz darf maximal 1000 Zeichen haben" }, { status: 400 });
+      }
     }
 
     const entry = await prisma.moodEntry.create({

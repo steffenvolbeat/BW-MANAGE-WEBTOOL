@@ -13,7 +13,10 @@ const BACKUP_CODE_LENGTH = 10;
 // ─── Encryption (AES-256-GCM) für gespeicherte Secrets ───────────────────────
 
 function encryptionKey(): Buffer {
-  const key = process.env.MFA_ENCRYPTION_KEY ?? process.env.JWT_SECRET ?? "fallback-dev-key-32-chars-minimum!";
+  const key = process.env.MFA_ENCRYPTION_KEY ?? process.env.JWT_SECRET;
+  if (!key) {
+    throw new Error("MFA_ENCRYPTION_KEY or JWT_SECRET environment variable must be set");
+  }
   return crypto.createHash("sha256").update(key).digest();
 }
 

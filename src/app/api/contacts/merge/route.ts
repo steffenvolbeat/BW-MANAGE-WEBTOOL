@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
+import { prisma } from "@/lib/database";
 
 function coalesce<T>(a: T | null | undefined, b: T | null | undefined): T | null | undefined {
   return a ?? b;
@@ -62,25 +63,21 @@ export async function POST(request: Request) {
     source: coalesce(primary.source, duplicate.source),
   };
 
-  await Promise.all([
-    db.raw.activity.updateMany({ where: { contactId: duplicateId, userId: user.id }, data: { contactId: primaryId } }),
-    db.raw.note.updateMany({ where: { contactId: duplicateId, userId: user.id }, data: { contactId: primaryId } }),
-    db.raw.meeting.updateMany({ where: { contactId: duplicateId, userId: user.id }, data: { contactId: primaryId } }),
-    db.raw.reminder.updateMany({ where: { contactId: duplicateId, userId: user.id }, data: { contactId: primaryId } }),
-  ]);
-
-  const updated = await db.contact.update({
-    where: { id: primaryId },
-    data: mergedData,
-    include: {
-      activities: true,
-      notes: true,
-      meetings: true,
-      reminders: true,
-    },
+  const updated = await prisma.$transaction(async (tx) => {
+    await Promise.all([
+      tx.activity.updateMany({ where: { contactId: duplicateId, userId: user.id }, data: { contactId: primaryId } }),
+      tx.note.updateMany({ where: { contactId: duplicateId, userId: user.id }, data: { contactId: primaryId } }),
+      tx.meeting.updateMany({ where: { contactId: duplicateId, userId: user.id }, data: { contactId: primaryId } }),
+      tx.reminder.updateMany({ where: { contactId: duplicateId, userId: user.id }, data: { contactId: primaryId } }),
+    ]);
+    const result = await tx.contact.update({
+      where: { id: primaryId },
+      data: mergedData,
+      include: { activities: true, notes: true, meetings: true, reminders: true },
+    });
+    await tx.contact.delete({ where: { id: duplicateId } });
+    return result;
   });
-
-  await db.contact.delete({ where: { id: duplicateId } });
 
   return NextResponse.json({ merged: updated, removedId: duplicateId });
 }

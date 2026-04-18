@@ -5,6 +5,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
+import { enforceRateLimit } from "@/lib/security/rateLimit";
 
 async function callClaude(prompt: string, imageBase64?: string, imageMediaType?: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -28,6 +29,8 @@ async function callClaude(prompt: string, imageBase64?: string, imageMediaType?:
 
 export async function POST(req: NextRequest) {
   try {
+    const rl = enforceRateLimit(req, "ai:bias-detector", { max: 10, windowMs: 60_000 });
+    if (rl) return rl;
     const user = await getCurrentUser();
     const { text, type = "job_posting" } = await req.json();
 

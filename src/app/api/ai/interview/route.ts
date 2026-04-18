@@ -6,8 +6,10 @@ import type { InterviewDifficulty } from "@/lib/ai/interviewSimulator";
 
 // POST /api/ai/interview – Startet eine neue Interview-Session
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) {
+  let user;
+  try {
+    user = await getCurrentUser();
+  } catch {
     return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
   }
 
@@ -21,6 +23,20 @@ export async function POST(req: NextRequest) {
 
   if (!jobTitle) {
     return NextResponse.json({ error: "jobTitle erforderlich" }, { status: 400 });
+  }
+
+  if (!difficulty || !["EASY", "MEDIUM", "HARD"].includes(difficulty)) {
+    return NextResponse.json({ error: "Ungültiger difficulty-Wert (EASY|MEDIUM|HARD)" }, { status: 400 });
+  }
+
+  if (!mode || !["TEXT", "VOICE"].includes(mode)) {
+    return NextResponse.json({ error: "Ungültiger mode-Wert (TEXT|VOICE)" }, { status: 400 });
+  }
+
+  // IDOR-Check: applicationId darf nur zu eingeloggtem User gehören
+  if (applicationId) {
+    const app = await prisma.application.findFirst({ where: { id: applicationId, userId: user.id } });
+    if (!app) return NextResponse.json({ error: "Bewerbung nicht gefunden" }, { status: 404 });
   }
 
   // Erstelle Session
@@ -68,8 +84,10 @@ Bitte stellen Sie sich kurz vor: Wer sind Sie, und was hat Sie dazu bewogen, sic
 
 // GET /api/ai/interview – Alle Sessions
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) {
+  let user;
+  try {
+    user = await getCurrentUser();
+  } catch {
     return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
   }
 

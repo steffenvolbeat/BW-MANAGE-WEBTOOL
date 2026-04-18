@@ -4,8 +4,12 @@ import { ContactType } from "@prisma/client";
 import { requireActiveUser, assertSameUser } from "@/lib/security/guard";
 
 function handleGuardError(error: unknown) {
-  if ((error as any)?.code === "FORBIDDEN") {
+  const code = (error as any)?.code;
+  if (code === "FORBIDDEN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+  if (code === "RISK_BLOCKED") {
+    return NextResponse.json({ error: "Request blocked due to risk" }, { status: 403 });
   }
   return null;
 }
@@ -78,6 +82,12 @@ export async function POST(request: Request) {
       );
     }
 
+    // Enum-Validierung für contactType
+    const validContactTypes = Object.values(ContactType);
+    if (!validContactTypes.includes(contactType)) {
+      return NextResponse.json({ error: "Ungültiger contactType", allowed: validContactTypes }, { status: 400 });
+    }
+
     const contact = await db.contact.create({
       data: {
         firstName,
@@ -137,6 +147,12 @@ export async function PUT(request: Request) {
         { error: "Contact not found or access denied" },
         { status: 404 }
       );
+    }
+
+    // Enum-Validierung für contactType in PUT
+    const validContactTypes = Object.values(ContactType);
+    if (updateData.contactType !== undefined && !validContactTypes.includes(updateData.contactType)) {
+      return NextResponse.json({ error: "Ungültiger contactType", allowed: validContactTypes }, { status: 400 });
     }
 
     const updatedContact = await db.contact.update({

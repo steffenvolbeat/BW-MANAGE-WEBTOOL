@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
 import { prisma } from "@/lib/database";
 
+const VALID_FOLLOWUP_TYPES = ["EMAIL", "PHONE", "LINKEDIN", "IN_PERSON"] as const;
+
 async function callClaude(prompt: string, imageBase64?: string, imageMediaType?: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY not set");
@@ -63,6 +65,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "dueAt und subject erforderlich" }, { status: 400 });
     }
 
+    // Enum-Validierung
+    if (type && !VALID_FOLLOWUP_TYPES.includes(type)) {
+      return NextResponse.json({ error: `Ungültiger type-Wert. Erlaubt: ${VALID_FOLLOWUP_TYPES.join(", ")}` }, { status: 400 });
+    }
+
+    // Invalid-Date-Check
+    const parsedDueAt = new Date(dueAt);
+    if (isNaN(parsedDueAt.getTime())) {
+      return NextResponse.json({ error: "Ungültiges Datumsformat für dueAt" }, { status: 400 });
+    }
+
+    // IDOR-Checks: applicationId/contactId müssen dem User gehören
+    if (applicationId) {
+      const app = await prisma.application.findFirst({ where: { id: applicationId, userId: user.id } });
+      if (!app) return NextResponse.json({ error: "Bewerbung nicht gefunden oder kein Zugriff" }, { status: 404 });
+    }
+    if (contactId) {
+      const contact = await prisma.contact.findFirst({ where: { id: contactId, userId: user.id } });
+      if (!contact) return NextResponse.json({ error: "Kontakt nicht gefunden oder kein Zugriff" }, { status: 404 });
+    }
+
     let aiDraft: string | null = null;
 
     if (generateDraft && context) {
@@ -82,7 +105,7 @@ Halte es kurz (max. 3 Absätze), professionell und freundlich. Beginne direkt mi
         userId: user.id,
         applicationId: applicationId ?? null,
         contactId: contactId ?? null,
-        dueAt: new Date(dueAt),
+        dueAt: parsedDueAt,
         type,
         subject,
         aiDraft,

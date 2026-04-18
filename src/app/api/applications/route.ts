@@ -101,6 +101,23 @@ export async function POST(request: Request) {
       );
     }
 
+    // Enum-Validierung für POST (PUT hat eigene Validierung weiter unten)
+    if (status && !Object.values(ApplicationStatus).includes(status)) {
+      return NextResponse.json({ error: "Ungültiger status-Wert", allowed: Object.values(ApplicationStatus) }, { status: 400 });
+    }
+    if (jobType && !Object.values(JobType).includes(jobType)) {
+      return NextResponse.json({ error: "Ungültiger jobType-Wert", allowed: Object.values(JobType) }, { status: 400 });
+    }
+    if (priority && !Object.values(Priority).includes(priority)) {
+      return NextResponse.json({ error: "Ungültiger priority-Wert", allowed: Object.values(Priority) }, { status: 400 });
+    }
+    if (data.appliedAt) {
+      const d = new Date(data.appliedAt);
+      if (isNaN(d.getTime())) {
+        return NextResponse.json({ error: "Ungültiges appliedAt-Datum" }, { status: 400 });
+      }
+    }
+
     const application = await db.application.create({
       data: {
         companyName,

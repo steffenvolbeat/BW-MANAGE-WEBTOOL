@@ -195,7 +195,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Datei zu groß (max 5 MB)" }, { status: 413 });
     }
 
-    const mimeOk = file.type === "application/pdf" || file.name.endsWith(".pdf") || file.type === "text/plain";
+    const mimeOk = file.type === "application/pdf" || file.type === "text/plain";
     if (!mimeOk) {
       return NextResponse.json({ error: "Nur PDF-Dateien erlaubt" }, { status: 415 });
     }

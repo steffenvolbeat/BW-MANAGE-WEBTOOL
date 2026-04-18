@@ -19,8 +19,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const updated = await prisma.followUp.update({
       where: { id },
       data: {
-        isDone: body.isDone ?? existing.isDone,
-        sentAt: body.isDone ? new Date() : existing.sentAt,
+        isDone: typeof body.isDone === "boolean" ? body.isDone : existing.isDone,
+        sentAt: (typeof body.isDone === "boolean" ? body.isDone : existing.isDone) && !existing.sentAt ? new Date() : existing.sentAt,
         subject: body.subject ?? existing.subject,
         aiDraft: body.aiDraft ?? existing.aiDraft,
       },
