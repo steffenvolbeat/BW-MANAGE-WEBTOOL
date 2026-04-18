@@ -40,7 +40,6 @@ interface Message {
 }
 
 // Web Speech API – Browser-seitig, kein @types package nötig
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnySpeechRecognition = any;
 
 // ── Quick-Actions ─────────────────────────────────────────────────────────────
@@ -164,7 +163,6 @@ export default function AvatarChat() {
     setCustomGlbName(null);
     localStorage.removeItem(CUSTOM_GLB_KEY);
   }, []);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<AnySpeechRecognition>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -322,7 +320,6 @@ export default function AvatarChat() {
   // ── Spracheingabe ──────────────────────────────────────────────────────────
 
   const toggleListening = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
     const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
     if (!SR) {
@@ -343,14 +340,11 @@ export default function AvatarChat() {
     recognition.continuous = false;
     recognition.interimResults = true;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       const transcript = Array.from(event.results as ArrayLike<unknown>)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((r: any) => r[0].transcript as string)
         .join("");
       setInput(transcript);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((event.results as any)[event.results.length - 1].isFinal) {
         sendMessage(transcript);
       }

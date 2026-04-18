@@ -66,6 +66,7 @@ export default function PeerReviewsPage() {
       .catch(() => setLoading(false));
   }, []);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- load() ruft setState via useCallback auf (valides async-Pattern)
   useEffect(() => { load(); }, [load]);
 
   const submitRequest = async () => {

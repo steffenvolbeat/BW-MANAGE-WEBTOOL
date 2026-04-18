@@ -14,6 +14,27 @@ const MOOD_LABELS = ["", "😢 Sehr schlecht", "😕 Schlecht", "😐 Neutral", 
 const ENERGY_LABELS = ["", "💤 Erschöpft", "😴 Müde", "⚡ Ok", "⚡⚡ Fit", "⚡⚡⚡ Top-Energie"];
 const STRESS_LABELS = ["", "😌 Kein Stress", "🟡 Wenig", "🟠 Mittel", "🔴 Viel", "🚨 Extrem"];
 
+// Slider als eigenständige Komponente außerhalb der Page-Funktion definiert,
+// um "Cannot create components during render"-Bug zu vermeiden.
+function MoodSlider({ value, onChange, labels, color }: { value: number; onChange: (v: number) => void; labels: string[]; color: string }) {
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-1">
+        {[1, 2, 3, 4, 5].map((v) => (
+          <button
+            key={v}
+            onClick={() => onChange(v)}
+            className={`w-10 h-10 rounded-full text-lg transition-transform ${v === value ? `${color} scale-125` : "bg-(--surface) border border-(--border) hover:scale-110"}`}
+          >
+            {v}
+          </button>
+        ))}
+      </div>
+      <p className="text-center text-sm text-(--muted) mt-1">{labels[value]}</p>
+    </div>
+  );
+}
+
 export default function StimmungsBarometerPage() {
   const [entries, setEntries] = useState<MoodEntry[]>([]);
   const [averages, setAverages] = useState<{ mood: number; energy: number; stress: number } | null>(null);
@@ -37,6 +58,7 @@ export default function StimmungsBarometerPage() {
     setLoading(false);
   };
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { load(); }, []);
 
   async function submit() {
@@ -54,23 +76,6 @@ export default function StimmungsBarometerPage() {
     }
     setSaving(false);
   }
-
-  const Slider = ({ value, onChange, labels, color }: { value: number; onChange: (v: number) => void; labels: string[]; color: string }) => (
-    <div>
-      <div className="flex justify-between items-center mb-1">
-        {[1, 2, 3, 4, 5].map((v) => (
-          <button
-            key={v}
-            onClick={() => onChange(v)}
-            className={`w-10 h-10 rounded-full text-lg transition-transform ${v === value ? `${color} scale-125` : "bg-(--surface) border border-(--border) hover:scale-110"}`}
-          >
-            {v}
-          </button>
-        ))}
-      </div>
-      <p className="text-center text-sm text-(--muted) mt-1">{labels[value]}</p>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-4xl mx-auto">
@@ -102,15 +107,15 @@ export default function StimmungsBarometerPage() {
         <div className="space-y-6">
           <div>
             <label className="text-sm font-medium mb-3 block">😊 Stimmung</label>
-            <Slider value={mood} onChange={setMood} labels={MOOD_LABELS} color="bg-yellow-400" />
+            <MoodSlider value={mood} onChange={setMood} labels={MOOD_LABELS} color="bg-yellow-400" />
           </div>
           <div>
             <label className="text-sm font-medium mb-3 block">⚡ Energie</label>
-            <Slider value={energy} onChange={setEnergy} labels={ENERGY_LABELS} color="bg-blue-400" />
+            <MoodSlider value={energy} onChange={setEnergy} labels={ENERGY_LABELS} color="bg-blue-400" />
           </div>
           <div>
             <label className="text-sm font-medium mb-3 block">🌡️ Stress</label>
-            <Slider value={stress} onChange={setStress} labels={STRESS_LABELS} color="bg-red-400" />
+            <MoodSlider value={stress} onChange={setStress} labels={STRESS_LABELS} color="bg-red-400" />
           </div>
 
           <div>

@@ -77,14 +77,11 @@ const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
 
 function AnschreibenContent() {
   const searchParams = useSearchParams();
-  const [tab, setTab] = useState<"din" | "novoresume" | "templates">("din");
+  // Tab direkt aus searchParams initialisieren – kein useEffect mit setState nötig
+  const [tab, setTab] = useState<"din" | "novoresume" | "templates">(() =>
+    searchParams.get("mode") === "novoresume" ? "novoresume" : "din"
+  );
   const [clTemplateKey, setClTemplateKey] = useState("midnight");
-
-  useEffect(() => {
-    if (searchParams.get("mode") === "novoresume") {
-      setTab("novoresume");
-    }
-  }, [searchParams]);
 
   return (
     <>

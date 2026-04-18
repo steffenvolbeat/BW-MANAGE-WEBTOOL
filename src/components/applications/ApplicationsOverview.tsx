@@ -960,7 +960,7 @@ export default function ApplicationsOverview() {
 
       {undoDoc && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white rounded-lg px-4 py-3 flex items-center gap-3 shadow-xl">
-          <span className="text-sm">Dokument „{undoDoc.doc.name}" gelöscht</span>
+          <span className="text-sm">Dokument &bdquo;{undoDoc.doc.name}&ldquo; gelöscht</span>
           <button
             onClick={handleUndoDeleteDoc}
             className="text-blue-400 hover:text-blue-300 text-sm font-semibold underline"

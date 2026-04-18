@@ -24,6 +24,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard SSR-Hydration-Pattern: setMounted + Theme aus localStorage
     setMounted(true);
     if (typeof window !== "undefined") {
       const stored = window.localStorage.getItem("theme-preference");

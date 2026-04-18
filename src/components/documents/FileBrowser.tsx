@@ -573,7 +573,7 @@ export default function FileBrowser() {
             <h2 className="text-base font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
               <ArrowsRightLeftIcon className="h-5 w-5 text-teal-500" /> Datei verschieben
             </h2>
-            <p className="text-sm text-gray-500 dark:text-slate-400 mb-4 truncate">„{movingFile.name}"</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400 mb-4 truncate">„{movingFile.name}&quot;</p>
             <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
               <button onClick={() => setMoveTarget(null)} className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition ${moveTarget === null ? "bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 font-medium" : "text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"}`}>
                 <HomeIcon className="h-4 w-4 flex-shrink-0" /> Alle Ordner (Wurzel)

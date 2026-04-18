@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import MainLayout from "@/components/layout/MainLayout";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -314,7 +315,7 @@ export default function SecurityPage() {
                 <div className="flex flex-col items-center gap-4">
                   {/* QR-Code */}
                   <div className="rounded-2xl p-3 bg-white border border-(--border) shadow-sm">
-                    <img src={setupData.qrCode} alt="TOTP QR-Code" className="w-48 h-48" />
+                    <Image src={setupData.qrCode} alt="TOTP QR-Code" width={192} height={192} className="w-48 h-48" unoptimized />
                   </div>
 
                   {/* Manuelle Eingabe */}

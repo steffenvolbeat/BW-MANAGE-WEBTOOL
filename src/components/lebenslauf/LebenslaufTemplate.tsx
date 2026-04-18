@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useCallback } from "react";
+import Image from "next/image";
 import {
   PrinterIcon, PencilSquareIcon, CheckIcon,
   PlusIcon, TrashIcon, EnvelopeIcon, PhoneIcon,
@@ -403,7 +404,7 @@ export default function LebenslaufTemplate() {
                 title={editing?"Klicken zum Foto hochladen":""}
               >
                 {photoSrc
-                  ? <img src={photoSrc} alt="Profilfoto" style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+                  ? <Image src={photoSrc} alt="Profilfoto" width={100} height={100} style={{width:"100%",height:"100%",objectFit:"cover"}} unoptimized />
                   : <span style={{fontSize:11,color:CM,textAlign:"center",padding:"0 4px",lineHeight:1.3}}>{editing?"📷":"Foto"}</span>
                 }
                 <input ref={photoInputRef} type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>setPhotoSrc((ev.target?.result as string)??"");r.readAsDataURL(f);}}/>

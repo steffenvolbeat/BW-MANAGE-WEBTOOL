@@ -15,11 +15,10 @@ export default function AdminSettingsPage() {
   const router = useRouter();
 
   const [saved, setSaved] = useState(false);
-  const [buildDate, setBuildDate] = useState("");
-
-  useEffect(() => {
-    setBuildDate(new Date().toLocaleDateString("de-DE"));
-  }, []);
+  // Datum direkt im State-Initializer berechnen (kein useEffect nötig)
+  const [buildDate] = useState(() =>
+    typeof window !== "undefined" ? new Date().toLocaleDateString("de-DE") : ""
+  );
 
   useEffect(() => {
     if (!loading && user?.role !== "ADMIN") {

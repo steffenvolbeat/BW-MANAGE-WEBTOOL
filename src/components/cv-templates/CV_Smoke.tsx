@@ -161,7 +161,7 @@ export default function CV_Smoke() {
           <div style={{ height: 4, background: `linear-gradient(90deg,${A},#d97706,${A})` }} />
           <div style={{ backgroundColor: BG, padding: "32px 40px 24px", borderBottom: `1px solid ${S3}`, display: "flex", gap: 28, alignItems: "flex-start" }}>
             <div style={{ width: curShape.w, height: curShape.h, borderRadius: curShape.br, clipPath: curShape.clip ?? "", overflow: "hidden", flexShrink: 0, backgroundColor: S3, border: `2px solid ${A}`, display: "flex", alignItems: "center", justifyContent: "center", cursor: editing ? "pointer" : "default", boxShadow: curShape.shadow ?? "" }} onClick={() => editing && photoInputRef.current?.click()}>
-              {photoSrc ? <img src={photoSrc} alt="Foto" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 10, color: "#555", textAlign: "center" }}>{editing ? "📷" : "Foto"}</span>}
+              {photoSrc ? <img /* eslint-disable-line @next/next/no-img-element */ src={photoSrc} alt="Foto" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 10, color: "#555", textAlign: "center" }}>{editing ? "📷" : "Foto"}</span>}
               <input ref={photoInputRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => setPhotoSrc((ev.target?.result as string) ?? ""); r.readAsDataURL(f); }} />
             </div>
             <div style={{ flex: 1 }}>

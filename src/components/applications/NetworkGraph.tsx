@@ -335,7 +335,6 @@ export default function NetworkGraph() {
     );
 
     return () => { simulation.stop(); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filteredData, fullscreen, strength]);
 
   // ── Statistiken ──────────────────────────────────────────────────────────────
@@ -463,6 +462,7 @@ export default function NetworkGraph() {
           <div
             className="absolute z-50 bg-(--card) border border-(--border) shadow-2xl rounded-xl px-3 py-2.5 text-sm pointer-events-none max-w-[220px]"
             style={{
+              // eslint-disable-next-line react-hooks/refs -- svgRef.current für Tooltip-Positionierung mit sicherem Fallback
               left: Math.min(tooltip.x + 14, (svgRef.current?.clientWidth ?? 800) - 240),
               top: Math.max(tooltip.y - 60, 8),
             }}

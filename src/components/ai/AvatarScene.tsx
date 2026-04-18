@@ -23,7 +23,6 @@ import CustomAvatarModel from "./CustomAvatarModel";
 // <Environment> im JSX verwendet wird. Wir patchen THREE.FileLoader, damit
 // externe .hdr-Requests abgefangen werden bevor sie CSP oder Netzwerk treffen.
 if (typeof window !== "undefined") {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const FLoader = THREE.FileLoader as any;
   const _origLoad = FLoader.prototype.load;
   FLoader.prototype.load = function (url: string, ...rest: unknown[]) {
@@ -324,25 +323,26 @@ function AvatarModel({ isSpeaking, emotion, mouthOpen = 0 }: AvatarModelProps) {
 
 // ── Partikel-Aura (spricht UI) ────────────────────────────────────────────────
 
+// Partikel-Positionen auf Modulebene initialisieren: Math.random() außerhalb des Render-Pfads
+const PARTICLE_COUNT = 12;
+const PARTICLE_POSITIONS = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
+  angle: (i / PARTICLE_COUNT) * Math.PI * 2,
+  radius: 0.85 + Math.random() * 0.2,
+  speed: 0.5 + Math.random() * 1.5,
+  phase: Math.random() * Math.PI * 2,
+  yBase: -0.1 + Math.random() * 0.6,
+}));
+
 function SpeakingParticles({ active }: { active: boolean }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
-  const count = 12;
+  const count = PARTICLE_COUNT;
   const dummy = useMemo(() => new THREE.Object3D(), []);
-  const positions = useMemo(() =>
-    Array.from({ length: count }, (_, i) => ({
-      angle: (i / count) * Math.PI * 2,
-      radius: 0.85 + Math.random() * 0.2,
-      speed: 0.5 + Math.random() * 1.5,
-      phase: Math.random() * Math.PI * 2,
-      yBase: -0.1 + Math.random() * 0.6,
-    })),
-    []
-  );
+  const positions = useRef(PARTICLE_POSITIONS);
 
   useFrame(({ clock }) => {
     if (!meshRef.current || !active) return;
     const t = clock.getElapsedTime();
-    positions.forEach((p, i) => {
+    positions.current.forEach((p, i) => {
       const r = p.radius + Math.sin(t * p.speed + p.phase) * 0.12;
       dummy.position.set(
         Math.cos(p.angle + t * 0.3) * r,

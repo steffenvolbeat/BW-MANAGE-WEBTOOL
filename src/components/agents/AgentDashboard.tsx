@@ -315,7 +315,7 @@ export default function AgentDashboard() {
         inputRef.current?.focus();
       }
     },
-    [isLoading]
+    [isLoading, messages]
   );
 
   // Task genehmigen

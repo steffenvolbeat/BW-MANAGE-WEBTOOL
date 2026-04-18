@@ -229,6 +229,7 @@ export default function CustomAvatarModel({
 
   // Animationsrefs
   const clockRef = useRef(0);
+  // eslint-disable-next-line react-hooks/purity -- Math.random im useRef-Initializer ist sicher (nur einmalig, kein Re-Render-Pfad)
   const blinkTimerRef = useRef(1.5 + Math.random() * 2);
   const blinkStateRef = useRef(false);
   const jawRestRef = useRef<THREE.Euler | null>(null);
@@ -249,6 +250,7 @@ export default function CustomAvatarModel({
 
     // ── Idle Kopfbewegung ─────────────────────────────────────────────────
     if (headBone) {
+      // eslint-disable-next-line react-hooks/immutability -- Three.js Bone wird in useFrame (Animations-Loop) mutiert, kein React-Render
       headBone.rotation.y = Math.sin(t * 0.4) * 0.08;
       headBone.rotation.x = Math.sin(t * 0.25) * 0.04 - 0.03;
     }
@@ -273,6 +275,7 @@ export default function CustomAvatarModel({
       } else if (jawBone && jawRestRef.current) {
         // Knochen-Kiefer-Fallback
         const targetRotX = jawRestRef.current.x + totalMouth * 0.25;
+        // eslint-disable-next-line react-hooks/immutability -- Three.js Bone-Mutation in useFrame
         jawBone.rotation.x = THREE.MathUtils.lerp(jawBone.rotation.x, targetRotX, 0.3);
       }
     } else {
