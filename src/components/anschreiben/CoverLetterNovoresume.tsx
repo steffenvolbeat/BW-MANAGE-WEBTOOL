@@ -19,6 +19,7 @@ const FONTS: { key:string; label:string; family:string; gf:string }[] = [
   { key:"inter",        label:"Inter",          family:"'Inter',Arial,sans-serif",            gf:"Inter:wght@400;500;600;700" },
   { key:"merriweather", label:"Merriweather",   family:"'Merriweather',Georgia,serif",        gf:"Merriweather:wght@400;700" },
   { key:"playfair",     label:"Playfair",       family:"'Playfair Display',Georgia,serif",    gf:"Playfair+Display:wght@400;700" },
+  { key:"sourcecode",   label:"Source Code Pro", family:"'Source Code Pro',Courier,monospace", gf:"Source+Code+Pro:wght@400;600;700" },
   { key:"georgia",      label:"Georgia",        family:"Georgia,serif",                       gf:"" },
 ];
 const FONT_SIZES: { key:string; label:string; scale:number }[] = [
