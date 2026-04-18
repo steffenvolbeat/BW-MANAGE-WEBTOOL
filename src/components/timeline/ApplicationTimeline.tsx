@@ -122,15 +122,17 @@ function dotColor(type: TimelineEntryType): string {
     case "STATUS_CHANGE":
       return "bg-blue-500";
     case "NOTE":
-      return "bg-yellow-500";
+      return "bg-amber-500";
     case "COVER_LETTER":
       return "bg-purple-500";
     case "CV_UPDATE":
-      return "bg-green-500";
+      return "bg-emerald-500";
     case "CALENDAR_EVENT":
       return "bg-orange-500";
+    case "ACTIVITY":
+      return "bg-rose-500";
     default:
-      return "bg-gray-400";
+      return "bg-slate-400";
   }
 }
 
@@ -483,217 +485,178 @@ export default function ApplicationTimeline({
         </div>
       )}
 
-      {/* Timeline entries */}
+      {/* Zeitstrahl */}
       {!loading && entries.length > 0 && (
         <div className="relative">
-          {/* Vertical line */}
-          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200 dark:bg-gray-700" />
+          {/* Achslinie – läuft von Mitte erstem Node bis Mitte letztem Node */}
+          <div className="absolute left-[21px] top-[22px] w-0.5 bg-gradient-to-b from-blue-400 via-blue-200 to-gray-200 dark:from-blue-500 dark:via-blue-900 dark:to-gray-700"
+            style={{ height: `calc(100% - 44px)` }}
+          />
 
-          <div className="space-y-1">
+          <div className="space-y-5">
             {entries.map((entry) => {
               const isEditing = editId === entry.id;
               const isExpanded = expandedId === entry.id;
 
               return (
-                <div key={entry.id} className="relative pl-10">
-                  {/* Dot */}
+                <div key={entry.id} className="relative flex items-start gap-4">
+                  {/* Node – großer farbiger Kreis mit Icon */}
                   <div
-                    className={`absolute left-2.5 top-4 w-3 h-3 rounded-full border-2 border-white dark:border-gray-900 ${dotColor(entry.type)}`}
-                  />
+                    className={`relative z-10 flex-shrink-0 w-11 h-11 rounded-full flex items-center justify-center border-4 border-white dark:border-gray-900 shadow-md text-white ${dotColor(entry.type)}`}
+                  >
+                    {typeIcon(entry.type)}
+                  </div>
 
-                  <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 shadow-sm">
-                    {isEditing ? (
-                      // ── Edit mode ──
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label htmlFor="tl-edit-type" className="block text-xs text-gray-500 mb-1">Typ</label>
-                            <select
-                              id="tl-edit-type"
-                              name="tl-edit-type"
-                              value={editForm.type}
-                              onChange={(e) =>
-                                setEditForm((f) => ({
-                                  ...f,
-                                  type: e.target.value as TimelineEntryType,
-                                }))
-                              }
-                              className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                            >
-                              {ENTRY_TYPES.map((t) => (
-                                <option key={t} value={t}>
-                                  {TYPE_LABELS[t]}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div>
-                            <label htmlFor="tl-edit-status" className="block text-xs text-gray-500 mb-1">Status</label>
-                            <select
-                              id="tl-edit-status"
-                              name="tl-edit-status"
-                              value={editForm.status}
-                              onChange={(e) =>
-                                setEditForm((f) => ({ ...f, status: e.target.value }))
-                              }
-                              className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                            >
-                              <option value="">– Kein Status –</option>
-                              {APPLICATION_STATUSES.map((s) => (
-                                <option key={s} value={s}>
-                                  {STATUS_LABELS[s]}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                        </div>
-                        <input
-                          id="tl-edit-title"
-                          name="tl-edit-title"
-                          type="text"
-                          value={editForm.title}
-                          onChange={(e) =>
-                            setEditForm((f) => ({ ...f, title: e.target.value }))
-                          }
-                          aria-label="Titel"
-                          className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                        />
-                        <textarea
-                          id="tl-edit-content"
-                          name="tl-edit-content"
-                          value={editForm.content}
-                          onChange={(e) =>
-                            setEditForm((f) => ({ ...f, content: e.target.value }))
-                          }
-                          rows={3}
-                          aria-label="Beschreibung"
-                          className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white resize-none"
-                        />
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            id="tl-edit-itbereich"
-                            name="tl-edit-itbereich"
-                            type="text"
-                            value={editForm.itBereich}
-                            onChange={(e) =>
-                              setEditForm((f) => ({ ...f, itBereich: e.target.value }))
-                            }
-                            placeholder="IT-Bereich"
-                            aria-label="IT-Bereich"
-                            className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                          />
-                          <input
-                            id="tl-edit-date"
-                            name="tl-edit-date"
-                            type="datetime-local"
-                            value={editForm.date}
-                            onChange={(e) =>
-                              setEditForm((f) => ({ ...f, date: e.target.value }))
-                            }
-                            aria-label="Datum"
-                            className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
-                          />
-                        </div>
-                        <div className="flex gap-2 justify-end">
-                          <button
-                            onClick={() => setEditId(null)}
-                            className="p-1.5 text-gray-400 hover:text-gray-600 rounded"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={handleEdit}
-                            disabled={!editForm.title.trim() || saving}
-                            className="p-1.5 text-green-600 hover:text-green-700 disabled:opacity-50 rounded"
-                          >
-                            {saving ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Check className="w-4 h-4" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      // ── View mode ──
-                      <div>
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2 min-w-0">
-                            <span
-                              className={`flex-shrink-0 flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${typeColor(entry.type)}`}
-                            >
-                              {typeIcon(entry.type)}
-                              <span>{TYPE_LABELS[entry.type]}</span>
-                            </span>
-                            <span className="font-medium text-sm text-gray-900 dark:text-white truncate">
-                              {entry.title}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1 flex-shrink-0">
-                            {(entry.content || entry.status || entry.itBereich) && (
-                              <button
-                                onClick={() =>
-                                  setExpandedId(isExpanded ? null : entry.id)
+                  {/* Karte */}
+                  <div className="flex-1 min-w-0">
+                    {/* Datum prominent über der Karte */}
+                    <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1.5 mt-2.5 leading-none">
+                      {formatDate(entry.date)}
+                    </p>
+
+                    <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-3 shadow-sm hover:shadow-md transition-shadow">
+                      {isEditing ? (
+                        // ── Bearbeitungsmodus ──
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label htmlFor="tl-edit-type" className="block text-xs text-gray-500 mb-1">Typ</label>
+                              <select
+                                id="tl-edit-type"
+                                name="tl-edit-type"
+                                value={editForm.type}
+                                onChange={(e) =>
+                                  setEditForm((f) => ({ ...f, type: e.target.value as TimelineEntryType }))
                                 }
-                                className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
+                                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
                               >
-                                {isExpanded ? (
-                                  <ChevronUp className="w-3.5 h-3.5" />
-                                ) : (
-                                  <ChevronDown className="w-3.5 h-3.5" />
-                                )}
-                              </button>
-                            )}
-                            <button
-                              onClick={() => startEdit(entry)}
-                              className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
+                                {ENTRY_TYPES.map((t) => (
+                                  <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label htmlFor="tl-edit-status" className="block text-xs text-gray-500 mb-1">Status</label>
+                              <select
+                                id="tl-edit-status"
+                                name="tl-edit-status"
+                                value={editForm.status}
+                                onChange={(e) => setEditForm((f) => ({ ...f, status: e.target.value }))}
+                                className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                              >
+                                <option value="">– Kein Status –</option>
+                                {APPLICATION_STATUSES.map((s) => (
+                                  <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+                                ))}
+                              </select>
+                            </div>
+                          </div>
+                          <input
+                            id="tl-edit-title" name="tl-edit-title" type="text"
+                            value={editForm.title}
+                            onChange={(e) => setEditForm((f) => ({ ...f, title: e.target.value }))}
+                            aria-label="Titel"
+                            className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                          />
+                          <textarea
+                            id="tl-edit-content" name="tl-edit-content"
+                            value={editForm.content}
+                            onChange={(e) => setEditForm((f) => ({ ...f, content: e.target.value }))}
+                            rows={3} aria-label="Beschreibung"
+                            className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white resize-none"
+                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              id="tl-edit-itbereich" name="tl-edit-itbereich" type="text"
+                              value={editForm.itBereich}
+                              onChange={(e) => setEditForm((f) => ({ ...f, itBereich: e.target.value }))}
+                              placeholder="IT-Bereich" aria-label="IT-Bereich"
+                              className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                            />
+                            <input
+                              id="tl-edit-date" name="tl-edit-date" type="datetime-local"
+                              value={editForm.date}
+                              onChange={(e) => setEditForm((f) => ({ ...f, date: e.target.value }))}
+                              aria-label="Datum"
+                              className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                            />
+                          </div>
+                          <div className="flex gap-2 justify-end">
+                            <button onClick={() => setEditId(null)} className="p-1.5 text-gray-400 hover:text-gray-600 rounded">
+                              <X className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDelete(entry.id)}
-                              className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded"
+                              onClick={handleEdit}
+                              disabled={!editForm.title.trim() || saving}
+                              className="p-1.5 text-green-600 hover:text-green-700 disabled:opacity-50 rounded"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                             </button>
                           </div>
                         </div>
-
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 ml-0.5">
-                          {formatDate(entry.date)}
-                        </p>
-
-                        {isExpanded && (
-                          <div className="mt-2 space-y-1.5 border-t border-gray-100 dark:border-gray-700 pt-2">
-                            {entry.status && (
-                              <div className="flex items-center gap-2 text-xs">
-                                <span className="text-gray-500 dark:text-gray-400 font-medium w-20">
-                                  Status
-                                </span>
-                                <span className="text-gray-900 dark:text-white">
-                                  {STATUS_LABELS[entry.status] ?? entry.status}
-                                </span>
-                              </div>
-                            )}
-                            {entry.itBereich && (
-                              <div className="flex items-center gap-2 text-xs">
-                                <span className="text-gray-500 dark:text-gray-400 font-medium w-20">
-                                  IT-Bereich
-                                </span>
-                                <span className="text-gray-900 dark:text-white">
-                                  {entry.itBereich}
-                                </span>
-                              </div>
-                            )}
-                            {entry.content && (
-                              <div className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                                {entry.content}
-                              </div>
-                            )}
+                      ) : (
+                        // ── Anzeigemodus ──
+                        <div>
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2 min-w-0 flex-wrap">
+                              <span className={`flex-shrink-0 flex items-center gap-1 text-xs px-2 py-0.5 rounded-full border ${typeColor(entry.type)}`}>
+                                {TYPE_LABELS[entry.type]}
+                              </span>
+                              <span className="font-semibold text-sm text-gray-900 dark:text-white leading-snug">
+                                {entry.title}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1 flex-shrink-0 ml-2">
+                              {(entry.content || entry.status || entry.itBereich) && (
+                                <button
+                                  onClick={() => setExpandedId(isExpanded ? null : entry.id)}
+                                  title={isExpanded ? "Einklappen" : "Details"}
+                                  className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded"
+                                >
+                                  {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                </button>
+                              )}
+                              <button
+                                onClick={() => startEdit(entry)}
+                                title="Bearbeiten"
+                                className="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 rounded"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(entry.id)}
+                                title="Löschen"
+                                className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    )}
+
+                          {isExpanded && (
+                            <div className="mt-2 space-y-1.5 border-t border-gray-100 dark:border-gray-700 pt-2">
+                              {entry.status && (
+                                <div className="flex items-center gap-2 text-xs">
+                                  <span className="text-gray-500 dark:text-gray-400 font-medium w-20">Status</span>
+                                  <span className="text-gray-900 dark:text-white">{STATUS_LABELS[entry.status] ?? entry.status}</span>
+                                </div>
+                              )}
+                              {entry.itBereich && (
+                                <div className="flex items-center gap-2 text-xs">
+                                  <span className="text-gray-500 dark:text-gray-400 font-medium w-20">IT-Bereich</span>
+                                  <span className="text-gray-900 dark:text-white">{entry.itBereich}</span>
+                                </div>
+                              )}
+                              {entry.content && (
+                                <p className="text-xs text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
+                                  {entry.content}
+                                </p>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               );

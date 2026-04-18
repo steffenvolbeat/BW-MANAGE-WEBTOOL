@@ -11,7 +11,6 @@ const DEFAULT_COLORS = { A:"#3ecfd6", SBG:"#1d2a3a", DBG:"#ffffff", CT:"#111827"
 const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
 const ColCtx = createContext(DEFAULT_COLORS);
 const FNT = "'Nunito','Calibri','Segoe UI',Arial,sans-serif";
-
 const FONTS: { key:string; label:string; family:string; gf:string }[] = [
   { key:"nunito",       label:"Nunito",        family:"'Nunito','Calibri',sans-serif",       gf:"Nunito:wght@400;600;700;800" },
   { key:"roboto",       label:"Roboto",         family:"'Roboto',Arial,sans-serif",           gf:"Roboto:wght@400;500;700" },

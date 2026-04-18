@@ -1923,6 +1923,16 @@ export default function ApplicationsOverview() {
                             <EyeIcon className="w-4 h-4" />
                           </button>
                           <button
+                            className="text-indigo-500 hover:text-indigo-800 p-1"
+                            title="Timeline öffnen"
+                            onClick={() => {
+                              setDetailApp(application);
+                              setDetailTab("timeline");
+                            }}
+                          >
+                            <ClockIcon className="w-4 h-4" />
+                          </button>
+                          <button
                             className="text-purple-600 hover:text-purple-900 p-1"
                             title="Anschreiben (Panel)"
                             onClick={() => {
