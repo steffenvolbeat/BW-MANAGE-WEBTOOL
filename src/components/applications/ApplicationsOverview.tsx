@@ -1851,6 +1851,7 @@ export default function ApplicationsOverview() {
                             </button>
                           </div>
                         ) : (
+                          <>
                           <button
                             type="button"
                             title="Klicken zum Ändern"
@@ -1866,6 +1867,22 @@ export default function ApplicationsOverview() {
                             <CalendarDaysIcon className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500" />
                             {formatDate(application.appliedAt)}
                           </button>
+                          {(() => {
+                            const siblings = applications.filter(
+                              (a) =>
+                                a.id !== application.id &&
+                                a.companyName.toLowerCase() === application.companyName.toLowerCase()
+                            );
+                            return siblings.length > 0 ? (
+                              <span
+                                title={siblings.map((s) => `${s.position} (${formatDate(s.appliedAt)})`).join("\n")}
+                                className="mt-1 inline-block text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 cursor-default"
+                              >
+                                +{siblings.length} weitere Bewerbung{siblings.length > 1 ? "en" : ""}
+                              </span>
+                            ) : null;
+                          })()}
+                          </>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -2232,6 +2249,41 @@ export default function ApplicationsOverview() {
                   </div>
                 </div>
               </div>
+
+              {(() => {
+                const siblings = applications.filter(
+                  (a) =>
+                    a.id !== detailApp.id &&
+                    a.companyName.toLowerCase() === detailApp.companyName.toLowerCase()
+                );
+                if (siblings.length === 0) return null;
+                return (
+                  <div className="mt-6 border border-amber-200 dark:border-amber-700/50 rounded-lg p-4 bg-amber-50 dark:bg-amber-900/20">
+                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-3">
+                      Weitere Bewerbungen bei {detailApp.companyName}
+                    </p>
+                    <ul className="space-y-2">
+                      {siblings.map((s) => (
+                        <li key={s.id} className="flex items-center justify-between text-sm">
+                          <button
+                            type="button"
+                            className="text-left text-blue-700 dark:text-blue-400 hover:underline font-medium"
+                            onClick={() => { setDetailApp(s); setDetailTab("info"); }}
+                          >
+                            {s.position}
+                          </button>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500 dark:text-slate-400">
+                              Beworben am {formatDate(s.appliedAt)}
+                            </span>
+                            {getStatusBadge(s.status)}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })()}
 
               <div className="mt-8 border border-gray-200 dark:border-slate-700 rounded-lg p-4 bg-gray-50 dark:bg-slate-800/50">
                 <div className="flex flex-wrap items-center gap-2 justify-between">
