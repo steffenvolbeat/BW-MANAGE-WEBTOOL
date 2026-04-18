@@ -230,7 +230,7 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
   useEffect(() => { loadEntries(); }, [loadEntries]);
 
   useEffect(() => {
-    if ((activeTab === "funnel" || activeTab === "heatmap" || activeTab === "gantt" || activeTab === "statistiken") && !stats) {
+    if ((activeTab === "gantt" || activeTab === "statistiken") && !stats) {
       loadStats();
     }
   }, [activeTab, stats, loadStats]);
@@ -376,7 +376,8 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
     for (let day = 0; day < 7; day++) {
       const d = new Date(startDay);
       d.setDate(d.getDate() + week * 7 + day);
-      const key = d.toISOString().slice(0, 10);
+      // Lokale Zeit verwenden (kein UTC) – muss mit heatmapData-Keys übereinstimmen
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
       col.push({ date: key, count: heatmapData[key] ?? 0 });
     }
     heatGrid.push(col);
