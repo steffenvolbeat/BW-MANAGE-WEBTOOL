@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAppUser } from "@/hooks/useAppUser";
 import { useReadOnly } from "@/hooks/useReadOnly";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
@@ -63,6 +63,8 @@ export default function ActivitiesOverview() {
   const { id: userId } = useAppUser();
   const { isReadOnly } = useReadOnly();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const viewAs = searchParams.get("viewAs");
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -101,7 +103,10 @@ export default function ActivitiesOverview() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/activities?userId=${userId}`);
+      const url = isReadOnly && viewAs
+        ? `/api/activities?viewAs=${viewAs}`
+        : `/api/activities?userId=${userId}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setActivities(data.map(normalizeActivity));
@@ -110,7 +115,7 @@ export default function ActivitiesOverview() {
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [userId, isReadOnly, viewAs]);
 
   useEffect(() => {
     loadActivities();

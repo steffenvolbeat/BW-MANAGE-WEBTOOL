@@ -23,7 +23,7 @@ import {
   ChevronDownIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 interface Application {
   id: string;
   companyName: string;
@@ -95,6 +95,8 @@ const IT_BEREICHE_OPTIONS = [
 export default function ApplicationsOverview() {
   const { id: userId } = useAppUser();
   const { isReadOnly } = useReadOnly();
+  const searchParams = useSearchParams();
+  const viewAs = searchParams.get("viewAs");
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -272,7 +274,10 @@ export default function ApplicationsOverview() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/applications?userId=${userId}`);
+      const url = isReadOnly && viewAs
+        ? `/api/applications?viewAs=${viewAs}`
+        : `/api/applications?userId=${userId}`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error(`Fetch failed (${res.status})`);
       const json = await res.json();
       const data = (Array.isArray(json) ? json : (json.applications ?? [])) as Application[];

@@ -3,6 +3,7 @@ import { useAppUser } from "@/hooks/useAppUser";
 import { useReadOnly } from "@/hooks/useReadOnly";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import {
   ChevronLeftIcon,
@@ -52,6 +53,8 @@ interface CalendarDay {
 export default function Calendar() {
   const { id: userId } = useAppUser();
   const { isReadOnly } = useReadOnly();
+  const searchParams = useSearchParams();
+  const viewAs = searchParams.get("viewAs");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -84,7 +87,7 @@ export default function Calendar() {
       setError(null);
       try {
         const params = new URLSearchParams({
-          userId: userId,
+          ...(isReadOnly && viewAs ? { viewAs } : { userId: userId }),
           startDate: startOfMonth.toISOString(),
           endDate: endOfMonth.toISOString(),
         });
@@ -107,7 +110,7 @@ export default function Calendar() {
 
     loadEvents();
     return () => controller.abort();
-  }, [userId, currentDate]);
+  }, [userId, isReadOnly, viewAs, currentDate]);
   const eventTypeConfig = {
     INTERVIEW_PHONE: {
       label: "Telefon Interview",
