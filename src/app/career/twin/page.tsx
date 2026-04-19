@@ -54,7 +54,8 @@ export default function CareerTwinPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/career/twin")
+    const controller = new AbortController();
+    fetch("/api/career/twin", { signal: controller.signal })
       .then(async (r) => {
         if (!r.ok) {
           const d = await r.json().catch(() => ({}));
@@ -66,8 +67,12 @@ export default function CareerTwinPage() {
         setEvents(d.timeline ?? []);
         setTwin(d.twin ?? null);
       })
-      .catch((e) => setLoadError(e.message ?? "Netzwerkfehler"))
+      .catch((e) => {
+        if (e instanceof Error && e.name === "AbortError") return;
+        setLoadError(e.message ?? "Netzwerkfehler");
+      })
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, []);
 
   const generateTwin = async () => {

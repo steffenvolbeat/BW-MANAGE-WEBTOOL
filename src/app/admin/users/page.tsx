@@ -41,10 +41,13 @@ export default function AdminUsersPage() {
   // User laden
   useEffect(() => {
     if (!loading && user?.role === "ADMIN") {
-      fetch("/api/admin/users")
+      const controller = new AbortController();
+      fetch("/api/admin/users", { signal: controller.signal })
         .then((r) => r.json())
         .then((data) => setUsers(data.users ?? []))
+        .catch((err) => { if (err instanceof Error && err.name === "AbortError") return; })
         .finally(() => setFetching(false));
+      return () => controller.abort();
     }
   }, [user, loading]);
 

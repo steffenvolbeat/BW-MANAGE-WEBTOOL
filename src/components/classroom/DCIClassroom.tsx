@@ -1394,7 +1394,7 @@ export default function DCIClassroom() {
         </h2>
         <div className="flex items-end gap-2 h-20">
           {APP_CURVE.map((d) => {
-            const real = stats?.weekStats?.find((s) => s.week === parseInt(d.week.replace("W", "")))?.count ?? null;
+            const real = stats?.weekStats?.find((s) => s.week === parseInt(d.week.replace("W", ""), 10))?.count ?? null;
             return (
               <div key={d.week} className="flex flex-col items-center flex-1 group relative">
                 {/* Ziel-Balken */}

@@ -61,7 +61,12 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user.id) return NextResponse.json({ error: "Unauth" }, { status: 401 });
 
-  const body = await req.json() as Partial<AutomationRule>;
+  let body: Partial<AutomationRule>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Ungültiges JSON" }, { status: 400 });
+  }
 
   if (!body.name || !body.trigger || !body.action) {
     return NextResponse.json({ error: "Pflichtfelder fehlen: name, trigger, action." }, { status: 400 });
@@ -101,7 +106,12 @@ export async function PATCH(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id fehlt." }, { status: 400 });
 
-  const body = await req.json() as Partial<AutomationRule>;
+  let body: Partial<AutomationRule>;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Ungültiges JSON" }, { status: 400 });
+  }
   const rules = getRules(user.id);
   const idx = rules.findIndex((r) => r.id === id);
 

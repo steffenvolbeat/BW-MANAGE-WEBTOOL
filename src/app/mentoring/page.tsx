@@ -37,7 +37,8 @@ export default function MentoringPage() {
   const [form, setForm] = useState({ headline: "", bio: "", skills: "", industries: "", hourlyRate: "", isAvailable: true });
 
   useEffect(() => {
-    fetch("/api/mentoring")
+    const controller = new AbortController();
+    fetch("/api/mentoring", { signal: controller.signal })
       .then((r) => r.json())
       .then((d) => {
         setMentors(d.mentors ?? []);
@@ -54,7 +55,11 @@ export default function MentoringPage() {
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setLoading(false);
+      });
+    return () => controller.abort();
   }, []);
 
   const filtered = mentors.filter(

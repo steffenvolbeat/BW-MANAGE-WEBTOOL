@@ -57,7 +57,8 @@ export default function PortfolioPage() {
   const linkRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/portfolio")
+    const controller = new AbortController();
+    fetch("/api/portfolio", { signal: controller.signal })
       .then((r) => r.json())
       .then((d) => {
         setProfile(d.profile);
@@ -77,7 +78,11 @@ export default function PortfolioPage() {
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setLoading(false);
+      });
+    return () => controller.abort();
   }, []);
 
   async function save() {

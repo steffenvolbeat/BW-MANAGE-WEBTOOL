@@ -42,7 +42,8 @@ export default function GamificationPage() {
   const [filter, setFilter] = useState<"all" | "unlocked" | "locked">("all");
 
   useEffect(() => {
-    fetch("/api/gamification/achievements")
+    const controller = new AbortController();
+    fetch("/api/gamification/achievements", { signal: controller.signal })
       .then((r) => r.json())
       .then((d) => {
         setAchievements(d.achievements ?? []);
@@ -50,7 +51,11 @@ export default function GamificationPage() {
         setUnlockedCount(d.unlockedCount ?? 0);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setLoading(false);
+      });
+    return () => controller.abort();
   }, []);
 
   const currentLevel = getLevel(totalXP);

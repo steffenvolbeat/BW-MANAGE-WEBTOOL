@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
   if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await req.json() as {
+  let body: {
     title?: string;
     body?: string;
     dueAt?: string;
@@ -86,6 +86,11 @@ export async function POST(req: NextRequest) {
     linkedEntityId?: string;
     maxRetries?: number;
   };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Ungültiges JSON" }, { status: 400 });
+  }
 
   if (!body.title?.trim()) return NextResponse.json({ error: "Titel fehlt" }, { status: 400 });
   if (!body.dueAt) return NextResponse.json({ error: "Fälligkeit fehlt" }, { status: 400 });
@@ -139,7 +144,12 @@ export async function PATCH(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
 
-  const body = await req.json() as { action?: "retry" | "cancel"; title?: string; body?: string; dueAt?: string; priority?: ReminderPriority };
+  let body: { action?: "retry" | "cancel"; title?: string; body?: string; dueAt?: string; priority?: ReminderPriority };
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Ungültiges JSON" }, { status: 400 });
+  }
 
   const all = getUserReminders(user.id);
   const idx = all.findIndex((r) => r.id === id && r.userId === user.id);

@@ -403,11 +403,13 @@ export default function HeatmapPage() {
   const [activeTab, setActiveTab] = useState<Tab>("heatmap");
 
   useEffect(() => {
-    fetch("/api/applications/heatmap")
+    const controller = new AbortController();
+    fetch("/api/applications/heatmap", { signal: controller.signal })
       .then((r) => r.json())
       .then((d: HeatmapData) => setData(d))
-      .catch((e) => setError(String(e)))
+      .catch((e) => { if (e instanceof Error && e.name === "AbortError") return; setError(String(e)); })
       .finally(() => setLoading(false));
+    return () => controller.abort();
   }, []);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [

@@ -51,12 +51,15 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userId) return;
 
+    const controller = new AbortController();
+
     const loadAnalytics = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await fetch(
-          `/api/analytics?userId=${userId}`
+          `/api/analytics?userId=${userId}`,
+          { signal: controller.signal }
         );
 
         if (!response.ok) {
@@ -66,6 +69,7 @@ export default function Dashboard() {
         const data = (await response.json()) as AnalyticsResponse;
         setAnalytics(data);
       } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
         console.error("Dashboard analytics fetch failed", err);
         setError("Daten konnten nicht geladen werden.");
       } finally {
@@ -74,6 +78,7 @@ export default function Dashboard() {
     };
 
     loadAnalytics();
+    return () => controller.abort();
   }, [userId]);
 
   const quickActions = [

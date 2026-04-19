@@ -107,13 +107,15 @@ export default function JobCoachPage() {
 
   // Bewerbungen laden
   useEffect(() => {
-    fetch("/api/applications?limit=20&sort=recent")
+    const controller = new AbortController();
+    fetch("/api/applications?limit=20&sort=recent", { signal: controller.signal })
       .then((r) => r.json())
       .then((d) => {
         const apps = d.applications ?? d.data ?? d ?? [];
         if (Array.isArray(apps)) setApplications(apps.slice(0, 20));
       })
-      .catch(() => {});
+      .catch((err) => { if (err instanceof Error && err.name === "AbortError") return; });
+    return () => controller.abort();
   }, []);
 
   // Auto-scroll

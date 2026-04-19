@@ -144,7 +144,8 @@ export default function JobPortalIntegration({
   }, []);
 
   useEffect(() => {
-    fetch("/api/applications")
+    const controller = new AbortController();
+    fetch("/api/applications", { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
         if (Array.isArray(data.applications)) {
@@ -157,7 +158,8 @@ export default function JobPortalIntegration({
           );
         }
       })
-      .catch(() => {});
+      .catch((err) => { if (err instanceof Error && err.name === "AbortError") return; });
+    return () => controller.abort();
   }, []);
 
   const addToHistory = (k: string, l: string, p: string) => {

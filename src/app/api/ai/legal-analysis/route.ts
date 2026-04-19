@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
   // Sicherheits-Check: Kein Vertragstext wird gespeichert – nur Metadaten
   const analysis = analyzeContract(contractText, contractName);
 
+  try {
   // Nur Metadaten in DB – kein Vertragstext
   const contract = await prisma.legalContract.create({
     data: {
@@ -72,6 +73,10 @@ export async function POST(req: NextRequest) {
       redFlagCount: analysis.redFlags.length,
     },
   });
+  } catch (err) {
+    console.error("legal-analysis POST failed", err);
+    return NextResponse.json({ error: "Analyse konnte nicht gespeichert werden" }, { status: 500 });
+  }
 }
 
 // GET /api/ai/legal-analysis – Alle Analysen
@@ -81,22 +86,26 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
   }
 
-  const contracts = await prisma.legalContract.findMany({
-    where: { userId: user.id },
-    orderBy: { uploadedAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      contractType: true,
-      riskLevel: true,
-      riskCount: true,
-      clauseCount: true,
-      analysisStatus: true,
-      findings: true,
-      uploadedAt: true,
-      analyzedAt: true,
-    },
-  });
-
-  return NextResponse.json({ contracts });
+  try {
+    const contracts = await prisma.legalContract.findMany({
+      where: { userId: user.id },
+      orderBy: { uploadedAt: "desc" },
+      select: {
+        id: true,
+        name: true,
+        contractType: true,
+        riskLevel: true,
+        riskCount: true,
+        clauseCount: true,
+        analysisStatus: true,
+        findings: true,
+        uploadedAt: true,
+        analyzedAt: true,
+      },
+    });
+    return NextResponse.json({ contracts });
+  } catch (err) {
+    console.error("legal-analysis GET failed", err);
+    return NextResponse.json({ error: "Analysen konnten nicht geladen werden" }, { status: 500 });
+  }
 }

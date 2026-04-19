@@ -218,7 +218,7 @@ export default function Calendar() {
     if (duration) {
       const [hours, minutes] = time.split(":");
       const startTime = new Date();
-      startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      startTime.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
       const endTime = new Date(startTime.getTime() + duration * 60000);
 
       return `${time} - ${endTime.toLocaleTimeString("de-DE", {

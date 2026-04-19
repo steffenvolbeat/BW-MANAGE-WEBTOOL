@@ -62,13 +62,18 @@ export default function SecurityPage() {
 
   // MFA-Status laden
   useEffect(() => {
-    fetch("/api/user/me")
+    const controller = new AbortController();
+    fetch("/api/user/me", { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
         setMfaEnabled(!!data.mfaEnabled);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setLoading(false);
+      });
+    return () => controller.abort();
   }, []);
 
   // WebAuthn-Credentials laden

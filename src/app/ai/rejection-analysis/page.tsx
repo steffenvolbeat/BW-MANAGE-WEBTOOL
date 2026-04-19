@@ -54,7 +54,8 @@ export default function RejectionAnalysisPage() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch("/api/ai/rejection-analysis")
+    const controller = new AbortController();
+    fetch("/api/ai/rejection-analysis", { signal: controller.signal })
       .then((r) => r.json())
       .then((d) => {
         setAnalysis(d.insight ?? null);
@@ -62,7 +63,11 @@ export default function RejectionAnalysisPage() {
         setMessage(d.message ?? "");
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setLoading(false);
+      });
+    return () => controller.abort();
   }, []);
 
   if (loading) {
