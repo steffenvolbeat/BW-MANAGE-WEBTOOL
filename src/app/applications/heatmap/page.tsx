@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   FireIcon,
@@ -396,7 +397,9 @@ function getCountryFlag(country: string): string {
 
 type Tab = "heatmap" | "locations" | "network";
 
-export default function HeatmapPage() {
+function HeatmapContent() {
+  const searchParams = useSearchParams();
+  const viewAs = searchParams.get("viewAs");
   const [data, setData] = useState<HeatmapData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -404,13 +407,19 @@ export default function HeatmapPage() {
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch("/api/applications/heatmap", { signal: controller.signal })
-      .then((r) => r.json())
+    const url = viewAs
+      ? `/api/applications/heatmap?viewAs=${viewAs}`
+      : "/api/applications/heatmap";
+    fetch(url, { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((d: HeatmapData) => setData(d))
       .catch((e) => { if (e instanceof Error && e.name === "AbortError") return; setError(String(e)); })
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, []);
+  }, [viewAs]);
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     {
@@ -547,5 +556,13 @@ export default function HeatmapPage() {
         </>
       )}
     </div>
+  );
+}
+
+export default function HeatmapPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-24"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" /></div>}>
+      <HeatmapContent />
+    </Suspense>
   );
 }

@@ -1,33 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { scopedPrisma } from "@/lib/security/scope";
-import { requireActiveUser } from "@/lib/security/guard";
+import { requireActiveUser, resolveTargetUserId } from "@/lib/security/guard";
 import { handleGuardError } from "@/lib/security/guard";
 import { enforceRateLimit } from "@/lib/security/rateLimit";
 import { TimelineEntryType } from "@prisma/client";
 
-// GET /api/timeline?applicationId=...
+// GET /api/timeline?applicationId=...&viewAs=...
 export async function GET(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
     const { searchParams } = new URL(req.url);
     const applicationId = searchParams.get("applicationId");
+    const viewAs = searchParams.get("viewAs");
 
     if (!applicationId) {
       return NextResponse.json({ error: "applicationId erforderlich" }, { status: 400 });
     }
 
+    let targetUserId: string;
+    try { targetUserId = await resolveTargetUserId(viewAs); }
+    catch { return NextResponse.json({ error: "Forbidden" }, { status: 403 }); }
+
     // Verify ownership of application
-    const db = scopedPrisma(user.id);
-    const application = await db.application.findFirst({
-      where: { id: applicationId },
+    const application = await prisma.application.findFirst({
+      where: { id: applicationId, userId: targetUserId },
     });
     if (!application) {
       return NextResponse.json({ error: "Bewerbung nicht gefunden" }, { status: 404 });
     }
 
     const entries = await prisma.applicationTimeline.findMany({
-      where: { applicationId, userId: user.id },
+      where: { applicationId, userId: targetUserId },
       orderBy: { date: "desc" },
     });
 
@@ -56,9 +58,8 @@ export async function POST(req: NextRequest) {
       validTypes.includes(type) ? (type as TimelineEntryType) : TimelineEntryType.MANUAL;
 
     // Verify ownership of application
-    const db = scopedPrisma(user.id);
-    const application = await db.application.findFirst({
-      where: { id: applicationId },
+    const application = await prisma.application.findFirst({
+      where: { id: applicationId, userId: user.id },
     });
     if (!application) {
       return NextResponse.json({ error: "Bewerbung nicht gefunden" }, { status: 404 });
