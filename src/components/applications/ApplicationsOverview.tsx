@@ -1963,6 +1963,7 @@ export default function ApplicationsOverview() {
                           <button
                             className="text-teal-600 hover:text-teal-800 p-1"
                             title="Novoresume Anschreiben erstellen"
+                            style={isReadOnly ? { display: "none" } : undefined}
                             onClick={() => {
                               const params = new URLSearchParams({
                                 mode: "novoresume",
@@ -2014,6 +2015,7 @@ export default function ApplicationsOverview() {
                             className="text-green-600 hover:text-green-800 p-1"
                             title="Dokument hochladen / anzeigen"
                             onClick={() => openUploadModal(application)}
+                            style={isReadOnly ? { display: "none" } : undefined}
                           >
                             <CloudArrowUpIcon className="w-4 h-4" />
                           </button>
@@ -2030,6 +2032,7 @@ export default function ApplicationsOverview() {
                             onClick={() => handleUpdateStatus(application)}
                             disabled={updatingId === application.id}
                             title="Status vorwärts schieben"
+                            style={isReadOnly ? { display: "none" } : undefined}
                           >
                             <ArrowPathIcon className="w-4 h-4" />
                           </button>
@@ -2075,11 +2078,13 @@ export default function ApplicationsOverview() {
                                       className="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-500 shrink-0 ml-1"
                                       onClick={(e) => { e.stopPropagation(); setClPreview({ appId: application.id, application, cl }); }}
                                       title="Anschreiben bearbeiten"
+                                      style={isReadOnly ? { display: "none" } : undefined}
                                     />
                                     <TrashIcon
                                       className="w-3.5 h-3.5 text-gray-300 group-hover:text-red-400 shrink-0"
                                       onClick={(e) => { e.stopPropagation(); handleDeleteCL(application.id, cl.id); }}
                                       title="Anschreiben löschen"
+                                      style={isReadOnly ? { display: "none" } : undefined}
                                     />
                                   </div>
                                 ))}
@@ -2124,6 +2129,7 @@ export default function ApplicationsOverview() {
                                           onClick={() => handleDeleteDoc(doc, application.id)}
                                           title="Dokument löschen"
                                           className="text-red-400 hover:text-red-600 transition-colors p-1"
+                                          style={isReadOnly ? { display: "none" } : undefined}
                                         >
                                           <TrashIcon className="w-3.5 h-3.5" />
                                         </button>
@@ -2639,7 +2645,7 @@ export default function ApplicationsOverview() {
                 >
                   Schließen
                 </button>
-                {clPreview.cl.id && (
+                {clPreview.cl.id && !isReadOnly && (
                   <button
                     className="text-sm text-red-500 hover:text-red-700 px-3 py-2 flex items-center gap-1 disabled:opacity-50"
                     disabled={clDeleting === clPreview.cl.id}
@@ -2652,6 +2658,7 @@ export default function ApplicationsOverview() {
                   </button>
                 )}
               </div>
+              {!isReadOnly && (
               <button
                 className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 text-sm flex items-center gap-2 disabled:opacity-60"
                 disabled={clPreviewSaving}
@@ -2660,6 +2667,7 @@ export default function ApplicationsOverview() {
                 {clPreviewSaving && <ArrowPathIcon className="w-4 h-4 animate-spin" />}
                 Speichern
               </button>
+              )}
             </div>
           </div>
         </div>

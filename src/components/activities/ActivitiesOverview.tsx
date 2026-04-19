@@ -402,6 +402,7 @@ export default function ActivitiesOverview() {
             <div className="text-lg font-bold text-gray-900">{getThisWeeksActivities()}</div>
           </div>
           {/* Sync */}
+          {!isReadOnly && (
           <button
             onClick={syncFromApplications}
             disabled={syncing}
@@ -411,6 +412,7 @@ export default function ActivitiesOverview() {
             <ArrowsRightLeftIcon className={`w-4 h-4 ${syncing ? "animate-spin" : ""}`} />
             Sync
           </button>
+          )}
           {/* Aktualisieren */}
           <button
             onClick={loadActivities}

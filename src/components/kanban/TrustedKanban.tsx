@@ -248,7 +248,7 @@ export function TrustedKanban() {
           {boards.length === 1 && (
             <span className="text-sm font-medium text-gray-700 bg-gray-100 px-3 py-1 rounded-lg">{boards[0].name}</span>
           )}
-          {selectedBoard && (
+          {selectedBoard && !isReadOnly && (
             <button
               title="Board löschen"
               onClick={handleDeleteBoard}
