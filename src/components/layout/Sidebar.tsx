@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import {
   HomeIcon,
@@ -334,12 +334,16 @@ const navigation: NavigationItem[] = [
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { user } = useAuth();
 
   // Da Sidebar nur client-seitig gerendert wird (ssr: false in MainLayout),
   // ist user immer bereits verfügbar – kein mounted-Trick nötig
   const isAdmin = user?.role === "ADMIN";
   const isReadOnly = user?.role === "MANAGER" || user?.role === "VERMITTLER";
+
+  // viewAs aus der aktuellen URL lesen (damit Sidebar-Links den Kontext behalten)
+  const viewAs = searchParams.get("viewAs");
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -378,9 +382,19 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
+            // Für Observer: normale User-Links nur anzeigen wenn viewAs aktiv,
+            // sonst nur den "Meine Teilnehmer"-Link zeigen
+            const hiddenForObserver =
+              isReadOnly && !item.observerOnly && !viewAs &&
+              item.href !== "/observer/targets";
             const hidden =
               (item.adminOnly && !isAdmin) ||
-              (item.observerOnly && !isReadOnly);
+              (item.observerOnly && !isReadOnly) ||
+              hiddenForObserver;
+
+            const resolvedHref = isReadOnly && viewAs && !item.observerOnly
+              ? `${item.href}?viewAs=${viewAs}`
+              : item.href;
 
             const linkClass = [
               hidden ? "hidden" : "",
@@ -402,7 +416,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             return (
               <Link
                 key={item.name}
-                href={item.href}
+                href={resolvedHref}
                 onClick={hidden ? undefined : onClose}
                 aria-hidden={hidden || undefined}
                 tabIndex={hidden ? -1 : undefined}
