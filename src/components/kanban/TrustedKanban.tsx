@@ -99,7 +99,7 @@ export function TrustedKanban() {
   useEffect(() => {
     fetchBoards();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, [userId, isReadOnly, viewAs]);
 
   async function handleCreateBoard() {
     if (!newBoardName.trim()) return;

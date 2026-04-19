@@ -301,7 +301,7 @@ export default function ApplicationsOverview() {
   useEffect(() => {
     loadApplications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, [userId, isReadOnly, viewAs]);
 
   const statusFlow = [
     "SAVED",
