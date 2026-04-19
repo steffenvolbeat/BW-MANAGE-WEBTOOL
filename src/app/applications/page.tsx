@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import ApplicationsOverview from "@/components/applications/ApplicationsOverview";
 
 export default function ApplicationsPage() {
-  return <ApplicationsOverview />;
+  return (
+    <Suspense>
+      <ApplicationsOverview />
+    </Suspense>
+  );
 }
