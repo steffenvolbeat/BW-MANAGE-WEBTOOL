@@ -111,8 +111,8 @@ export default function ViewAccessPage() {
 
   // Nur MANAGER und VERMITTLER können beobachten
   const observers = allUsers.filter((u) => ["MANAGER", "VERMITTLER"].includes(u.role));
-  // Nur USER können beobachtet werden
-  const targets = allUsers.filter((u) => u.role === "USER");
+  // Alle Nicht-Observer-Rollen können beobachtet werden (USER, ADMIN)
+  const targets = allUsers.filter((u) => !["MANAGER", "VERMITTLER"].includes(u.role));
 
   if (loading || user?.role !== "ADMIN") {
     return (
