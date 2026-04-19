@@ -547,6 +547,7 @@ export default function Calendar() {
                                   <ApplicationTimeline
                                     applicationId={event.applicationId}
                                     applicationName={event.company ?? event.application?.companyName ?? event.title}
+                                    viewAs={viewAs}
                                   />
                                 </div>
                               )}

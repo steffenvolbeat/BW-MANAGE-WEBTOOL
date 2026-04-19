@@ -65,6 +65,7 @@ interface ApplicationTimelineProps {
   applicationName: string;
   itBereich?: string;
   currentStatus?: string;
+  viewAs?: string | null;
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -195,6 +196,7 @@ export default function ApplicationTimeline({
   applicationName,
   itBereich,
   currentStatus,
+  viewAs,
 }: ApplicationTimelineProps) {
   const [entries, setEntries] = useState<TimelineEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -242,7 +244,9 @@ export default function ApplicationTimeline({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/timeline?applicationId=${applicationId}`);
+      const params = new URLSearchParams({ applicationId });
+      if (viewAs) params.set("viewAs", viewAs);
+      const res = await fetch(`/api/timeline?${params.toString()}`);
       if (!res.ok) throw new Error("Fehler beim Laden der Timeline");
       const data = await res.json();
       setEntries(data);
@@ -251,7 +255,7 @@ export default function ApplicationTimeline({
     } finally {
       setLoading(false);
     }
-  }, [applicationId]);
+  }, [applicationId, viewAs]);
 
   useEffect(() => {
     fetchEntries();

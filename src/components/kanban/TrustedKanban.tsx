@@ -533,6 +533,7 @@ export function TrustedKanban() {
                 <ApplicationTimeline
                   applicationId={editCard.metadata.applicationId}
                   applicationName={editCard.title}
+                  viewAs={viewAs}
                 />
               ) : (
                 <div className="space-y-3">

@@ -2228,6 +2228,7 @@ export default function ApplicationsOverview() {
                   applicationName={`${detailApp.position} @ ${detailApp.companyName}`}
                   itBereich={detailApp.itBereich}
                   currentStatus={detailApp.status}
+                  viewAs={viewAs}
                 />
               ) : (
                 <>
@@ -2708,6 +2709,7 @@ export default function ApplicationsOverview() {
             {/* Modal-Body */}
             <div className="p-6 overflow-y-auto">
               <GlobalApplicationTimeline
+                viewAs={viewAs}
                 onOpenApplication={(applicationId) => {
                   const app = applications.find((a) => a.id === applicationId);
                   if (app) {

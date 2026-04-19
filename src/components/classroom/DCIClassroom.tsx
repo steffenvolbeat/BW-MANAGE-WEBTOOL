@@ -2033,7 +2033,7 @@ export default function DCIClassroom() {
               </button>
             </div>
             <div className="p-6">
-              <GlobalApplicationTimeline />
+              <GlobalApplicationTimeline viewAs={viewAs} />
             </div>
           </div>
         </div>

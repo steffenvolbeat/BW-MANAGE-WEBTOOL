@@ -704,6 +704,7 @@ export default function ActivitiesOverview() {
               <ApplicationTimeline
                 applicationId={detailActivity.applicationId}
                 applicationName={detailActivity.application?.companyName ?? detailActivity.metadata?.company as string ?? "Bewerbung"}
+                viewAs={viewAs}
               />
             ) : (
               <>

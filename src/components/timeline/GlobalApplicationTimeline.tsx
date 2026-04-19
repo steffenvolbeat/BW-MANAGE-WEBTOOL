@@ -160,10 +160,6 @@ interface TimelineStats {
 
 type ViewTab = "zeitstrahl" | "funnel" | "heatmap" | "gantt" | "statistiken";
 
-interface Props {
-  onOpenApplication?: (applicationId: string) => void;
-}
-
 // ─── Funnel colors ────────────────────────────────────────────────────────────
 const FUNNEL_ORDER = [
   "APPLIED", "REVIEWED", "INTERVIEW_SCHEDULED", "INTERVIEWED",
@@ -183,7 +179,12 @@ const FUNNEL_COLORS: Record<string, string> = {
   REJECTED: "bg-red-500",
 };
 
-export default function GlobalApplicationTimeline({ onOpenApplication }: Props) {
+interface Props {
+  onOpenApplication?: (applicationId: string) => void;
+  viewAs?: string | null;
+}
+
+export default function GlobalApplicationTimeline({ onOpenApplication, viewAs }: Props) {
   const [entries, setEntries] = useState<GlobalEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,7 +205,9 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/timeline/all?limit=500");
+      const params = new URLSearchParams({ limit: "500" });
+      if (viewAs) params.set("viewAs", viewAs);
+      const res = await fetch(`/api/timeline/all?${params.toString()}`);
       if (!res.ok) throw new Error("Fehler beim Laden");
       setEntries(await res.json());
     } catch {
@@ -212,12 +215,15 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [viewAs]);
 
   const loadStats = useCallback(async () => {
     setStatsLoading(true);
     try {
-      const res = await fetch("/api/timeline/stats");
+      const params = new URLSearchParams();
+      if (viewAs) params.set("viewAs", viewAs);
+      const url = params.toString() ? `/api/timeline/stats?${params.toString()}` : "/api/timeline/stats";
+      const res = await fetch(url);
       if (!res.ok) throw new Error();
       setStats(await res.json());
     } catch {
@@ -225,7 +231,7 @@ export default function GlobalApplicationTimeline({ onOpenApplication }: Props) 
     } finally {
       setStatsLoading(false);
     }
-  }, []);
+  }, [viewAs]);
 
   useEffect(() => { loadEntries(); }, [loadEntries]);
 

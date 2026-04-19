@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { resolveTargetUserId, handleGuardError } from "@/lib/security/guard";
 import { prisma } from "@/lib/database";
 
 // GET /api/timeline/stats — Funnel + Reaktionszeiten + Staleness
-export async function GET(_req: NextRequest) {
-  let user;
+export async function GET(req: NextRequest) {
+  let targetUserId: string;
   try {
-    user = await requireActiveUser();
+    const viewAs = new URL(req.url).searchParams.get("viewAs");
+    targetUserId = await resolveTargetUserId(viewAs);
   } catch (err) {
     return handleGuardError(err);
   }
 
   const entries = await prisma.applicationTimeline.findMany({
-    where: { userId: user.id },
+    where: { userId: targetUserId },
     include: {
       application: {
         select: {
