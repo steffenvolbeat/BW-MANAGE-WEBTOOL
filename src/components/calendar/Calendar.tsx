@@ -83,6 +83,7 @@ export default function Calendar() {
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
     const loadEvents = async () => {
+      if (isReadOnly && !viewAs) return;
       setLoading(true);
       setError(null);
       try {

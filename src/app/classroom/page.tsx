@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import MainLayout from "@/components/layout/MainLayout";
 import DCIClassroom from "@/components/classroom/DCIClassroom";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -11,7 +12,9 @@ export default function ClassroomPage() {
   return (
     <ProtectedRoute>
       <MainLayout>
-        <DCIClassroom />
+        <Suspense>
+          <DCIClassroom />
+        </Suspense>
       </MainLayout>
     </ProtectedRoute>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { useReadOnly } from "@/hooks/useReadOnly";
 import { computeCurrentWeek, getWeekStart } from "@/lib/classroom/schedule";
 import GlobalApplicationTimeline from "@/components/timeline/GlobalApplicationTimeline";
@@ -1182,9 +1183,16 @@ export default function DCIClassroom() {
   const entryKey = (week: number, day: number | null, type: string) =>
     `${week}-${day ?? "w"}-${type}`;
 
+  const searchParams = useSearchParams();
+  const viewAs = searchParams.get("viewAs");
+
   const loadEntries = useCallback(async (week: number) => {
+    if (isReadOnly && !viewAs) return;
     try {
-      const res = await fetch(`/api/classroom/entries?week=${week}`);
+      const url = isReadOnly && viewAs
+        ? `/api/classroom/entries?week=${week}&viewAs=${viewAs}`
+        : `/api/classroom/entries?week=${week}`;
+      const res = await fetch(url);
       if (!res.ok) return;
       const data = await res.json() as Array<{ week: number; day: number | null; type: string; content: string; title?: string }>;
       setEntries((prev) => {
@@ -1195,7 +1203,7 @@ export default function DCIClassroom() {
         return next;
       });
     } catch { /* ignorieren */ }
-  }, []);
+  }, [isReadOnly, viewAs]);
 
   const saveEntry = async (week: number, day: number | null, type: string, content: string) => {
     const key = entryKey(week, day, type);
