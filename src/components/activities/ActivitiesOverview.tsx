@@ -100,6 +100,7 @@ export default function ActivitiesOverview() {
 
   const loadActivities = useCallback(async () => {
     if (!userId) return;
+    if (isReadOnly && !viewAs) return;
     setLoading(true);
     setError(null);
     try {

@@ -271,6 +271,7 @@ export default function ApplicationsOverview() {
 
   const loadApplications = async () => {
     if (!userId) return;
+    if (isReadOnly && !viewAs) return;
     setLoading(true);
     setError(null);
     try {

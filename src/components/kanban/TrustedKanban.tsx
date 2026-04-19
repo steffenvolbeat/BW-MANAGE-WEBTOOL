@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAppUser } from "@/hooks/useAppUser";
 import { useReadOnly } from "@/hooks/useReadOnly";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
@@ -38,6 +39,8 @@ interface Card {
 export function TrustedKanban() {
   const { id: userId } = useAppUser();
   const { isReadOnly } = useReadOnly();
+  const searchParams = useSearchParams();
+  const viewAs = searchParams.get("viewAs");
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,10 +74,14 @@ export function TrustedKanban() {
   );
 
   async function fetchBoards() {
+    if (isReadOnly && !viewAs) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/kanban/boards");
+      const url = isReadOnly && viewAs
+        ? `/api/kanban/boards?viewAs=${viewAs}`
+        : "/api/kanban/boards";
+      const res = await fetch(url);
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error ?? "Boards konnten nicht geladen werden");
       const loaded: Board[] = data.boards ?? [];
