@@ -24,13 +24,6 @@ const STATUS_TO_COLUMN: Record<string, string> = {
   WITHDRAWN: "Abgeschlossen",
 };
 
-function handleGuardError(error: unknown) {
-  if ((error as any)?.code === "FORBIDDEN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  return null;
-}
-
 // GET - Retrieve all applications (MANAGER/VERMITTLER via ?viewAs=<userId>)
 export async function GET(request: Request) {
   try {
