@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useReadOnly } from "@/hooks/useReadOnly";
 import { computeCurrentWeek, getWeekStart } from "@/lib/classroom/schedule";
 import GlobalApplicationTimeline from "@/components/timeline/GlobalApplicationTimeline";
 
@@ -1158,6 +1159,7 @@ interface SyncResult {
 }
 
 export default function DCIClassroom() {
+  const { isReadOnly } = useReadOnly();
   const [activeWeek, setActiveWeek] = useState(computeCurrentWeek);
   const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>(() => {
     if (typeof window === "undefined") return {};
@@ -1568,12 +1570,15 @@ export default function DCIClassroom() {
                           className="w-full text-xs rounded border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-2 py-1.5 resize-none focus:ring-1 focus:ring-blue-400 focus:outline-none"
                           rows={3}
                           placeholder="Was habe ich heute gelernt / gearbeitet?"
+                          readOnly={isReadOnly}
                           value={entries[entryKey(activeWeek, i + 1, "DAY_NOTE")] ?? ""}
                           onChange={(e) => {
+                            if (isReadOnly) return;
                             const k = entryKey(activeWeek, i + 1, "DAY_NOTE");
                             setEntries((prev) => ({ ...prev, [k]: e.target.value }));
                           }}
                           onBlur={(e) => {
+                            if (isReadOnly) return;
                             const val = e.target.value.trim();
                             if (val) saveEntry(activeWeek, i + 1, "DAY_NOTE", val);
                             else deleteEntry(activeWeek, i + 1, "DAY_NOTE");
@@ -1591,12 +1596,15 @@ export default function DCIClassroom() {
                           className="w-full text-xs rounded border border-blue-200 dark:border-blue-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-2 py-1.5 resize-none focus:ring-1 focus:ring-blue-400 focus:outline-none"
                           rows={3}
                           placeholder="Zusammenfassung des Tages…"
+                          readOnly={isReadOnly}
                           value={entries[entryKey(activeWeek, i + 1, "DAY_SUMMARY")] ?? ""}
                           onChange={(e) => {
+                            if (isReadOnly) return;
                             const k = entryKey(activeWeek, i + 1, "DAY_SUMMARY");
                             setEntries((prev) => ({ ...prev, [k]: e.target.value }));
                           }}
                           onBlur={(e) => {
+                            if (isReadOnly) return;
                             const val = e.target.value.trim();
                             if (val) saveEntry(activeWeek, i + 1, "DAY_SUMMARY", val);
                             else deleteEntry(activeWeek, i + 1, "DAY_SUMMARY");
@@ -1895,12 +1903,15 @@ export default function DCIClassroom() {
                   className="w-full text-sm rounded-lg border border-purple-200 dark:border-purple-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-3 py-2 resize-none focus:ring-2 focus:ring-purple-400 focus:outline-none"
                   rows={4}
                   placeholder="Was habe ich diese Woche recherchiert? Welche Ressourcen, Links, Konzepte sind wichtig?"
+                  readOnly={isReadOnly}
                   value={entries[entryKey(activeWeek, null, "RESEARCH")] ?? ""}
                   onChange={(e) => {
+                    if (isReadOnly) return;
                     const k = entryKey(activeWeek, null, "RESEARCH");
                     setEntries((prev) => ({ ...prev, [k]: e.target.value }));
                   }}
                   onBlur={(e) => {
+                    if (isReadOnly) return;
                     const val = e.target.value.trim();
                     if (val) saveEntry(activeWeek, null, "RESEARCH", val);
                     else deleteEntry(activeWeek, null, "RESEARCH");
@@ -1920,12 +1931,15 @@ export default function DCIClassroom() {
                   className="w-full text-sm rounded-lg border border-purple-200 dark:border-purple-700 bg-white dark:bg-slate-800 text-gray-800 dark:text-slate-200 px-3 py-2 resize-none focus:ring-2 focus:ring-purple-400 focus:outline-none"
                   rows={5}
                   placeholder="Was habe ich diese Woche gelernt und gemacht? Was lief gut, was schwer?"
+                  readOnly={isReadOnly}
                   value={entries[entryKey(activeWeek, null, "WEEK_SUMMARY")] ?? ""}
                   onChange={(e) => {
+                    if (isReadOnly) return;
                     const k = entryKey(activeWeek, null, "WEEK_SUMMARY");
                     setEntries((prev) => ({ ...prev, [k]: e.target.value }));
                   }}
                   onBlur={(e) => {
+                    if (isReadOnly) return;
                     const val = e.target.value.trim();
                     if (val) saveEntry(activeWeek, null, "WEEK_SUMMARY", val);
                     else deleteEntry(activeWeek, null, "WEEK_SUMMARY");

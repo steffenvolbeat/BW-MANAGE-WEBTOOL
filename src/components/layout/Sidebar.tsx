@@ -307,6 +307,13 @@ const navigation: NavigationItem[] = [
     adminOnly: true,
   },
   {
+    name: "Lesezugriff verwalten",
+    href: "/admin/view-access",
+    icon: ShieldCheckIcon,
+    description: "MANAGER / VERMITTLER Zugriffsrechte",
+    adminOnly: true,
+  },
+  {
     name: "Roadmap",
     href: "/admin/coming-soon",
     icon: SparklesIcon,

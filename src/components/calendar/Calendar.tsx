@@ -1,5 +1,6 @@
 "use client";
 import { useAppUser } from "@/hooks/useAppUser";
+import { useReadOnly } from "@/hooks/useReadOnly";
 
 import { useEffect, useState, type ReactNode } from "react";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
@@ -50,6 +51,7 @@ interface CalendarDay {
 
 export default function Calendar() {
   const { id: userId } = useAppUser();
+  const { isReadOnly } = useReadOnly();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -349,6 +351,7 @@ export default function Calendar() {
                 setShowCreate(true);
               }}
               className="inline-flex items-center gap-2 rounded-lg bg-white text-slate-900 px-4 py-2 font-semibold shadow hover:-translate-y-0.5 hover:shadow-md transition duration-150"
+              style={isReadOnly ? { display: "none" } : undefined}
             >
               <PlusIcon className="w-4 h-4" />
               Termin hinzufügen
@@ -471,12 +474,14 @@ export default function Calendar() {
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
+                  {!isReadOnly && (
                   <button
                     onClick={() => { resetForm(); setShowCreate(true); }}
                     className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition"
                   >
                     <PlusIcon className="w-3 h-3" /> Termin
                   </button>
+                  )}
                   <button
                     onClick={() => setSelectedDate(null)}
                     className="text-slate-400 hover:text-slate-600 transition"

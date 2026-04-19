@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useAppUser } from "@/hooks/useAppUser";
+import { useReadOnly } from "@/hooks/useReadOnly";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import {
   PlusIcon,
@@ -36,6 +37,7 @@ interface Card {
 
 export function TrustedKanban() {
   const { id: userId } = useAppUser();
+  const { isReadOnly } = useReadOnly();
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -261,6 +263,7 @@ export function TrustedKanban() {
         <button
           onClick={() => setShowNewBoard(true)}
           className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+          style={isReadOnly ? { display: "none" } : undefined}
         >
           <PlusIcon className="w-4 h-4" />
           Neues Board
@@ -319,6 +322,7 @@ export function TrustedKanban() {
                       <div className="flex items-start justify-between gap-1">
                         <p className="text-sm font-medium text-gray-900 flex-1">{card.title}</p>
                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          {!isReadOnly && (
                           <button
                             title="Bearbeiten"
                             onClick={() => openEditCard(card)}
@@ -326,6 +330,8 @@ export function TrustedKanban() {
                           >
                             <PencilSquareIcon className="w-3.5 h-3.5" />
                           </button>
+                          )}
+                          {!isReadOnly && (
                           <button
                             title="Löschen"
                             onClick={() => handleDeleteCard(card.id)}
@@ -333,6 +339,7 @@ export function TrustedKanban() {
                           >
                             <TrashIcon className="w-3.5 h-3.5" />
                           </button>
+                          )}
                         </div>
                       </div>
                       {card.description && (
@@ -375,7 +382,7 @@ export function TrustedKanban() {
                 </div>
 
                 {/* Karte hinzufügen */}
-                {addingCardToCol === col.id ? (
+                {!isReadOnly && (addingCardToCol === col.id ? (
                   <div className="p-2 border-t border-gray-200 bg-white rounded-b-xl">
                     <input
                       autoFocus
@@ -425,7 +432,7 @@ export function TrustedKanban() {
                     <PlusIcon className="w-3.5 h-3.5" />
                     Karte hinzufügen
                   </button>
-                )}
+                ))}
               </div>
             ))}
           </div>

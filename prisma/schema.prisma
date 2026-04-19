@@ -59,6 +59,10 @@ model User {
   timelineShares       TimelineShare[]
   classroomEntries    ClassroomEntry[]
 
+  // Lesezugriff-Grants (MANAGER / VERMITTLER)
+  viewAccessGranted   ViewAccessGrant[] @relation("Grantee")
+  viewAccessTargets   ViewAccessGrant[] @relation("GrantTarget")
+
   @@map("users")
 }
 
@@ -367,6 +371,8 @@ enum BoardRole {
 enum Role {
   USER
   ADMIN
+  MANAGER    // DCI-Dozenten & Management – reiner Lesezugriff
+  VERMITTLER // Agentur für Arbeit        – reiner Lesezugriff
 }
 
 enum UserStatus {
@@ -832,5 +838,26 @@ model ClassroomEntry {
   @@unique([userId, week, day, type])
   @@index([userId, week])
   @@map("classroom_entries")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ZUGRIFFSRECHTE: MANAGER (DCI) & VERMITTLER (AfA) – NUR LESEZUGRIFF
+// Admin vergibt einem MANAGER/VERMITTLER Lesezugriff auf einen bestimmten User.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model ViewAccessGrant {
+  id        String   @id @default(cuid())
+  /// MANAGER oder VERMITTLER, der Lesezugriff erhält
+  granteeId String
+  grantee   User     @relation("Grantee", fields: [granteeId], references: [id], onDelete: Cascade)
+  /// USER/Bewerber, dessen Daten gelesen werden dürfen
+  targetId  String
+  target    User     @relation("GrantTarget", fields: [targetId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([granteeId, targetId])
+  @@index([granteeId])
+  @@index([targetId])
+  @@map("view_access_grants")
 }
 

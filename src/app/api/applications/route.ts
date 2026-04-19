@@ -8,7 +8,7 @@ import {
   JobType,
   Priority,
 } from "@prisma/client";
-import { requireActiveUser, assertSameUser } from "@/lib/security/guard";
+import { requireActiveUser, assertSameUser, resolveTargetUserId, blockReadOnlyRoles, isReadOnlyRole, handleGuardError } from "@/lib/security/guard";
 
 // Mapping: ApplicationStatus → Kanban-Spaltenname
 const STATUS_TO_COLUMN: Record<string, string> = {
@@ -31,19 +31,26 @@ function handleGuardError(error: unknown) {
   return null;
 }
 
-// GET - Retrieve all applications for a user
+// GET - Retrieve all applications (MANAGER/VERMITTLER via ?viewAs=<userId>)
 export async function GET(request: Request) {
   try {
     const user = await requireActiveUser().catch(() => null);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const db = scopedPrisma(user.id);
 
     const { searchParams } = new URL(request.url);
-    const requestedUserId = searchParams.get("userId");
-    assertSameUser(requestedUserId, user.id);
+    const viewAs = searchParams.get("viewAs");
 
+    let targetUserId: string;
+    try { targetUserId = await resolveTargetUserId(viewAs); }
+    catch { return NextResponse.json({ error: "Forbidden" }, { status: 403 }); }
+
+    if (!isReadOnlyRole(user.role)) {
+      assertSameUser(searchParams.get("userId"), user.id);
+    }
+
+    const db = scopedPrisma(targetUserId);
     const applications = await db.application.findMany({
-      where: { userId: user.id },
+      where: { userId: targetUserId },
       include: {
         documents: true,
         activities: true,
@@ -58,22 +65,15 @@ export async function GET(request: Request) {
     if (msg === "UNAUTHORIZED" || msg === "INACTIVE") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    if ((error as any)?.code === "FORBIDDEN" || msg === "FORBIDDEN") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-    console.error("Error fetching applications:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleGuardError(error);
   }
 }
 
-// POST - Create new application
+// POST - Create new application (MANAGER/VERMITTLER: 403 Forbidden)
 export async function POST(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let user: Awaited<ReturnType<typeof blockReadOnlyRoles>>;
+    try { user = await blockReadOnlyRoles(); } catch (e) { return handleGuardError(e); }
     const db = scopedPrisma(user.id);
 
     const data = await request.json();
@@ -215,11 +215,11 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT - Update application
+// PUT - Update application (MANAGER/VERMITTLER: 403 Forbidden)
 export async function PUT(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let user: Awaited<ReturnType<typeof blockReadOnlyRoles>>;
+    try { user = await blockReadOnlyRoles(); } catch (e) { return handleGuardError(e); }
     const db = scopedPrisma(user.id);
 
     const data = await request.json();
@@ -400,11 +400,11 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE - Delete application
+// DELETE - Delete application (MANAGER/VERMITTLER: 403 Forbidden)
 export async function DELETE(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let user: Awaited<ReturnType<typeof blockReadOnlyRoles>>;
+    try { user = await blockReadOnlyRoles(); } catch (e) { return handleGuardError(e); }
     const db = scopedPrisma(user.id);
 
     const { searchParams } = new URL(request.url);

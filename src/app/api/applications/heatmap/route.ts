@@ -6,11 +6,11 @@
  * - locations: Top-Bewerbungsorte
  * - maxStreak: Längste zusammenhängende Bewerbungsphase
  */
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { requireActiveUser } from "@/lib/security/guard";
+import { requireActiveUser, resolveTargetUserId, handleGuardError } from "@/lib/security/guard";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const user = await requireActiveUser().catch(() => null);
     if (!user)
@@ -19,18 +19,25 @@ export async function GET() {
         { status: 401 }
       );
 
+    const { searchParams } = new URL(request.url);
+    const viewAs = searchParams.get("viewAs");
+
+    let targetUserId: string;
+    try { targetUserId = await resolveTargetUserId(viewAs); }
+    catch { return NextResponse.json({ error: "Forbidden" }, { status: 403 }); }
+
     const now = new Date();
     const oneYearAgo = new Date(now);
     oneYearAgo.setFullYear(now.getFullYear() - 1);
 
     const [recent, allApps] = await Promise.all([
       prisma.application.findMany({
-        where: { userId: user.id, appliedAt: { gte: oneYearAgo } },
+        where: { userId: targetUserId, appliedAt: { gte: oneYearAgo } },
         select: { appliedAt: true, status: true, location: true, country: true },
         orderBy: { appliedAt: "asc" },
       }),
       prisma.application.findMany({
-        where: { userId: user.id },
+        where: { userId: targetUserId },
         select: { status: true, location: true, country: true },
       }),
     ]);

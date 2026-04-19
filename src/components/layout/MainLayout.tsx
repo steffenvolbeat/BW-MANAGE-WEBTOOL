@@ -3,6 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Header from "./Header";
+import ReadOnlyBanner from "@/components/ReadOnlyBanner";
 
 // SSR deaktiviert – Sidebar nutzt useAuth/mounted-Logik die nur im Browser gilt
 // Verhindert Hydration-Mismatch zwischen Server (kein User-Kontext) und Client
@@ -35,6 +36,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
         onMobileMenuToggle={handleMobileMenuToggle}
         isMobileMenuOpen={isMobileMenuOpen}
       />
+
+      {/* Lesezugriff-Banner für MANAGER / VERMITTLER */}
+      <ReadOnlyBanner />
 
       <div className="flex">
         {/* Sidebar */}

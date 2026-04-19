@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAppUser } from "@/hooks/useAppUser";
+import { useReadOnly } from "@/hooks/useReadOnly";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import {
   ClockIcon,
@@ -60,6 +61,7 @@ interface Activity {
 
 export default function ActivitiesOverview() {
   const { id: userId } = useAppUser();
+  const { isReadOnly } = useReadOnly();
   const router = useRouter();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
@@ -599,6 +601,7 @@ export default function ActivitiesOverview() {
                   )}
 
                   {/* Bearbeiten */}
+                  {!isReadOnly && (
                   <button
                     onClick={() => openEdit(activity)}
                     title="Bearbeiten"
@@ -606,8 +609,10 @@ export default function ActivitiesOverview() {
                   >
                     <PencilIcon className="w-4 h-4" />
                   </button>
+                  )}
 
                   {/* Löschen */}
+                  {!isReadOnly && (
                   <button
                     onClick={() => deleteActivity(activity.id)}
                     title="Löschen"
@@ -615,6 +620,7 @@ export default function ActivitiesOverview() {
                   >
                     <TrashIcon className="w-4 h-4" />
                   </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -740,12 +746,14 @@ export default function ActivitiesOverview() {
             </dl>
 
             <div className="flex gap-2 pt-2">
+              {!isReadOnly && (
               <button
                 onClick={() => { setDetailActivity(null); setDetailTab("info"); openEdit(detailActivity); }}
                 className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
               >
                 <PencilIcon className="w-4 h-4" /> Bearbeiten
               </button>
+              )}
               <button
                 onClick={() => { setDetailActivity(null); setDetailTab("info"); }}
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"

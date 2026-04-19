@@ -5,7 +5,7 @@ import {
   ActivityStatus,
   Priority,
 } from "@prisma/client";
-import { requireActiveUser, assertSameUser } from "@/lib/security/guard";
+import { requireActiveUser, assertSameUser, resolveTargetUserId, blockReadOnlyRoles, isReadOnlyRole, handleGuardError } from "@/lib/security/guard";
 
 function handleGuardError(error: unknown) {
   if ((error as any)?.code === "FORBIDDEN") {
@@ -14,37 +14,33 @@ function handleGuardError(error: unknown) {
   return null;
 }
 
-// GET - Retrieve all activities for a user
+// GET - Retrieve all activities (MANAGER/VERMITTLER via ?viewAs=<userId>)
 export async function GET(request: Request) {
   try {
     const user = await requireActiveUser().catch(() => null);
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const db = scopedPrisma(user.id);
 
     const { searchParams } = new URL(request.url);
-    const requestedUserId = searchParams.get("userId");
+    const viewAs = searchParams.get("viewAs");
     const applicationId = searchParams.get("applicationId");
     const contactId = searchParams.get("contactId");
 
-    assertSameUser(requestedUserId, user.id);
+    let targetUserId: string;
+    try { targetUserId = await resolveTargetUserId(viewAs); }
+    catch { return NextResponse.json({ error: "Forbidden" }, { status: 403 }); }
 
-    const whereClause: any = {};
-    whereClause.userId = user.id;
-
-    if (applicationId) {
-      whereClause.applicationId = applicationId;
+    if (!isReadOnlyRole(user.role)) {
+      assertSameUser(searchParams.get("userId"), user.id);
     }
 
-    if (contactId) {
-      whereClause.contactId = contactId;
-    }
+    const db = scopedPrisma(targetUserId);
+    const whereClause: any = { userId: targetUserId };
+    if (applicationId) whereClause.applicationId = applicationId;
+    if (contactId) whereClause.contactId = contactId;
 
     const activities = await db.activity.findMany({
       where: whereClause,
-      include: {
-        application: true,
-        contact: true,
-      },
+      include: { application: true, contact: true },
       orderBy: { timestamp: "asc" },
     });
 
@@ -53,18 +49,15 @@ export async function GET(request: Request) {
     const guardResponse = handleGuardError(error);
     if (guardResponse) return guardResponse;
     console.error("Error fetching activities:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-// POST - Create new activity
+// POST - Create new activity (MANAGER/VERMITTLER: 403 Forbidden)
 export async function POST(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let user: Awaited<ReturnType<typeof blockReadOnlyRoles>>;
+    try { user = await blockReadOnlyRoles(); } catch (e) { return handleGuardError(e); }
     const db = scopedPrisma(user.id);
 
     const data = await request.json();
@@ -167,11 +160,11 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT - Update activity
+// PUT - Update activity (MANAGER/VERMITTLER: 403 Forbidden)
 export async function PUT(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let user: Awaited<ReturnType<typeof blockReadOnlyRoles>>;
+    try { user = await blockReadOnlyRoles(); } catch (e) { return handleGuardError(e); }
     const db = scopedPrisma(user.id);
 
     const data = await request.json();
@@ -261,11 +254,11 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE - Delete activity
+// DELETE - Delete activity (MANAGER/VERMITTLER: 403 Forbidden)
 export async function DELETE(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    let user: Awaited<ReturnType<typeof blockReadOnlyRoles>>;
+    try { user = await blockReadOnlyRoles(); } catch (e) { return handleGuardError(e); }
     const db = scopedPrisma(user.id);
 
     const { searchParams } = new URL(request.url);

@@ -1,5 +1,6 @@
 "use client";
 import { useAppUser } from "@/hooks/useAppUser";
+import { useReadOnly } from "@/hooks/useReadOnly";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import GlobalApplicationTimeline from "@/components/timeline/GlobalApplicationTimeline";
 
@@ -93,6 +94,7 @@ const IT_BEREICHE_OPTIONS = [
 
 export default function ApplicationsOverview() {
   const { id: userId } = useAppUser();
+  const { isReadOnly } = useReadOnly();
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -951,6 +953,7 @@ export default function ApplicationsOverview() {
             onClick={() => (window.location.href = "/applications/new")}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             disabled={!userId}
+            style={isReadOnly ? { display: "none" } : undefined}
           >
             <PlusIcon className="w-4 h-4 mr-2" />
             Neue Bewerbung
@@ -2018,6 +2021,7 @@ export default function ApplicationsOverview() {
                             className="text-indigo-600 hover:text-indigo-900 p-1 disabled:opacity-60"
                             onClick={() => openEdit(application)}
                             title="Bearbeiten"
+                            style={isReadOnly ? { display: "none" } : undefined}
                           >
                             <PencilSquareIcon className="w-4 h-4" />
                           </button>
@@ -2034,6 +2038,7 @@ export default function ApplicationsOverview() {
                             onClick={() => handleDelete(application.id)}
                             disabled={deletingId === application.id}
                             title="Löschen"
+                            style={isReadOnly ? { display: "none" } : undefined}
                           >
                             <TrashIcon className="w-4 h-4" />
                           </button>

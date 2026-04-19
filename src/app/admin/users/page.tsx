@@ -16,7 +16,7 @@ interface ManagedUser {
   id: string;
   email: string;
   name: string | null;
-  role: "USER" | "ADMIN";
+  role: "USER" | "ADMIN" | "MANAGER" | "VERMITTLER";
   status: "ACTIVE" | "INACTIVE" | "SUSPENDED";
   createdAt: string;
   emailVerified: boolean;
@@ -51,7 +51,7 @@ export default function AdminUsersPage() {
     }
   }, [user, loading]);
 
-  async function updateUser(userId: string, patch: { role?: "USER" | "ADMIN"; status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" }) {
+  async function updateUser(userId: string, patch: { role?: "USER" | "ADMIN" | "MANAGER" | "VERMITTLER"; status?: "ACTIVE" | "INACTIVE" | "SUSPENDED" }) {
     setSaving(userId);
     setMessage(null);
     const res = await fetch("/api/admin/users", {
@@ -79,8 +79,10 @@ export default function AdminUsersPage() {
   }
 
   const roleColors: Record<string, string> = {
-    ADMIN: "bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300",
-    USER: "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+    ADMIN:      "bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300",
+    USER:       "bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300",
+    MANAGER:    "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300",
+    VERMITTLER: "bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300",
   };
 
   const statusColors: Record<string, string> = {
@@ -154,7 +156,7 @@ export default function AdminUsersPage() {
 
                       {/* Rolle */}
                       <td className="px-5 py-3">
-                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${roleColors[u.role]}`}>
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${roleColors[u.role] ?? ""}`}>
                           {u.role === "ADMIN" ? <ShieldCheckIcon className="h-3 w-3" /> : <UserIcon className="h-3 w-3" />}
                           {u.role}
                         </span>
@@ -178,22 +180,18 @@ export default function AdminUsersPage() {
                           <span className="text-xs text-(--muted) italic">Eigenes Konto</span>
                         ) : (
                           <div className="flex flex-wrap gap-2">
-                            {/* Rolle umschalten */}
-                            <button
+                            {/* Rolle als Dropdown */}
+                            <select
                               disabled={isLoading}
-                              onClick={() => updateUser(u.id, { role: u.role === "ADMIN" ? "USER" : "ADMIN" })}
-                              className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md border transition-colors disabled:opacity-50 ${
-                                u.role === "ADMIN"
-                                  ? "border-purple-400 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
-                                  : "border-blue-400 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                              }`}
+                              value={u.role}
+                              onChange={(e) => updateUser(u.id, { role: e.target.value as "USER" | "ADMIN" | "MANAGER" | "VERMITTLER" })}
+                              className="text-xs px-2 py-1.5 rounded-md border border-(--border) bg-(--card) text-foreground cursor-pointer disabled:opacity-50"
                             >
-                              {u.role === "ADMIN" ? (
-                                <><ShieldExclamationIcon className="h-3.5 w-3.5" /> zu USER</>
-                              ) : (
-                                <><ShieldCheckIcon className="h-3.5 w-3.5" /> zu ADMIN</>
-                              )}
-                            </button>
+                              <option value="USER">USER</option>
+                              <option value="ADMIN">ADMIN</option>
+                              <option value="MANAGER">MANAGER (DCI)</option>
+                              <option value="VERMITTLER">VERMITTLER (AfA)</option>
+                            </select>
 
                             {/* Status sperren/entsperren */}
                             {u.status === "SUSPENDED" ? (

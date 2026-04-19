@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { requireActiveUser } from "@/lib/security/guard";
-import { handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, handleGuardError, resolveTargetUserId, blockReadOnlyRoles } from "@/lib/security/guard";
 import { enforceRateLimit } from "@/lib/security/rateLimit";
 import { ClassroomEntryType } from "@prisma/client";
 
@@ -10,11 +9,16 @@ export async function GET(req: NextRequest) {
   try {
     const user = await requireActiveUser();
     const { searchParams } = new URL(req.url);
+    const viewAs = searchParams.get("viewAs");
     const weekParam = searchParams.get("week");
     const dayParam = searchParams.get("day");
     const typeParam = searchParams.get("type");
 
-    const where: Record<string, unknown> = { userId: user.id };
+    let targetUserId: string;
+    try { targetUserId = await resolveTargetUserId(viewAs); }
+    catch { return NextResponse.json({ error: "Forbidden" }, { status: 403 }); }
+
+    const where: Record<string, unknown> = { userId: targetUserId };
     if (weekParam !== null) {
       const w = parseInt(weekParam, 10);
       if (!isNaN(w)) where.week = w;
@@ -45,7 +49,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     await enforceRateLimit(req, "classroom:entries", { max: 240, windowMs: 60 * 60_000 });
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const body = await req.json();
     const { week, day, type, title, content } = body;
 

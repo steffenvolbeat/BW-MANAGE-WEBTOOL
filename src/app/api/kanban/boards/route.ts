@@ -1,20 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, handleGuardError, resolveTargetUserId, blockReadOnlyRoles, isReadOnlyRole } from "@/lib/security/guard";
 
 export const revalidate = 0;
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
     const user = await requireActiveUser();
+    const { searchParams } = new URL(req.url);
+    const viewAs = searchParams.get("viewAs");
+
+    let targetUserId: string;
+    try { targetUserId = await resolveTargetUserId(viewAs); }
+    catch { return NextResponse.json({ error: "Forbidden" }, { status: 403 }); }
+
+    const boardQuery = isReadOnlyRole(user.role)
+      ? { ownerId: targetUserId }
+      : { OR: [{ ownerId: targetUserId }, { members: { some: { userId: targetUserId } } }] };
 
     const boards = await prisma.board.findMany({
-      where: {
-        OR: [
-          { ownerId: user.id },
-          { members: { some: { userId: user.id } } },
-        ],
-      },
+      where: boardQuery,
       orderBy: { createdAt: "asc" },
       include: {
         columns: {
@@ -40,7 +45,7 @@ export async function GET(_req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const { name } = await req.json();
     if (!name?.trim()) {
       return NextResponse.json({ error: "Name erforderlich" }, { status: 400 });
@@ -80,7 +85,7 @@ export async function POST(req: NextRequest) {
 // DELETE /api/kanban/boards?id=xxx — Board löschen (nur Owner)
 export async function DELETE(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "id erforderlich" }, { status: 400 });

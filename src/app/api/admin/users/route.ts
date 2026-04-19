@@ -26,7 +26,7 @@ export async function GET() {
   return NextResponse.json({ users });
 }
 
-const VALID_ROLES = ["USER", "ADMIN"] as const;
+const VALID_ROLES = ["USER", "ADMIN", "MANAGER", "VERMITTLER"] as const;
 const VALID_STATUSES = ["ACTIVE", "INACTIVE", "SUSPENDED"] as const;
 
 // PATCH /api/admin/users – Rolle oder Status eines Users ändern
