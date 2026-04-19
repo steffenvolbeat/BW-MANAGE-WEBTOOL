@@ -10,6 +10,8 @@ import {
   CheckCircleIcon,
   XCircleIcon,
   ArrowPathIcon,
+  PlusIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 
 interface ManagedUser {
@@ -30,6 +32,39 @@ export default function AdminUsersPage() {
   const [fetching, setFetching] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
+
+  // Formular: neuer Benutzer
+  const [showForm, setShowForm] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newRole, setNewRole] = useState<"USER" | "ADMIN" | "MANAGER" | "VERMITTLER">("MANAGER");
+  const [creating, setCreating] = useState(false);
+
+  function resetForm() {
+    setNewName(""); setNewEmail(""); setNewPassword(""); setNewRole("MANAGER"); setShowForm(false);
+  }
+
+  async function createUser(e: React.FormEvent) {
+    e.preventDefault();
+    setCreating(true);
+    setMessage(null);
+    const res = await fetch("/api/admin/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName, email: newEmail, password: newPassword, role: newRole }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setUsers((prev) => [data.user, ...prev]);
+      setMessage({ text: `Benutzer "${data.user.name}" erfolgreich angelegt ✓`, ok: true });
+      resetForm();
+    } else {
+      setMessage({ text: data.error ?? "Fehler beim Anlegen", ok: false });
+    }
+    setCreating(false);
+    setTimeout(() => setMessage(null), 4000);
+  }
 
   // Zugriff nur für Admins
   useEffect(() => {
@@ -96,13 +131,79 @@ export default function AdminUsersPage() {
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <ShieldCheckIcon className="h-8 w-8 text-purple-500" />
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Benutzerverwaltung</h1>
-            <p className="text-(--muted)">Rollen und Status aller Benutzer verwalten</p>
+        <div className="flex items-center justify-between gap-3 mb-8">
+          <div className="flex items-center gap-3">
+            <ShieldCheckIcon className="h-8 w-8 text-purple-500" />
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Benutzerverwaltung</h1>
+              <p className="text-(--muted)">Rollen und Status aller Benutzer verwalten</p>
+            </div>
           </div>
+          <button
+            onClick={() => setShowForm((v) => !v)}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors"
+          >
+            {showForm ? <XMarkIcon className="h-4 w-4" /> : <PlusIcon className="h-4 w-4" />}
+            {showForm ? "Abbrechen" : "Neuer Benutzer"}
+          </button>
         </div>
+
+        {/* Formular: Neuer Benutzer */}
+        {showForm && (
+          <form onSubmit={createUser} className="mb-6 bg-(--card) border border-(--border) rounded-xl p-6 space-y-4">
+            <h2 className="text-base font-semibold text-foreground">Neuen Benutzer anlegen</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-(--muted) mb-1">Name</label>
+                <input
+                  type="text" required value={newName} onChange={(e) => setNewName(e.target.value)}
+                  placeholder="Max Mustermann" minLength={2} maxLength={100}
+                  className="w-full px-3 py-2 rounded-lg bg-(--surface) border border-(--border) text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-(--muted) mb-1">E-Mail</label>
+                <input
+                  type="email" required value={newEmail} onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="name@beispiel.de"
+                  className="w-full px-3 py-2 rounded-lg bg-(--surface) border border-(--border) text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-(--muted) mb-1">Passwort</label>
+                <input
+                  type="text" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Mindestens 8 Zeichen" minLength={8} maxLength={128}
+                  className="w-full px-3 py-2 rounded-lg bg-(--surface) border border-(--border) text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-(--muted) mb-1">Rolle</label>
+                <select
+                  value={newRole} onChange={(e) => setNewRole(e.target.value as typeof newRole)}
+                  className="w-full px-3 py-2 rounded-lg bg-(--surface) border border-(--border) text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="MANAGER">MANAGER (DCI-Dozent)</option>
+                  <option value="VERMITTLER">VERMITTLER (Agentur f. Arbeit)</option>
+                  <option value="USER">USER (Bewerber)</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 pt-1">
+              <button
+                type="submit" disabled={creating}
+                className="flex items-center gap-2 px-5 py-2 rounded-lg bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white text-sm font-medium transition-colors"
+              >
+                {creating ? <ArrowPathIcon className="h-4 w-4 animate-spin" /> : <PlusIcon className="h-4 w-4" />}
+                {creating ? "Wird angelegt…" : "Benutzer anlegen"}
+              </button>
+              <button type="button" onClick={resetForm} className="text-sm text-(--muted) hover:text-foreground transition-colors">
+                Abbrechen
+              </button>
+            </div>
+          </form>
+        )}
 
         {/* Status-Meldung */}
         {message && (
