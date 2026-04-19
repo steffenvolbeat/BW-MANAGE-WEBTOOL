@@ -43,6 +43,8 @@ interface NavigationItem {
   badge?: string;
   restricted?: boolean;
   adminOnly?: boolean;
+  /** Nur für MANAGER und VERMITTLER sichtbar */
+  observerOnly?: boolean;
 }
 
 interface SidebarProps {
@@ -300,6 +302,13 @@ const navigation: NavigationItem[] = [
     adminOnly: true,
   },
   {
+    name: "Meine Teilnehmer",
+    href: "/observer/targets",
+    icon: UsersIcon,
+    description: "Zugewiesene Teilnehmer einsehen",
+    observerOnly: true,
+  },
+  {
     name: "Benutzerverwaltung",
     href: "/admin/users",
     icon: UsersIcon,
@@ -330,6 +339,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   // Da Sidebar nur client-seitig gerendert wird (ssr: false in MainLayout),
   // ist user immer bereits verfügbar – kein mounted-Trick nötig
   const isAdmin = user?.role === "ADMIN";
+  const isReadOnly = user?.role === "MANAGER" || user?.role === "VERMITTLER";
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -368,7 +378,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {navigation.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.href);
-            const hidden = item.adminOnly && !isAdmin;
+            const hidden =
+              (item.adminOnly && !isAdmin) ||
+              (item.observerOnly && !isReadOnly);
 
             const linkClass = [
               hidden ? "hidden" : "",

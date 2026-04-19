@@ -10,6 +10,17 @@ function LoginPageContent() {
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
 
+  /** Leitet MANAGER/VERMITTLER nach dem Login zur Teilnehmerübersicht weiter. */
+  function resolveRedirect(role: string | undefined): string {
+    if (
+      (role === "MANAGER" || role === "VERMITTLER") &&
+      redirectTo === "/dashboard"
+    ) {
+      return "/observer/targets";
+    }
+    return redirectTo;
+  }
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -65,7 +76,7 @@ function LoginPageContent() {
       const verData = await verRes.json();
       if (!verRes.ok) throw new Error(verData.error ?? "Authentifizierung fehlgeschlagen");
 
-      router.replace(redirectTo);
+      router.replace(resolveRedirect(verData.user?.role));
       router.refresh();
     } catch (e: any) {
       setWebauthnError(e.message ?? "Unbekannter Fehler");
@@ -93,7 +104,7 @@ function LoginPageContent() {
         setMfaRequired(true);
         setTimeout(() => totpInputRef.current?.focus(), 100);
       } else {
-        router.replace(redirectTo);
+        router.replace(resolveRedirect(data.user?.role));
         router.refresh();
       }
     } catch {
@@ -119,7 +130,7 @@ function LoginPageContent() {
       if (!res.ok) {
         setError(data.error || "Ungültiger Code.");
       } else {
-        router.replace(redirectTo);
+        router.replace(resolveRedirect(data.user?.role));
         router.refresh();
       }
     } catch {
