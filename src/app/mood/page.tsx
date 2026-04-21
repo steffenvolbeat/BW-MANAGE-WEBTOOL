@@ -40,6 +40,7 @@ export default function StimmungsBarometerPage() {
   const [averages, setAverages] = useState<{ mood: number; energy: number; stress: number } | null>(null);
   const [burnoutWarning, setBurnoutWarning] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [todayExists, setTodayExists] = useState(false);
 
   // Form
   const [mood, setMood] = useState(3);
@@ -56,6 +57,16 @@ export default function StimmungsBarometerPage() {
       setEntries(data.entries ?? []);
       setAverages(data.averages);
       setBurnoutWarning(data.burnoutWarning ?? false);
+      // Heutigen Eintrag ins Formular vorladen
+      if (data.todayEntry) {
+        setTodayExists(true);
+        setMood(data.todayEntry.mood);
+        setEnergy(data.todayEntry.energy);
+        setStress(data.todayEntry.stress);
+        setNote(data.todayEntry.note ?? "");
+      } else {
+        setTodayExists(false);
+      }
     } catch {
       // Stimmungsdaten konnten nicht geladen werden
     } finally {
@@ -75,7 +86,7 @@ export default function StimmungsBarometerPage() {
       });
       if (res.ok) {
         setSaved(true);
-        setNote("");
+        setTodayExists(true);
         await load();
         setTimeout(() => setSaved(false), 3000);
       }
@@ -111,7 +122,14 @@ export default function StimmungsBarometerPage() {
 
       {/* Eingabe-Formular */}
       <div className="bg-(--card) border border-(--border) rounded-xl p-6 mb-8">
-        <h2 className="text-lg font-semibold mb-6">Wie geht es dir heute?</h2>
+        <h2 className="text-lg font-semibold mb-6 flex items-center gap-2">
+          Wie geht es dir heute?
+          {todayExists && (
+            <span className="text-xs font-normal bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full">
+              ✏️ Heute bereits gespeichert – Änderungen überschreiben den Eintrag
+            </span>
+          )}
+        </h2>
 
         <div className="space-y-6">
           <div>
@@ -144,7 +162,7 @@ export default function StimmungsBarometerPage() {
             disabled={saving}
             className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 transition"
           >
-            {saving ? "💾 Speichern..." : saved ? "✅ Gespeichert!" : "💾 Stimmung speichern"}
+            {saving ? "💾 Speichern..." : saved ? "✅ Gespeichert!" : todayExists ? "💾 Heute’s Eintrag aktualisieren" : "💾 Stimmung speichern"}
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 /**
  * Stimmungs-Barometer API
- * GET  /api/mood         → letzte 30 Einträge + Auswertung
- * POST /api/mood         → neuen Eintrag speichern
+ * GET  /api/mood         → letzte 30 Tage (max. 1 Eintrag/Tag) + Auswertung
+ * POST /api/mood         → Eintrag speichern (Upsert: heute bereits vorhanden → überschreiben)
  */
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/currentUser";
@@ -12,11 +12,23 @@ export async function GET() {
   try {
     const user = await getCurrentUser();
 
+    // Letzte 30 Tage (UTC-Tagesgrenzen)
+    const now = new Date();
+    const thirtyDaysAgo = new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 29
+    ));
+
     const entries = await prisma.moodEntry.findMany({
-      where: { userId: user.id },
+      where: { userId: user.id, createdAt: { gte: thirtyDaysAgo } },
       orderBy: { createdAt: "desc" },
       take: 30,
     });
+
+    // Eintrag von heute (für Vorab-Befüllung des Formulars)
+    const todayStart = new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()
+    ));
+    const todayEntry = entries.find((e) => new Date(e.createdAt) >= todayStart) ?? null;
 
     const avg = entries.length
       ? {
@@ -30,7 +42,7 @@ export async function GET() {
     const last7 = entries.slice(0, 7);
     const burnoutWarning = last7.filter((e) => e.stress >= 4 && e.energy <= 2).length >= 3;
 
-    return NextResponse.json({ entries, averages: avg, burnoutWarning, count: entries.length });
+    return NextResponse.json({ entries, averages: avg, burnoutWarning, count: entries.length, todayEntry });
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
@@ -61,11 +73,30 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const entry = await prisma.moodEntry.create({
-      data: { userId: user.id, mood, energy, stress, note: note ?? null },
+    // Upsert: Gibt es bereits einen Eintrag für heute (UTC)? → überschreiben
+    const now = new Date();
+    const todayStart = new Date(Date.UTC(
+      now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()
+    ));
+    const todayEnd = new Date(todayStart.getTime() + 86_400_000);
+
+    const existing = await prisma.moodEntry.findFirst({
+      where: { userId: user.id, createdAt: { gte: todayStart, lt: todayEnd } },
     });
 
-    return NextResponse.json({ entry }, { status: 201 });
+    let entry;
+    if (existing) {
+      entry = await prisma.moodEntry.update({
+        where: { id: existing.id },
+        data: { mood, energy, stress, note: note ?? null },
+      });
+    } else {
+      entry = await prisma.moodEntry.create({
+        data: { userId: user.id, mood, energy, stress, note: note ?? null },
+      });
+    }
+
+    return NextResponse.json({ entry, updated: !!existing }, { status: 200 });
   } catch (e: unknown) {
     if (e instanceof Error && e.message === "UNAUTHORIZED") {
       return NextResponse.json({ error: "Nicht angemeldet" }, { status: 401 });
