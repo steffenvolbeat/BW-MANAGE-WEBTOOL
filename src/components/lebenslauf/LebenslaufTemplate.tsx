@@ -289,6 +289,7 @@ export default function LebenslaufTemplate() {
   const [sizeKey,setSizeKey]             = useState("md");
   const [photoShapeKey,setPhotoShapeKey] = useState("rounded");
   const [showDesign,setShowDesign]       = useState(false);
+  const [confirmReset, setConfirmReset]   = useState(false);
   const curFont  = FONTS.find(f=>f.key===fontKey)??FONTS[0];
   const curSize  = FONT_SIZES.find(s=>s.key===sizeKey)??FONT_SIZES[2];
   const curShape = PHOTO_SHAPES.find(s=>s.key===photoShapeKey)??PHOTO_SHAPES[1];
@@ -346,9 +347,16 @@ export default function LebenslaufTemplate() {
         <button onClick={()=>setShowDesign(v=>!v)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:`1px solid ${showDesign?"#4f46e5":"#e5e7eb"}`,backgroundColor:showDesign?"#eef2ff":"white",color:showDesign?"#4f46e5":CB,fontFamily:FNT}}>
           🎨 Design
         </button>
-        <button onClick={()=>{if(window.confirm("Zurücksetzen?")){setData(JSON.parse(JSON.stringify(DEFAULT_DATA)));setHiddenContacts(new Set());setFontKey("nunito");setSizeKey("md");setPhotoShapeKey("rounded");setShowDesign(false);}}} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"1px solid #d1d5db",backgroundColor:"white",color:CB,fontFamily:FNT}}>
+        <button onClick={()=>setConfirmReset(true)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:8,fontSize:13,fontWeight:600,cursor:"pointer",border:"1px solid #d1d5db",backgroundColor:"white",color:CB,fontFamily:FNT}}>
           <XMarkIcon style={{width:16,height:16}}/>Zurücksetzen
         </button>
+        {confirmReset&&(
+          <div style={{display:"flex",alignItems:"center",gap:6,background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,padding:"6px 12px"}}>
+            <span style={{fontSize:13,color:"#b91c1c"}}>Wirklich zurücksetzen?</span>
+            <button style={{fontSize:12,fontWeight:700,color:"#b91c1c",cursor:"pointer",border:"none",background:"transparent",padding:"0 4px"}} onClick={()=>{setData(JSON.parse(JSON.stringify(DEFAULT_DATA)));setHiddenContacts(new Set());setFontKey("nunito");setSizeKey("md");setPhotoShapeKey("rounded");setShowDesign(false);setConfirmReset(false);}}>Ja</button>
+            <button style={{fontSize:12,color:"#6b7280",cursor:"pointer",border:"none",background:"transparent",padding:"0 4px"}} onClick={()=>setConfirmReset(false)}>Nein</button>
+          </div>
+        )}
         {editing&&<span style={{alignSelf:"center",fontSize:12,color:CM,fontStyle:"italic"}}>Alle Felder direkt bearbeitbar</span>}
         {showDesign&&(
           <div style={{width:"100%",background:"white",border:"1px solid #e5e7eb",borderRadius:10,padding:"14px 18px",display:"flex",gap:24,flexWrap:"wrap",boxShadow:"0 2px 8px rgba(0,0,0,0.08)"}}>
