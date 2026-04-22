@@ -22,6 +22,7 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   DocumentTextIcon,
+  ChatBubbleLeftEllipsisIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter, useSearchParams } from "next/navigation";
 interface Application {
@@ -169,6 +170,37 @@ export default function ApplicationsOverview() {
   const [quickDateId, setQuickDateId] = useState<string | null>(null);
   const [quickDateVal, setQuickDateVal] = useState<string>("");
   const [savingQuickDate, setSavingQuickDate] = useState(false);
+
+  // Schnell-Notiz Modal
+  const [notesModalId, setNotesModalId] = useState<string | null>(null);
+  const [notesModalValue, setNotesModalValue] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
+
+  const openNotesModal = (app: Application) => {
+    setNotesModalId(app.id);
+    setNotesModalValue(app.notesText ?? "");
+  };
+
+  const saveNotes = async () => {
+    if (!notesModalId || !userId) return;
+    setSavingNotes(true);
+    try {
+      const res = await fetch("/api/applications", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: notesModalId, userId, notesText: notesModalValue }),
+      });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const updated = await res.json();
+      setApplications((prev) => prev.map((a) => (a.id === notesModalId ? { ...a, ...updated } : a)));
+      showToast("Notiz gespeichert.");
+      setNotesModalId(null);
+    } catch (err) {
+      showToast("Notiz konnte nicht gespeichert werden.", "error");
+    } finally {
+      setSavingNotes(false);
+    }
+  };
 
   const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
     SAVED: { label: "Gespeichert", color: "bg-gray-100 text-gray-600", icon: ClockIcon },
@@ -1986,6 +2018,17 @@ export default function ApplicationsOverview() {
                             <EyeIcon className="w-4 h-4" />
                           </button>
                           <button
+                            className="relative text-yellow-600 hover:text-yellow-800 p-1"
+                            title={application.notesText?.trim() ? `Notiz: ${application.notesText.slice(0, 60)}…` : "Notiz hinzufügen"}
+                            onClick={() => openNotesModal(application)}
+                            style={isReadOnly ? { display: "none" } : undefined}
+                          >
+                            <ChatBubbleLeftEllipsisIcon className="w-4 h-4" />
+                            {application.notesText?.trim() && (
+                              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-yellow-400 rounded-full" />
+                            )}
+                          </button>
+                          <button
                             className="text-indigo-500 hover:text-indigo-800 p-1"
                             title="Timeline öffnen"
                             onClick={() => {
@@ -2763,6 +2806,51 @@ export default function ApplicationsOverview() {
                   }
                 }}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Schnell-Notiz Modal ─────────────────────────────────────────── */}
+      {notesModalId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setNotesModalId(null)}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center gap-2">
+                <ChatBubbleLeftEllipsisIcon className="w-5 h-5 text-yellow-500" />
+                <h2 className="text-lg font-semibold text-gray-800">
+                  Notiz — {applications.find((a) => a.id === notesModalId)?.companyName}
+                </h2>
+              </div>
+              <button onClick={() => setNotesModalId(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="px-6 py-5">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Notizen zu diesem Unternehmen</label>
+              <textarea
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-y"
+                rows={7}
+                placeholder="Eigene Notizen, Gesprächsnotizen, Kontaktpersonen, Besonderheiten…"
+                value={notesModalValue}
+                onChange={(e) => setNotesModalValue(e.target.value)}
+                autoFocus
+              />
+            </div>
+            <div className="flex justify-end gap-3 px-6 pb-5">
+              <button
+                onClick={() => setNotesModalId(null)}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-600 hover:bg-gray-50"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={saveNotes}
+                disabled={savingNotes}
+                className="px-5 py-2 rounded-lg bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold disabled:opacity-60"
+              >
+                {savingNotes ? "Speichert…" : "Speichern"}
+              </button>
             </div>
           </div>
         </div>

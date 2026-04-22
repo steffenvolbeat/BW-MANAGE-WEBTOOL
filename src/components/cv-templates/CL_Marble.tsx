@@ -45,7 +45,7 @@ export default function CL_Marble() {
           *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           body * { visibility: hidden !important; }
           .clmrb-doc, .clmrb-doc * { visibility: visible !important; }
-          .clmrb-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; box-shadow: none !important; margin: 0 !important; }
+          .clmrb-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 850px !important; min-height: 1202px !important; overflow: hidden !important; zoom: 0.934 !important; box-shadow: none !important; margin: 0 !important; }
           .clmrb-zoom { zoom: 1 !important; width: 100% !important; }
           .clmrb-ctrl { display: none !important; }
         }

@@ -45,7 +45,7 @@ export default function CL_Cloud() {
           *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           body * { visibility: hidden !important; }
           .clcld-doc, .clcld-doc * { visibility: visible !important; }
-          .clcld-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; box-shadow: none !important; margin: 0 !important; }
+          .clcld-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 850px !important; min-height: 1202px !important; overflow: hidden !important; zoom: 0.934 !important; box-shadow: none !important; margin: 0 !important; }
           .clcld-zoom { zoom: 1 !important; width: 100% !important; }
           .clcld-ctrl { display: none !important; }
         }

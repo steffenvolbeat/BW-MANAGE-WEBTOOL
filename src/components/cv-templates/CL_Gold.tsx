@@ -45,7 +45,7 @@ export default function CL_Gold() {
           *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           body * { visibility: hidden !important; }
           .clgol-doc, .clgol-doc * { visibility: visible !important; }
-          .clgol-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 210mm !important; box-shadow: none !important; margin: 0 !important; }
+          .clgol-doc { position: absolute !important; top: 0 !important; left: 0 !important; width: 850px !important; min-height: 1202px !important; overflow: hidden !important; zoom: 0.934 !important; box-shadow: none !important; margin: 0 !important; }
           .clgol-zoom { zoom: 1 !important; width: 100% !important; }
           .clgol-ctrl { display: none !important; }
         }

@@ -322,12 +322,14 @@ export default function LebenslaufTemplate() {
           .cv-doc {
             position: absolute !important;
             top: 0 !important; left: 0 !important;
-            width: 210mm !important; max-width: 210mm !important;
+            width: 850px !important;
+            min-height: 1202px !important;
+            overflow: hidden !important;
+            zoom: 0.934 !important;
             box-shadow: none !important; margin: 0 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* Sidebar nur so hoch wie ihr Inhalt – kein dunkler Balken auf Seite 2 */
           .cv-zoom-wrapper { zoom: 1 !important; width: 100% !important; }
           .cv-doc > div > div:first-child { align-items: flex-start !important; }
           .cv-ctrl { display: none !important; visibility: hidden !important; }
