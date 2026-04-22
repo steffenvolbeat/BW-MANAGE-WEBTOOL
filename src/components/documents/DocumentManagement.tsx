@@ -76,7 +76,6 @@ export default function DocumentManagement() {
   const [selectedTag, setSelectedTag] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const loadDocuments = async () => {
     if (!userId) return;
@@ -195,6 +194,8 @@ export default function DocumentManagement() {
 
   const handleDelete = async (id: string) => {
     if (!userId) return;
+    const confirmed = window.confirm("Dokument wirklich löschen?");
+    if (!confirmed) return;
     setDeletingId(id);
     try {
       const res = await fetch(`/api/documents?id=${id}&userId=${userId}`, {
@@ -209,7 +210,6 @@ export default function DocumentManagement() {
       showToast("Löschen fehlgeschlagen.", "error");
     } finally {
       setDeletingId(null);
-      setConfirmDeleteId(null);
     }
   };
 
@@ -235,18 +235,11 @@ export default function DocumentManagement() {
                 </a>
                 <button
                   className="p-1 text-red-500 hover:text-red-700"
-                  onClick={() => setConfirmDeleteId(doc.id)}
+                  onClick={() => handleDelete(doc.id)}
                   disabled={deletingId === doc.id}
                 >
                   <TrashIcon className="w-4 h-4" />
                 </button>
-                {confirmDeleteId === doc.id && (
-                  <div className="flex items-center gap-1 bg-red-50 border border-red-200 rounded px-1.5 py-0.5">
-                    <span className="text-xs text-red-700">Löschen?</span>
-                    <button className="text-xs font-semibold text-red-700 hover:text-red-900 px-1" onClick={() => handleDelete(doc.id)}>Ja</button>
-                    <button className="text-xs text-gray-500 hover:text-gray-700 px-1" onClick={() => setConfirmDeleteId(null)}>Nein</button>
-                  </div>
-                )}
               </div>
             </div>
 
@@ -353,18 +346,11 @@ export default function DocumentManagement() {
                       </a>
                       <button
                         className="text-red-600 hover:text-red-900 p-1"
-                        onClick={() => setConfirmDeleteId(doc.id)}
+                        onClick={() => handleDelete(doc.id)}
                         disabled={deletingId === doc.id}
                       >
                         <TrashIcon className="w-4 h-4" />
                       </button>
-                      {confirmDeleteId === doc.id && (
-                        <div className="flex items-center gap-1 bg-red-50 border border-red-200 rounded px-1.5 py-0.5">
-                          <span className="text-xs text-red-700">Löschen?</span>
-                          <button className="text-xs font-semibold text-red-700 hover:text-red-900 px-1" onClick={() => handleDelete(doc.id)}>Ja</button>
-                          <button className="text-xs text-gray-500 hover:text-gray-700 px-1" onClick={() => setConfirmDeleteId(null)}>Nein</button>
-                        </div>
-                      )}
                     </div>
                   </td>
                 </tr>

@@ -39,6 +39,14 @@ import CL_Blush from "@/components/cv-templates/CL_Blush";
 import CL_Jade from "@/components/cv-templates/CL_Jade";
 import CL_Smoke from "@/components/cv-templates/CL_Smoke";
 import CL_Gold from "@/components/cv-templates/CL_Gold";
+import CL_Typewriter from "@/components/cv-templates/CL_Typewriter";
+import CL_Blueprint from "@/components/cv-templates/CL_Blueprint";
+import CL_Glassmorphism from "@/components/cv-templates/CL_Glassmorphism";
+import CL_Cyberpunk from "@/components/cv-templates/CL_Cyberpunk";
+import CL_Magazine from "@/components/cv-templates/CL_Magazine";
+import CL_Terminal from "@/components/cv-templates/CL_Terminal";
+import CL_Prism from "@/components/cv-templates/CL_Prism";
+import CL_Nordic from "@/components/cv-templates/CL_Nordic";
 
 const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   midnight: CL_Midnight,
@@ -73,6 +81,14 @@ const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   jade: CL_Jade,
   smoke: CL_Smoke,
   gold: CL_Gold,
+  typewriter: CL_Typewriter,
+  blueprint: CL_Blueprint,
+  glass: CL_Glassmorphism,
+  cyber: CL_Cyberpunk,
+  magazine: CL_Magazine,
+  terminal: CL_Terminal,
+  prism: CL_Prism,
+  nordic: CL_Nordic,
 };
 
 function AnschreibenContent() {
