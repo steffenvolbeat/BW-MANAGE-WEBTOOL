@@ -123,6 +123,14 @@ export const CL_TEMPLATES: TemplateMeta[] = [
   { key: "jade",        label: "Jade",         description: "Jadegrün, hell und frisch",          accent: "#059669", bg: "#f0fdf4",  preview: "linear-gradient(135deg,#f0fdf4,#d1fae5,#059669)" },
   { key: "smoke",       label: "Smoke",        description: "Rauchgrau, warm-dunkel",             accent: "#a8a29e", bg: "#1c1917",  preview: "linear-gradient(135deg,#1c1917 40%,#a8a29e 100%)" },
   { key: "gold",        label: "Gold",         description: "Reines Gold auf Schwarz",            accent: "#fbbf24", bg: "#0f0a00",  preview: "linear-gradient(135deg,#0f0a00 40%,#fbbf24 100%)" },
+  { key: "typewriter",  label: "Typewriter",   description: "Retro Schreibmaschinen-Look",         accent: "#8B4513", bg: "#f5f0e8",  preview: "linear-gradient(135deg,#f5f0e8,#e8dcc8,#8B4513)" },
+  { key: "blueprint",   label: "Blueprint",    description: "Technische Zeichnung",                accent: "#60d4ff", bg: "#0b2441",  preview: "linear-gradient(135deg,#0b2441 40%,#60d4ff 100%)" },
+  { key: "glass",       label: "Glassmorphism",description: "Frosted Glass Panels",                accent: "#c084fc", bg: "#1a0a2e",  preview: "linear-gradient(135deg,#1a0a2e,#2d1b4e,#c084fc)" },
+  { key: "cyber",       label: "Cyberpunk",    description: "Neon-Dystopie Hot-Pink/Cyan",         accent: "#f900ff", bg: "#080015",  preview: "linear-gradient(135deg,#080015,#1a0030,#f900ff)" },
+  { key: "magazine",    label: "Magazine",     description: "Redaktionelles Layout",               accent: "#dc2626", bg: "#ffffff",  preview: "linear-gradient(135deg,#fff,#f5f5f5,#dc2626)" },
+  { key: "terminal",    label: "Terminal",     description: "CLI / Kommandozeile",                 accent: "#00ff41", bg: "#0a0a0a",  preview: "linear-gradient(135deg,#0a0a0a 40%,#00ff41 100%)" },
+  { key: "prism",       label: "Prism",        description: "Holografisches Regenbogen-Design",    accent: "#818cf8", bg: "#0f0f1a",  preview: "linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f)" },
+  { key: "nordic",      label: "Nordic",       description: "Skandinavisches Minimalismus",        accent: "#2563eb", bg: "#fafafa",  preview: "linear-gradient(135deg,#fafafa,#e8ecf0,#2563eb)" },
 ];
 
 // ─── CV Types ─────────────────────────────────────────────────────────────────
