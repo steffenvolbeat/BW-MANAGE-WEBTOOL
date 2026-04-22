@@ -154,14 +154,16 @@ export default function ApplicationsOverview() {
   const [clPreviewSaving, setClPreviewSaving] = useState(false);
   const [clDeleting, setClDeleting] = useState<string | null>(null);
 
+  // Nicht-blockierender Confirm-Dialog (ersetzt window.confirm für bessere INP)
+  const [confirmDialog, setConfirmDialog] = useState<{
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
+
   // Cover Letters – edit modal
   const [editCoverLetters, setEditCoverLetters] = useState<CoverLetterEntry[]>([]);
   const [coverLettersLoading, setCoverLettersLoading] = useState(false);
   const [activeCoverIdx, setActiveCoverIdx] = useState<number | null>(null);
-
-  // Inline-Bestätigungsdialoge (ersetzen window.confirm → kein INP-Block)
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [confirmDeleteCL, setConfirmDeleteCL] = useState<{ appId: string; letterId: string } | null>(null);
 
   // Inline-Datepicker "Beworben am"
   const [quickDateId, setQuickDateId] = useState<string | null>(null);
@@ -529,25 +531,30 @@ export default function ApplicationsOverview() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!userId) return;
-    setDeletingId(id);
-    setError(null);
-    try {
-      const res = await fetch(`/api/applications?id=${id}&userId=${userId}`, {
-        method: "DELETE",
-      });
-      if (!res.ok) throw new Error(`Delete failed (${res.status})`);
-      setApplications((prev) => prev.filter((a) => a.id !== id));
-      showToast("Bewerbung gelöscht.");
-    } catch (err) {
-      console.error("Delete failed", err);
-      setError("Bewerbung konnte nicht gelöscht werden.");
-      showToast("Bewerbung konnte nicht gelöscht werden.", "error");
-    } finally {
-      setDeletingId(null);
-      setConfirmDeleteId(null);
-    }
+    setConfirmDialog({
+      message: "Bewerbung wirklich löschen?",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        setDeletingId(id);
+        setError(null);
+        try {
+          const res = await fetch(`/api/applications?id=${id}&userId=${userId}`, {
+            method: "DELETE",
+          });
+          if (!res.ok) throw new Error(`Delete failed (${res.status})`);
+          setApplications((prev) => prev.filter((a) => a.id !== id));
+          showToast("Bewerbung gelöscht.");
+        } catch (err) {
+          console.error("Delete failed", err);
+          setError("Bewerbung konnte nicht gelöscht werden.");
+          showToast("Bewerbung konnte nicht gelöscht werden.", "error");
+        } finally {
+          setDeletingId(null);
+        }
+      },
+    });
   };
 
   const formatDate = (dateString: string) => {
@@ -674,28 +681,33 @@ export default function ApplicationsOverview() {
     }
   };
 
-  const handleDeleteCL = async (appId: string, letterId: string) => {
-    setClDeleting(letterId);
-    try {
-      const r = await fetch(`/api/applications/${appId}/cover-letters?letterId=${letterId}`, { method: "DELETE" });
-      if (!r.ok) throw new Error(`Löschen fehlgeschlagen (${r.status})`);
-      setRowCLData((prev) => ({
-        ...prev,
-        [appId]: (prev[appId] ?? []).filter((c) => c.id !== letterId),
-      }));
-      setApplications((prev) =>
-        prev.map((a) =>
-          a.id === appId ? { ...a, _clCount: Math.max(0, (a._clCount ?? 1) - 1) } : a
-        )
-      );
-      setClPreview((p) => (p?.cl.id === letterId ? null : p));
-      showToast("Anschreiben gelöscht.");
-    } catch (err) {
-      showToast(err instanceof Error ? err.message : "Fehler beim Löschen.", "error");
-    } finally {
-      setClDeleting(null);
-      setConfirmDeleteCL(null);
-    }
+  const handleDeleteCL = (appId: string, letterId: string) => {
+    setConfirmDialog({
+      message: "Anschreiben wirklich löschen?",
+      onConfirm: async () => {
+        setConfirmDialog(null);
+        setClDeleting(letterId);
+        try {
+          const r = await fetch(`/api/applications/${appId}/cover-letters?letterId=${letterId}`, { method: "DELETE" });
+          if (!r.ok) throw new Error(`Löschen fehlgeschlagen (${r.status})`);
+          setRowCLData((prev) => ({
+            ...prev,
+            [appId]: (prev[appId] ?? []).filter((c) => c.id !== letterId),
+          }));
+          setApplications((prev) =>
+            prev.map((a) =>
+              a.id === appId ? { ...a, _clCount: Math.max(0, (a._clCount ?? 1) - 1) } : a
+            )
+          );
+          setClPreview((p) => (p?.cl.id === letterId ? null : p));
+          showToast("Anschreiben gelöscht.");
+        } catch (err) {
+          showToast(err instanceof Error ? err.message : "Fehler beim Löschen.", "error");
+        } finally {
+          setClDeleting(null);
+        }
+      },
+    });
   };
 
   const loadCLForRow = async (applicationId: string) => {
@@ -994,6 +1006,34 @@ export default function ApplicationsOverview() {
             {toast.type === "success" ? "Erfolg" : "Fehler"}
           </span>
           <span>{toast.message}</span>
+        </div>
+      )}
+
+      {/* Nicht-blockierender Confirm-Dialog (ersetzt window.confirm) */}
+      {confirmDialog && (
+        <div
+          className="fixed inset-0 z-9999 flex items-center justify-center bg-black/40"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Bestätigung"
+        >
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4">
+            <p className="text-gray-900 dark:text-white font-medium mb-6">{confirmDialog.message}</p>
+            <div className="flex justify-end gap-3">
+              <button
+                className="px-4 py-2 text-sm rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+                onClick={() => setConfirmDialog(null)}
+              >
+                Abbrechen
+              </button>
+              <button
+                className="px-4 py-2 text-sm rounded-lg bg-red-600 text-white hover:bg-red-700"
+                onClick={confirmDialog.onConfirm}
+              >
+                Löschen
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -2047,26 +2087,13 @@ export default function ApplicationsOverview() {
                           </button>
                           <button
                             className="text-red-600 hover:text-red-900 p-1 disabled:opacity-60"
-                            onClick={() => setConfirmDeleteId(application.id)}
+                            onClick={() => handleDelete(application.id)}
                             disabled={deletingId === application.id}
                             title="Löschen"
                             style={isReadOnly ? { display: "none" } : undefined}
                           >
                             <TrashIcon className="w-4 h-4" />
                           </button>
-                          {confirmDeleteId === application.id && (
-                            <div className="flex items-center gap-1 bg-red-50 border border-red-200 rounded-lg px-2 py-1">
-                              <span className="text-xs text-red-700">Löschen?</span>
-                              <button
-                                className="text-xs text-red-700 font-semibold hover:text-red-900 px-1"
-                                onClick={() => handleDelete(application.id)}
-                              >Ja</button>
-                              <button
-                                className="text-xs text-gray-500 hover:text-gray-700 px-1"
-                                onClick={() => setConfirmDeleteId(null)}
-                              >Nein</button>
-                            </div>
-                          )}
                         </div>
                       </td>
                     </tr>
@@ -2104,7 +2131,7 @@ export default function ApplicationsOverview() {
                                     />
                                     <TrashIcon
                                       className="w-3.5 h-3.5 text-gray-300 group-hover:text-red-400 shrink-0"
-                                      onClick={(e) => { e.stopPropagation(); setConfirmDeleteCL({ appId: application.id, letterId: cl.id }); }}
+                                      onClick={(e) => { e.stopPropagation(); handleDeleteCL(application.id, cl.id); }}
                                       title="Anschreiben löschen"
                                       style={isReadOnly ? { display: "none" } : undefined}
                                     />
@@ -2669,33 +2696,16 @@ export default function ApplicationsOverview() {
                   Schließen
                 </button>
                 {clPreview.cl.id && !isReadOnly && (
-                  <>
-                    {confirmDeleteCL?.letterId === clPreview.cl.id ? (
-                      <div className="flex items-center gap-1 bg-red-50 border border-red-200 rounded-lg px-2 py-1">
-                        <span className="text-xs text-red-700">Wirklich löschen?</span>
-                        <button
-                          className="text-xs text-red-700 font-semibold hover:text-red-900 px-1 disabled:opacity-50"
-                          disabled={clDeleting === clPreview.cl.id}
-                          onClick={() => handleDeleteCL(clPreview.appId, clPreview.cl.id!)}
-                        >Ja</button>
-                        <button
-                          className="text-xs text-gray-500 hover:text-gray-700 px-1"
-                          onClick={() => setConfirmDeleteCL(null)}
-                        >Nein</button>
-                      </div>
-                    ) : (
-                      <button
-                        className="text-sm text-red-500 hover:text-red-700 px-3 py-2 flex items-center gap-1 disabled:opacity-50"
-                        disabled={clDeleting === clPreview.cl.id}
-                        onClick={() => setConfirmDeleteCL({ appId: clPreview.appId, letterId: clPreview.cl.id! })}
-                      >
-                        {clDeleting === clPreview.cl.id
-                          ? <ArrowPathIcon className="w-4 h-4 animate-spin" />
-                          : <TrashIcon className="w-4 h-4" />}
-                        Löschen
-                      </button>
-                    )}
-                  </>
+                  <button
+                    className="text-sm text-red-500 hover:text-red-700 px-3 py-2 flex items-center gap-1 disabled:opacity-50"
+                    disabled={clDeleting === clPreview.cl.id}
+                    onClick={() => handleDeleteCL(clPreview.appId, clPreview.cl.id!)}
+                  >
+                    {clDeleting === clPreview.cl.id
+                      ? <ArrowPathIcon className="w-4 h-4 animate-spin" />
+                      : <TrashIcon className="w-4 h-4" />}
+                    Löschen
+                  </button>
                 )}
               </div>
               {!isReadOnly && (
