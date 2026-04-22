@@ -75,7 +75,7 @@ export default function CV_Titanium() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 20px rgba(0,0,0,0.5)",fontFamily:fnt,overflow:"hidden",border:`1px solid ${S3}`}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 20px rgba(0,0,0,0.5)",fontFamily:fnt,overflow: "visible",border:`1px solid ${S3}`}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Metallic gradient top bar */}
           <div style={{height:4,background:`linear-gradient(90deg,${CM},${A},#eceff1,${A},${CM})`}}/>

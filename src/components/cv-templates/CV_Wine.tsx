@@ -75,7 +75,7 @@ export default function CV_Wine() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 24px rgba(155,34,38,0.35)",fontFamily:fnt,overflow:"hidden"}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 24px rgba(155,34,38,0.35)",fontFamily:fnt,overflow: "visible"}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           <div style={{display:"flex",minHeight:1202}}>
             {/* Sidebar */}

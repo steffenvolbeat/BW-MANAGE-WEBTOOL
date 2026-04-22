@@ -122,7 +122,7 @@ export default function CV_Glassmorphism() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:"#1a0a2e",boxShadow:"0 0 80px rgba(192,132,252,0.2)",overflow:"hidden",fontFamily:fnt,border:"1px solid rgba(192,132,252,0.2)",borderRadius:2,position:"relative",zIndex:1}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:"#1a0a2e",boxShadow:"0 0 80px rgba(192,132,252,0.2)",overflow: "visible",fontFamily:fnt,border:"1px solid rgba(192,132,252,0.2)",borderRadius:2,position:"relative",zIndex:1}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           <div style={{height:2,background:"linear-gradient(90deg,#818cf8,#c084fc,#e879f9,#c084fc,#818cf8)"}}/>
           {/* Glass header */}

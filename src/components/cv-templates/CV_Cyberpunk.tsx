@@ -121,7 +121,7 @@ export default function CV_Cyberpunk() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:"#080015",boxShadow:"0 0 40px rgba(249,0,255,0.3), 0 0 80px rgba(0,255,231,0.1), inset 0 0 40px rgba(249,0,255,0.03)",overflow:"hidden",fontFamily:fnt,border:"1px solid rgba(249,0,255,0.3)",position:"relative"}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:"#080015",boxShadow:"0 0 40px rgba(249,0,255,0.3), 0 0 80px rgba(0,255,231,0.1), inset 0 0 40px rgba(249,0,255,0.03)",overflow: "visible",fontFamily:fnt,border:"1px solid rgba(249,0,255,0.3)",position:"relative"}}>
         <div className={`${PFX}-scanlines`} style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:1,pointerEvents:"none"}}/>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale,position:"relative",zIndex:2}}>
           <div style={{height:2,background:"linear-gradient(90deg,#f900ff,#00ffe7,#f900ff)"}}/>

@@ -75,7 +75,7 @@ export default function CV_Bauhaus() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"4px 4px 0px rgba(0,0,0,0.2)",fontFamily:fnt,overflow:"hidden"}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"4px 4px 0px rgba(0,0,0,0.2)",fontFamily:fnt,overflow: "visible"}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Bauhaus tricolor top bar */}
           <div style={{height:10,display:"flex"}}>

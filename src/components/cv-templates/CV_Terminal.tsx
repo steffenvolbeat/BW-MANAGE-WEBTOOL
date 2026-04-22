@@ -121,7 +121,7 @@ export default function CV_Terminal() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:"#0a0a0a",boxShadow:`0 0 40px rgba(0,255,65,0.15)`,overflow:"hidden",fontFamily:fnt,border:"1px solid rgba(0,255,65,0.2)"}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:"#0a0a0a",boxShadow:`0 0 40px rgba(0,255,65,0.15)`,overflow: "visible",fontFamily:fnt,border:"1px solid rgba(0,255,65,0.2)"}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* macOS-style window bar */}
           <div style={{backgroundColor:"#1a1a1a",padding:"8px 14px",display:"flex",alignItems:"center",gap:7,borderBottom:"1px solid rgba(0,255,65,0.1)"}}>

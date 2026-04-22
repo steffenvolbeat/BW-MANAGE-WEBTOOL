@@ -123,7 +123,7 @@ export default function CV_Magazine() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"0 4px 30px rgba(0,0,0,0.12)",overflow:"hidden",fontFamily:fnt}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"0 4px 30px rgba(0,0,0,0.12)",overflow: "visible",fontFamily:fnt}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Magazine masthead */}
           <div style={{backgroundColor:"#111",padding:"14px 40px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>

@@ -120,7 +120,7 @@ export default function CV_Nordic() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"0 1px 8px rgba(0,0,0,0.08)",overflow:"hidden",fontFamily:fnt}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"0 1px 8px rgba(0,0,0,0.08)",overflow: "visible",fontFamily:fnt}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Header */}
           <div style={{background:S2,padding:"36px 48px 28px",borderBottom:`1px solid ${S3}`}}>

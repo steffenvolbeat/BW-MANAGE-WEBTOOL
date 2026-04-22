@@ -75,7 +75,7 @@ export default function CV_Coastal() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 20px rgba(0,119,182,0.12)",fontFamily:fnt,overflow:"hidden"}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 20px rgba(0,119,182,0.12)",fontFamily:fnt,overflow: "visible"}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Ocean wave top */}
           <div style={{height:6,background:`linear-gradient(90deg,${A},#0096c7,#00b4d8,${A})`}}/>

@@ -75,7 +75,7 @@ export default function CV_Zen() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"0 1px 12px rgba(0,0,0,0.07)",fontFamily:fnt,overflow:"hidden",borderLeft:`6px solid ${A}`}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"0 1px 12px rgba(0,0,0,0.07)",fontFamily:fnt,overflow: "visible",borderLeft:`6px solid ${A}`}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Zen header – spacious, minimal */}
           <div style={{backgroundColor:S2,padding:"52px 64px 40px"}}>

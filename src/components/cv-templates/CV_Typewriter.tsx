@@ -145,7 +145,7 @@ export default function CV_Typewriter() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"4px 4px 20px rgba(0,0,0,0.3)",overflow:"hidden",fontFamily:fnt,border:`2px solid ${A}`}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"4px 4px 20px rgba(0,0,0,0.3)",overflow: "visible",fontFamily:fnt,border:`2px solid ${A}`}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Typewriter header strip */}
           <div style={{height:6,background:A}}/>

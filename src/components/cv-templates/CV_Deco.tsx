@@ -75,7 +75,7 @@ export default function CV_Deco() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:`0 0 40px ${hex2rgba(A,0.2)}`,fontFamily:fnt,overflow:"hidden"}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:`0 0 40px ${hex2rgba(A,0.2)}`,fontFamily:fnt,overflow: "visible"}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Deco top border */}
           <div style={{height:3,background:`linear-gradient(90deg,transparent 0%,${A} 30%,${A} 70%,transparent 100%)`}}/>

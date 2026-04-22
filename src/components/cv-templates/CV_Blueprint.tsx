@@ -124,7 +124,7 @@ export default function CV_Blueprint() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,backgroundImage:GRID_SVG,boxShadow:`0 0 60px ${hex2rgba(A,0.15)}`,overflow:"hidden",fontFamily:fnt,border:`1px solid ${hex2rgba(A,0.3)}`}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,backgroundImage:GRID_SVG,boxShadow:`0 0 60px ${hex2rgba(A,0.15)}`,overflow: "visible",fontFamily:fnt,border:`1px solid ${hex2rgba(A,0.3)}`}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           <div style={{height:3,background:`linear-gradient(90deg,${A},#0ea5e9,${A})`}}/>
           {/* Blueprint header */}

@@ -124,7 +124,7 @@ export default function CV_Prism() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:`0 0 60px rgba(129,140,248,0.2)`,overflow:"hidden",fontFamily:fnt}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:`0 0 60px rgba(129,140,248,0.2)`,overflow: "visible",fontFamily:fnt}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Rainbow top band */}
           <div style={{height:4,background:RAINBOW}}/>

@@ -75,7 +75,7 @@ export default function CV_Parchment() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 16px rgba(107,58,42,0.2)",fontFamily:fnt,overflow:"hidden",border:`1px solid ${hex2rgba(A,0.2)}`}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 16px rgba(107,58,42,0.2)",fontFamily:fnt,overflow: "visible",border:`1px solid ${hex2rgba(A,0.2)}`}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Decorative top border */}
           <div style={{height:8,background:`repeating-linear-gradient(90deg,${A} 0,${A} 12px,${hex2rgba(A,0.3)} 12px,${hex2rgba(A,0.3)} 14px,${A} 14px)`}}/>

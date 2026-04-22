@@ -74,7 +74,7 @@ export default function CV_Mono() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 12px rgba(0,0,0,0.15)",fontFamily:fnt,overflow:"hidden"}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"0 2px 12px rgba(0,0,0,0.15)",fontFamily:fnt,overflow: "visible"}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Thick black header bar */}
           <div style={{backgroundColor:"#000",padding:"28px 48px 24px",display:"flex",alignItems:"center",gap:28}}>

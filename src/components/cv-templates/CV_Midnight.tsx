@@ -154,7 +154,7 @@ export default function CV_Midnight() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{ width: 850, margin: "0 auto", backgroundColor: BG, boxShadow: `0 0 60px ${hex2rgba(A,0.12)}`, overflow: "hidden", fontFamily: fnt }}>
+      <div className={`${PFX}-doc`} style={{ width: 850, minHeight: 1202, margin: "0 auto", backgroundColor: BG, boxShadow: `0 0 60px ${hex2rgba(A,0.12)}`, overflow: "visible", fontFamily: fnt }}>
         <div className={`${PFX}-zoom`} style={{ width: Math.round(850 / scale), zoom: scale }}>
           <div style={{ height: 4, background: `linear-gradient(90deg,${A},#d97706,${A})` }} />
           <div style={{ backgroundColor: BG, padding: "32px 40px 24px", borderBottom: `1px solid ${S3}`, display: "flex", gap: 28, alignItems: "flex-start" }}>

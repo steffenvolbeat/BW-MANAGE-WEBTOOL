@@ -75,7 +75,7 @@ export default function CV_Circuit() {
         </div>)}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850,margin:"0 auto",backgroundColor:BG,boxShadow:`0 0 30px rgba(118,255,3,0.08)`,fontFamily:fnt,overflow:"hidden",border:`1px solid ${hex2rgba(A,0.2)}`}}>
+      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:`0 0 30px rgba(118,255,3,0.08)`,fontFamily:fnt,overflow: "visible",border:`1px solid ${hex2rgba(A,0.2)}`}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Circuit top bar */}
           <div style={{height:3,background:`linear-gradient(90deg,${A},${hex2rgba(A,0.3)},${A})`}}/>
