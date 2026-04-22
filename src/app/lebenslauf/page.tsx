@@ -37,6 +37,14 @@ import CV_Blush from "@/components/cv-templates/CV_Blush";
 import CV_Jade from "@/components/cv-templates/CV_Jade";
 import CV_Smoke from "@/components/cv-templates/CV_Smoke";
 import CV_Gold from "@/components/cv-templates/CV_Gold";
+import CV_Typewriter from "@/components/cv-templates/CV_Typewriter";
+import CV_Blueprint from "@/components/cv-templates/CV_Blueprint";
+import CV_Glassmorphism from "@/components/cv-templates/CV_Glassmorphism";
+import CV_Cyberpunk from "@/components/cv-templates/CV_Cyberpunk";
+import CV_Magazine from "@/components/cv-templates/CV_Magazine";
+import CV_Terminal from "@/components/cv-templates/CV_Terminal";
+import CV_Prism from "@/components/cv-templates/CV_Prism";
+import CV_Nordic from "@/components/cv-templates/CV_Nordic";
 
 const CV_MAP: Record<string, React.ComponentType> = {
   novoresume: LebenslaufTemplate,
@@ -72,6 +80,14 @@ const CV_MAP: Record<string, React.ComponentType> = {
   jade: CV_Jade,
   smoke: CV_Smoke,
   gold: CV_Gold,
+  typewriter: CV_Typewriter,
+  blueprint: CV_Blueprint,
+  glass: CV_Glassmorphism,
+  cyber: CV_Cyberpunk,
+  magazine: CV_Magazine,
+  terminal: CV_Terminal,
+  prism: CV_Prism,
+  nordic: CV_Nordic,
 };
 
 function LebenslaufContent() {
