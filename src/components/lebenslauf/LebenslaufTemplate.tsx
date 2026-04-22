@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import {
   PrinterIcon, PencilSquareIcon, CheckIcon,
@@ -281,7 +281,9 @@ function CRow({ icon, value, editing, onChange, onDelete, hidden }: { icon:React
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 export default function LebenslaufTemplate() {
-  const [data,setData]     = useState<CVData>(JSON.parse(JSON.stringify(DEFAULT_DATA)));
+  const K = "cv-novoresume";
+
+  const [data,setData]     = useState<CVData>(() => JSON.parse(JSON.stringify(DEFAULT_DATA)));
   const [editing,setEditing] = useState(false);
   const [photoSrc,setPhotoSrc] = useState("");
   const [hiddenContacts,setHiddenContacts] = useState<Set<string>>(new Set());
@@ -290,6 +292,57 @@ export default function LebenslaufTemplate() {
   const [photoShapeKey,setPhotoShapeKey] = useState("rounded");
   const [showDesign,setShowDesign]       = useState(false);
   const [confirmReset, setConfirmReset]   = useState(false);
+  const [storageLoaded, setStorageLoaded] = useState(false);
+
+  // ── Load from localStorage once after hydration ───────────────────────────
+  useEffect(() => {
+    try {
+      const d = localStorage.getItem(`${K}-data`);
+      if (d) setData(JSON.parse(d));
+      const f = localStorage.getItem(`${K}-font`);
+      if (f) setFontKey(f);
+      const s = localStorage.getItem(`${K}-size`);
+      if (s) setSizeKey(s);
+      const sh = localStorage.getItem(`${K}-shape`);
+      if (sh) setPhotoShapeKey(sh);
+      const p = localStorage.getItem(`${K}-photo`);
+      if (p) setPhotoSrc(p);
+      const hc = localStorage.getItem(`${K}-hidden`);
+      if (hc) setHiddenContacts(new Set(JSON.parse(hc)));
+    } catch { /* ignore */ }
+    setStorageLoaded(true);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Save to localStorage on change (only after initial load) ─────────────
+  useEffect(() => {
+    if (!storageLoaded) return;
+    try { localStorage.setItem(`${K}-data`, JSON.stringify(data)); } catch { /* quota */ }
+  }, [data, storageLoaded]);
+
+  useEffect(() => {
+    if (!storageLoaded) return;
+    try { localStorage.setItem(`${K}-font`, fontKey); } catch { /* ignore */ }
+  }, [fontKey, storageLoaded]);
+
+  useEffect(() => {
+    if (!storageLoaded) return;
+    try { localStorage.setItem(`${K}-size`, sizeKey); } catch { /* ignore */ }
+  }, [sizeKey, storageLoaded]);
+
+  useEffect(() => {
+    if (!storageLoaded) return;
+    try { localStorage.setItem(`${K}-shape`, photoShapeKey); } catch { /* ignore */ }
+  }, [photoShapeKey, storageLoaded]);
+
+  useEffect(() => {
+    if (!storageLoaded) return;
+    try { localStorage.setItem(`${K}-photo`, photoSrc); } catch { /* ignore */ }
+  }, [photoSrc, storageLoaded]);
+
+  useEffect(() => {
+    if (!storageLoaded) return;
+    try { localStorage.setItem(`${K}-hidden`, JSON.stringify([...hiddenContacts])); } catch { /* ignore */ }
+  }, [hiddenContacts, storageLoaded]);
   const curFont  = FONTS.find(f=>f.key===fontKey)??FONTS[0];
   const curSize  = FONT_SIZES.find(s=>s.key===sizeKey)??FONT_SIZES[2];
   const curShape = PHOTO_SHAPES.find(s=>s.key===photoShapeKey)??PHOTO_SHAPES[1];
@@ -318,18 +371,28 @@ export default function LebenslaufTemplate() {
         .cv-doc, .cv-doc * { font-family: ${fnt} !important; }
         @media print {
           @page { size: A4 portrait; margin: 0; }
+          *, *::before, *::after { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
           body * { visibility: hidden !important; }
           .cv-doc, .cv-doc * { visibility: visible !important; }
           .cv-doc {
             position: absolute !important;
             top: 0 !important; left: 0 !important;
-            width: 210mm !important; max-width: 210mm !important;
+            width: 850px !important;
+            height: 1202px !important;
+            overflow: hidden !important;
+            zoom: 0.934 !important;
             box-shadow: none !important; margin: 0 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* Sidebar nur so hoch wie ihr Inhalt – kein dunkler Balken auf Seite 2 */
-          .cv-zoom-wrapper { zoom: 1 !important; width: 100% !important; }
+          .cv-zoom-wrapper {
+            zoom: 1 !important;
+            width: 850px !important;
+            height: 1202px !important;
+          }
+          /* Flex-Container + Sidebar auf volle Seitenhöhe strecken */
+          .cv-zoom-wrapper > div { height: 100% !important; min-height: 1202px !important; }
+          .cv-zoom-wrapper > div > div:last-child { min-height: 1202px !important; }
           .cv-doc > div > div:first-child { align-items: flex-start !important; }
           .cv-ctrl { display: none !important; visibility: hidden !important; }
         }
@@ -353,7 +416,7 @@ export default function LebenslaufTemplate() {
         {confirmReset&&(
           <div style={{display:"flex",alignItems:"center",gap:6,background:"#fef2f2",border:"1px solid #fca5a5",borderRadius:8,padding:"6px 12px"}}>
             <span style={{fontSize:13,color:"#b91c1c"}}>Wirklich zurücksetzen?</span>
-            <button style={{fontSize:12,fontWeight:700,color:"#b91c1c",cursor:"pointer",border:"none",background:"transparent",padding:"0 4px"}} onClick={()=>{setData(JSON.parse(JSON.stringify(DEFAULT_DATA)));setHiddenContacts(new Set());setFontKey("nunito");setSizeKey("md");setPhotoShapeKey("rounded");setShowDesign(false);setConfirmReset(false);}}>Ja</button>
+            <button style={{fontSize:12,fontWeight:700,color:"#b91c1c",cursor:"pointer",border:"none",background:"transparent",padding:"0 4px"}} onClick={()=>{["data","font","size","shape","photo","hidden"].forEach(s=>{try{localStorage.removeItem(`${K}-${s}`);}catch{}});setData(JSON.parse(JSON.stringify(DEFAULT_DATA)));setHiddenContacts(new Set());setFontKey("nunito");setSizeKey("md");setPhotoShapeKey("rounded");setShowDesign(false);setConfirmReset(false);}}>Ja</button>
             <button style={{fontSize:12,color:"#6b7280",cursor:"pointer",border:"none",background:"transparent",padding:"0 4px"}} onClick={()=>setConfirmReset(false)}>Nein</button>
           </div>
         )}

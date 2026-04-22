@@ -1,8 +1,9 @@
 "use client";
 // ─── CV Template: Lemon ─────────────────────────────────────────────────
-import { useState, useRef, useContext, createContext } from "react";
+import { useState, useEffect, useRef, useContext, createContext } from "react";
 import { PrinterIcon, PencilSquareIcon, CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FONTS, FONT_SIZES, PHOTO_SHAPES, CVData, DEFAULT_CV_DATA, uid } from "./shared";
+import { useCVStorage } from "./useCV";
 
 const DEFAULT_COLORS = { A:"#fde047", BG:"#1a1500", S2:"#221d00", S3:"#2d2600", SBG:"#141000", CT:"#ffffff", CB:"#fef3c7", CM:"#fde68a" };
 const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
@@ -68,14 +69,11 @@ function SecH({ title }: { title: string }) {
 }
 
 export default function CV_Lemon() {
-  const [data, setData] = useState<CVData>(JSON.parse(JSON.stringify(DEFAULT_CV_DATA)));
+  const { data, setData, fontKey, setFontKey, sizeKey, setSizeKey,
+         photoShapeKey, setPhotoShapeKey, photoSrc, setPhotoSrc,
+         clrs, setClrs, resetStorage } = useCVStorage("lemon", DEFAULT_COLORS);
   const [editing, setEditing] = useState(false);
-  const [photoSrc, setPhotoSrc] = useState("");
-  const [fontKey, setFontKey] = useState("nunito");
-  const [sizeKey, setSizeKey] = useState("md");
-  const [photoShapeKey, setPhotoShapeKey] = useState("circle");
   const [showDesign, setShowDesign] = useState(false);
-  const [clrs, setClrs] = useState(DEFAULT_COLORS);
   const {A,BG,S2,S3,SBG,CT,CB,CM} = clrs;
   const curFont = FONTS.find(f => f.key === fontKey) ?? FONTS[0];
   const curSize = FONT_SIZES.find(s => s.key === sizeKey) ?? FONT_SIZES[2];
@@ -117,7 +115,7 @@ export default function CV_Lemon() {
         <button onClick={() => setShowDesign(v => !v)} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: `1px solid ${showDesign ? A : "#333"}`, backgroundColor: showDesign ? hex2rgba(A,0.1) : "transparent", color: showDesign ? A : "#888" }}>
           🎨 Design
         </button>
-        <button onClick={() => { setData(JSON.parse(JSON.stringify(DEFAULT_CV_DATA))); setPhotoSrc(""); setFontKey("nunito"); setSizeKey("md"); setPhotoShapeKey("circle"); setClrs(DEFAULT_COLORS); setShowDesign(false); }} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: "1px solid #333", backgroundColor: "transparent", color: "#888", display: "flex", alignItems: "center", gap: 6 }}>
+        <button onClick={() => { resetStorage(); setData(JSON.parse(JSON.stringify(DEFAULT_CV_DATA))); setPhotoSrc(""); setFontKey("nunito"); setSizeKey("md"); setPhotoShapeKey("circle"); setClrs(DEFAULT_COLORS); setShowDesign(false); }} style={{ padding: "7px 16px", borderRadius: 8, fontSize: 13, cursor: "pointer", border: "1px solid #333", backgroundColor: "transparent", color: "#888", display: "flex", alignItems: "center", gap: 6 }}>
           <XMarkIcon style={{ width: 16, height: 16 }} />Reset
         </button>
         {showDesign && (

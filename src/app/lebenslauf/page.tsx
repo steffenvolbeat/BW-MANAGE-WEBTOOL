@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LebenslaufTemplate from "@/components/lebenslauf/LebenslaufTemplate";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import MainLayout from "@/components/layout/MainLayout";
@@ -76,11 +76,25 @@ const CV_MAP: Record<string, React.ComponentType> = {
 
 function LebenslaufContent() {
   const [templateKey, setTemplateKey] = useState("novoresume");
+
+  // Persist selected template across page reloads
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("cv-selected-template");
+      if (saved && CV_MAP[saved]) setTemplateKey(saved);
+    } catch { /* ignore */ }
+  }, []);
+
+  const handleSelect = (key: string) => {
+    setTemplateKey(key);
+    try { localStorage.setItem("cv-selected-template", key); } catch { /* ignore */ }
+  };
+
   const ActiveTemplate = CV_MAP[templateKey] ?? LebenslaufTemplate;
 
   return (
     <>
-      <TemplateSwitcher templates={CV_TEMPLATES} activeKey={templateKey} onSelect={setTemplateKey} label="Lebenslauf-Template wählen" />
+      <TemplateSwitcher templates={CV_TEMPLATES} activeKey={templateKey} onSelect={handleSelect} label="Lebenslauf-Template wählen" />
       <ActiveTemplate />
     </>
   );
