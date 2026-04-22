@@ -47,6 +47,16 @@ import CL_Magazine from "@/components/cv-templates/CL_Magazine";
 import CL_Terminal from "@/components/cv-templates/CL_Terminal";
 import CL_Prism from "@/components/cv-templates/CL_Prism";
 import CL_Nordic from "@/components/cv-templates/CL_Nordic";
+import CL_Bauhaus from "@/components/cv-templates/CL_Bauhaus";
+import CL_Deco from "@/components/cv-templates/CL_Deco";
+import CL_Zen from "@/components/cv-templates/CL_Zen";
+import CL_Velvet from "@/components/cv-templates/CL_Velvet";
+import CL_Circuit from "@/components/cv-templates/CL_Circuit";
+import CL_Parchment from "@/components/cv-templates/CL_Parchment";
+import CL_Coastal from "@/components/cv-templates/CL_Coastal";
+import CL_Mono from "@/components/cv-templates/CL_Mono";
+import CL_Wine from "@/components/cv-templates/CL_Wine";
+import CL_Titanium from "@/components/cv-templates/CL_Titanium";
 
 const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   midnight: CL_Midnight,
@@ -89,6 +99,16 @@ const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   terminal: CL_Terminal,
   prism: CL_Prism,
   nordic: CL_Nordic,
+  bauhaus: CL_Bauhaus,
+  deco: CL_Deco,
+  zen: CL_Zen,
+  velvet: CL_Velvet,
+  circuit: CL_Circuit,
+  parchment: CL_Parchment,
+  coastal: CL_Coastal,
+  mono: CL_Mono,
+  wine: CL_Wine,
+  titanium: CL_Titanium,
 };
 
 function AnschreibenContent() {

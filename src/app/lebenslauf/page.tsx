@@ -45,6 +45,16 @@ import CV_Magazine from "@/components/cv-templates/CV_Magazine";
 import CV_Terminal from "@/components/cv-templates/CV_Terminal";
 import CV_Prism from "@/components/cv-templates/CV_Prism";
 import CV_Nordic from "@/components/cv-templates/CV_Nordic";
+import CV_Bauhaus from "@/components/cv-templates/CV_Bauhaus";
+import CV_Deco from "@/components/cv-templates/CV_Deco";
+import CV_Zen from "@/components/cv-templates/CV_Zen";
+import CV_Velvet from "@/components/cv-templates/CV_Velvet";
+import CV_Circuit from "@/components/cv-templates/CV_Circuit";
+import CV_Parchment from "@/components/cv-templates/CV_Parchment";
+import CV_Coastal from "@/components/cv-templates/CV_Coastal";
+import CV_Mono from "@/components/cv-templates/CV_Mono";
+import CV_Wine from "@/components/cv-templates/CV_Wine";
+import CV_Titanium from "@/components/cv-templates/CV_Titanium";
 
 const CV_MAP: Record<string, React.ComponentType> = {
   novoresume: LebenslaufTemplate,
@@ -88,6 +98,16 @@ const CV_MAP: Record<string, React.ComponentType> = {
   terminal: CV_Terminal,
   prism: CV_Prism,
   nordic: CV_Nordic,
+  bauhaus: CV_Bauhaus,
+  deco: CV_Deco,
+  zen: CV_Zen,
+  velvet: CV_Velvet,
+  circuit: CV_Circuit,
+  parchment: CV_Parchment,
+  coastal: CV_Coastal,
+  mono: CV_Mono,
+  wine: CV_Wine,
+  titanium: CV_Titanium,
 };
 
 function LebenslaufContent() {

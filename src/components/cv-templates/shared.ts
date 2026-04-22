@@ -87,6 +87,16 @@ export const CV_TEMPLATES: TemplateMeta[] = [
   { key: "terminal",    label: "Terminal",     description: "CLI / Kommandozeile",                 accent: "#00ff41", bg: "#0a0a0a",  preview: "linear-gradient(135deg,#0a0a0a 40%,#00ff41 100%)" },
   { key: "prism",       label: "Prism",        description: "Holografisches Regenbogen-Design",    accent: "#818cf8", bg: "#0f0f1a",  preview: "linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f)" },
   { key: "nordic",      label: "Nordic",       description: "Skandinavisches Minimalismus",        accent: "#2563eb", bg: "#fafafa",  preview: "linear-gradient(135deg,#fafafa,#e8ecf0,#2563eb)" },
+  { key: "bauhaus",   label: "Bauhaus",    description: "Geometrisches Bauhaus-Design",          accent: "#e63946", bg: "#ffffff",  preview: "linear-gradient(135deg,#fff,#f4f4f4,#e63946)" },
+  { key: "deco",      label: "Art Deco",   description: "Gold Art Deco auf Schwarz",              accent: "#d4af37", bg: "#0d0d0d",  preview: "linear-gradient(135deg,#0d0d0d 40%,#d4af37 100%)" },
+  { key: "zen",       label: "Zen",        description: "Japanischer Minimalismus",               accent: "#c62828", bg: "#fafaf7",  preview: "linear-gradient(135deg,#fafaf7,#f2f2ef,#c62828)" },
+  { key: "velvet",    label: "Velvet",     description: "Tiefviolett mit Gold, luxuriös",         accent: "#f4c430", bg: "#1a0533",  preview: "linear-gradient(135deg,#1a0533 40%,#f4c430 100%)" },
+  { key: "circuit",   label: "Circuit",    description: "Leiterplatten-Design, Tech",             accent: "#76ff03", bg: "#0a1a08",  preview: "linear-gradient(135deg,#0a1a08 40%,#76ff03 100%)" },
+  { key: "parchment", label: "Parchment",  description: "Altes Pergament, Handschrift-Stil",      accent: "#6b3a2a", bg: "#fef3e2",  preview: "linear-gradient(135deg,#fef3e2,#f5e6c8,#6b3a2a)" },
+  { key: "coastal",   label: "Coastal",    description: "Mediterran, Meeresblau",                 accent: "#0077b6", bg: "#f0f8ff",  preview: "linear-gradient(135deg,#f0f8ff,#e0f0fa,#0077b6)" },
+  { key: "mono",      label: "Mono",       description: "Reines Schwarz-Weiß, Typografie",        accent: "#000000", bg: "#ffffff",  preview: "linear-gradient(135deg,#fff,#f4f4f4,#000)" },
+  { key: "wine",      label: "Wine",       description: "Weinrot, elegant und edel",              accent: "#9b2226", bg: "#fff5f0",  preview: "linear-gradient(135deg,#fff5f0,#f5e8e5,#9b2226)" },
+  { key: "titanium",  label: "Titanium",   description: "Dunkles Metall, industriell",            accent: "#90a4ae", bg: "#1c2833",  preview: "linear-gradient(135deg,#1c2833 40%,#90a4ae 100%)" },
 ];
 
 export const CL_TEMPLATES: TemplateMeta[] = [
@@ -131,6 +141,16 @@ export const CL_TEMPLATES: TemplateMeta[] = [
   { key: "terminal",    label: "Terminal",     description: "CLI / Kommandozeile",                 accent: "#00ff41", bg: "#0a0a0a",  preview: "linear-gradient(135deg,#0a0a0a 40%,#00ff41 100%)" },
   { key: "prism",       label: "Prism",        description: "Holografisches Regenbogen-Design",    accent: "#818cf8", bg: "#0f0f1a",  preview: "linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f)" },
   { key: "nordic",      label: "Nordic",       description: "Skandinavisches Minimalismus",        accent: "#2563eb", bg: "#fafafa",  preview: "linear-gradient(135deg,#fafafa,#e8ecf0,#2563eb)" },
+  { key: "bauhaus",   label: "Bauhaus",    description: "Geometrisches Bauhaus-Design",          accent: "#e63946", bg: "#ffffff",  preview: "linear-gradient(135deg,#fff,#f4f4f4,#e63946)" },
+  { key: "deco",      label: "Art Deco",   description: "Gold Art Deco auf Schwarz",              accent: "#d4af37", bg: "#0d0d0d",  preview: "linear-gradient(135deg,#0d0d0d 40%,#d4af37 100%)" },
+  { key: "zen",       label: "Zen",        description: "Japanischer Minimalismus",               accent: "#c62828", bg: "#fafaf7",  preview: "linear-gradient(135deg,#fafaf7,#f2f2ef,#c62828)" },
+  { key: "velvet",    label: "Velvet",     description: "Tiefviolett mit Gold, luxuriös",         accent: "#f4c430", bg: "#1a0533",  preview: "linear-gradient(135deg,#1a0533 40%,#f4c430 100%)" },
+  { key: "circuit",   label: "Circuit",    description: "Leiterplatten-Design, Tech",             accent: "#76ff03", bg: "#0a1a08",  preview: "linear-gradient(135deg,#0a1a08 40%,#76ff03 100%)" },
+  { key: "parchment", label: "Parchment",  description: "Altes Pergament, Handschrift-Stil",      accent: "#6b3a2a", bg: "#fef3e2",  preview: "linear-gradient(135deg,#fef3e2,#f5e6c8,#6b3a2a)" },
+  { key: "coastal",   label: "Coastal",    description: "Mediterran, Meeresblau",                 accent: "#0077b6", bg: "#f0f8ff",  preview: "linear-gradient(135deg,#f0f8ff,#e0f0fa,#0077b6)" },
+  { key: "mono",      label: "Mono",       description: "Reines Schwarz-Weiß, Typografie",        accent: "#000000", bg: "#ffffff",  preview: "linear-gradient(135deg,#fff,#f4f4f4,#000)" },
+  { key: "wine",      label: "Wine",       description: "Weinrot, elegant und edel",              accent: "#9b2226", bg: "#fff5f0",  preview: "linear-gradient(135deg,#fff5f0,#f5e8e5,#9b2226)" },
+  { key: "titanium",  label: "Titanium",   description: "Dunkles Metall, industriell",            accent: "#90a4ae", bg: "#1c2833",  preview: "linear-gradient(135deg,#1c2833 40%,#90a4ae 100%)" },
 ];
 
 // ─── CV Types ─────────────────────────────────────────────────────────────────
