@@ -38,7 +38,7 @@ export default function CL_Parchment() {
         ${curFont.gf?`@import url('https://fonts.googleapis.com/css2?family=${curFont.gf}&display=swap')`:""}
         .clpar-doc,.clpar-doc *{font-family:${fnt}!important;}
         @media print{
-          @page{size:A4 portrait;margin:0;}
+          @page{size:A4 portrait;margin:0;}html,body{height:0!important;overflow:visible!important;margin:0!important;padding:0!important;}
           *,*::before,*::after{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
           body *{visibility:hidden!important;}
           .clpar-doc,.clpar-doc *{visibility:visible!important;}

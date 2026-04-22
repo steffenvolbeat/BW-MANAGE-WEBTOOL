@@ -86,7 +86,7 @@ export default function CV_Typewriter() {
       <style>{`
         .${PFX}-doc, .${PFX}-doc * { font-family: 'Courier New', Courier, monospace !important; }
         @media print {
-          @page { size: A4 portrait; margin: 0; }
+          @page { size: A4 portrait; margin: 0; }html,body{height:0!important;overflow:visible!important;margin:0!important;padding:0!important;}
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }

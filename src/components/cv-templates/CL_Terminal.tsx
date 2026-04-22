@@ -43,7 +43,7 @@ export default function CL_Terminal() {
         .clt-cursor::after { content: '_'; animation: blink 1s step-end infinite; }
         @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
         @media print {
-          @page{size:A4 portrait;margin:0;}
+          @page{size:A4 portrait;margin:0;}html,body{height:0!important;overflow:visible!important;margin:0!important;padding:0!important;}
           *,*::before,*::after{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
           body *{visibility:hidden!important;}
           .clt-doc,.clt-doc *{visibility:visible!important;}

@@ -45,7 +45,7 @@ export default function CL_Cyberpunk() {
         .cyber-glow-pink { text-shadow: 0 0 10px ${A}, 0 0 20px ${A}, 0 0 40px ${A}; }
         .cyber-glow-cyan { text-shadow: 0 0 10px ${CM}, 0 0 20px ${CM}; }
         @media print {
-          @page{size:A4 portrait;margin:0;}
+          @page{size:A4 portrait;margin:0;}html,body{height:0!important;overflow:visible!important;margin:0!important;padding:0!important;}
           *,*::before,*::after{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
           body *{visibility:hidden!important;}
           .clcy-doc,.clcy-doc *{visibility:visible!important;}
