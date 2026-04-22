@@ -186,7 +186,7 @@ export default function CoverLetterNovoresume({
             position: absolute !important;
             top: 0 !important; left: 0 !important;
             width: 850px !important; max-width: 850px !important;
-            height: 297mm !important; max-height: 297mm !important;
+            min-height: 1202px !important;
             overflow: hidden !important;
             box-shadow: none !important; margin: 0 !important;
             zoom: 0.935 !important;
