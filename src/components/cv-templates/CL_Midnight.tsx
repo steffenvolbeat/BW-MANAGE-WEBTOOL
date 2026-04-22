@@ -2,7 +2,7 @@
 // ─── Anschreiben Template: Midnight (Schwarz/Gold) ────────────────────────────
 import { useState, useContext, createContext } from "react";
 import { PrinterIcon, PencilSquareIcon, CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { FONTS, FONT_SIZES, CLData, DEFAULT_CL_DATA, uid } from "./shared";
+import { FONTS, FONT_SIZES, CLData, DEFAULT_CL_DATA, uid, usePersistentCLState } from "./shared";
 
 const DEFAULT_COLORS = { A:"#f59e0b", BG:"#0a0a0a", HD:"#111111", S2:"#1a1a1a", CT:"#ffffff", CB:"#d1d5db", CM:"#9ca3af" };
 const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
@@ -20,12 +20,12 @@ function E({ value, onChange, editing, multiline = false, style = {} as React.CS
 }
 
 export default function CL_Midnight() {
-  const [data, setData] = useState<CLData>(JSON.parse(JSON.stringify(DEFAULT_CL_DATA)));
+  const [data, setData] = usePersistentCLState<CLData>('cl_midnight_data', JSON.parse(JSON.stringify(DEFAULT_CL_DATA)));
   const [editing, setEditing] = useState(false);
-  const [fontKey, setFontKey] = useState("nunito");
-  const [sizeKey, setSizeKey] = useState("md");
+  const [fontKey, setFontKey] = usePersistentCLState('cl_midnight_font', "nunito");
+  const [sizeKey, setSizeKey] = usePersistentCLState('cl_midnight_size', "md");
   const [showDesign, setShowDesign] = useState(false);
-  const [clrs, setClrs] = useState(DEFAULT_COLORS);
+  const [clrs, setClrs] = usePersistentCLState('cl_midnight_colors', DEFAULT_COLORS);
   const {A,BG,HD,S2,CT,CB,CM} = clrs;
   const curFont = FONTS.find(f => f.key === fontKey) ?? FONTS[0];
   const curSize = FONT_SIZES.find(s => s.key === sizeKey) ?? FONT_SIZES[2];

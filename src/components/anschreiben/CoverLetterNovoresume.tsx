@@ -1,5 +1,6 @@
 "use client";
-import { useState, useCallback, createContext, useContext } from "react";
+import { useState, useCallback, createContext, useContext, useEffect } from "react";
+import { usePersistentCLState } from "@/components/cv-templates/shared";
 import {
   PrinterIcon, PencilSquareIcon, CheckIcon,
   PlusIcon, XMarkIcon, EnvelopeIcon, PhoneIcon,
@@ -134,13 +135,23 @@ export default function CoverLetterNovoresume({
   const start = JSON.parse(JSON.stringify(DEFAULT_CL)) as CLData;
   if (initialCompany)  start.recipient.company = initialCompany;
   if (initialPosition) start.subject = `Bewerbung als ${initialPosition}`;
-  const [data, setData]       = useState<CLData>(start);
+  const [data, setData]       = usePersistentCLState<CLData>('cl_novoresume_data', start);
   const [editing, setEditing] = useState(false);
-  const [hiddenContacts, setHiddenContacts] = useState<Set<string>>(new Set());
-  const [fontKey, setFontKey]   = useState("nunito");
-  const [sizeKey, setSizeKey]   = useState("md");
+  const [hiddenContacts, setHiddenContacts] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    try {
+      const stored = localStorage.getItem('cl_novoresume_hidden');
+      if (stored) return new Set(JSON.parse(stored) as string[]);
+    } catch { /* ignore */ }
+    return new Set();
+  });
+  useEffect(() => {
+    try { localStorage.setItem('cl_novoresume_hidden', JSON.stringify([...hiddenContacts])); } catch { /* ignore */ }
+  }, [hiddenContacts]);
+  const [fontKey, setFontKey]   = usePersistentCLState<string>('cl_novoresume_font', "nunito");
+  const [sizeKey, setSizeKey]   = usePersistentCLState<string>('cl_novoresume_size', "md");
   const [showDesign, setShowDesign] = useState(false);
-  const [clrs, setClrs] = useState(DEFAULT_COLORS);
+  const [clrs, setClrs] = usePersistentCLState<typeof DEFAULT_COLORS>('cl_novoresume_colors', DEFAULT_COLORS);
   const {A, SBG, DBG, CT, CB, CM} = clrs;
   const curFont = FONTS.find(f => f.key === fontKey) ?? FONTS[0];
   const curSize = FONT_SIZES.find(s => s.key === sizeKey) ?? FONT_SIZES[2];

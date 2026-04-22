@@ -247,3 +247,30 @@ export const DEFAULT_CL_DATA: CLData = {
   closing:       "Mit freundlichen Grüßen,",
   signatureName: "Steffen Lorenz",
 };
+
+// ─── Persistence hook ─────────────────────────────────────────────────────────
+// Speichert jeden State-Wert automatisch in localStorage.
+// Wird in allen CL-Templates verwendet, damit Änderungen nach dem Reload erhalten bleiben.
+import { useState, useEffect } from "react";
+
+export function usePersistentCLState<T>(
+  storageKey: string,
+  defaultValue: T
+): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [state, setState] = useState<T>(() => {
+    if (typeof window === "undefined") return defaultValue;
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) return JSON.parse(stored) as T;
+    } catch { /* Fehler beim Parsen – Default verwenden */ }
+    return defaultValue;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    } catch { /* localStorage voll oder nicht verfügbar */ }
+  }, [storageKey, state]);
+
+  return [state, setState];
+}

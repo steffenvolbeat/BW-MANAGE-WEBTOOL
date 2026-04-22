@@ -2,7 +2,7 @@
 // ─── Anschreiben Template: Marble ────────────────────────────
 import { useState, useContext, createContext } from "react";
 import { PrinterIcon, PencilSquareIcon, CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { FONTS, FONT_SIZES, CLData, DEFAULT_CL_DATA, uid } from "./shared";
+import { FONTS, FONT_SIZES, CLData, DEFAULT_CL_DATA, uid, usePersistentCLState } from "./shared";
 
 const DEFAULT_COLORS = { A:"#6b7280", BG:"#f9fafb", HD:"#d3d4d4", S2:"#f3f4f6", CT:"#111827", CB:"#374151", CM:"#6b7280" };
 const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
@@ -20,12 +20,12 @@ function E({ value, onChange, editing, multiline = false, style = {} as React.CS
 }
 
 export default function CL_Marble() {
-  const [data, setData] = useState<CLData>(JSON.parse(JSON.stringify(DEFAULT_CL_DATA)));
+  const [data, setData] = usePersistentCLState<CLData>('cl_marble_data', JSON.parse(JSON.stringify(DEFAULT_CL_DATA)));
   const [editing, setEditing] = useState(false);
-  const [fontKey, setFontKey] = useState("nunito");
-  const [sizeKey, setSizeKey] = useState("md");
+  const [fontKey, setFontKey] = usePersistentCLState('cl_marble_font', "nunito");
+  const [sizeKey, setSizeKey] = usePersistentCLState('cl_marble_size', "md");
   const [showDesign, setShowDesign] = useState(false);
-  const [clrs, setClrs] = useState(DEFAULT_COLORS);
+  const [clrs, setClrs] = usePersistentCLState('cl_marble_colors', DEFAULT_COLORS);
   const {A,BG,HD,S2,CT,CB,CM} = clrs;
   const curFont = FONTS.find(f => f.key === fontKey) ?? FONTS[0];
   const curSize = FONT_SIZES.find(s => s.key === sizeKey) ?? FONT_SIZES[2];
