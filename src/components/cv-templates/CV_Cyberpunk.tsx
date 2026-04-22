@@ -88,7 +88,7 @@ export default function CV_Cyberpunk() {
         .${PFX}-doc, .${PFX}-doc * { font-family: 'Courier New', monospace !important; }
         .${PFX}-scanlines { background: repeating-linear-gradient(0deg, rgba(0,255,231,0.015) 0px, rgba(0,255,231,0.015) 1px, transparent 1px, transparent 3px); pointer-events: none; }
         @media print {
-          @page { size: A4 portrait; margin: 0; }html,body{height:0!important;overflow:visible!important;margin:0!important;padding:0!important;}
+          @page { size: A4 portrait; margin: 0; }
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }

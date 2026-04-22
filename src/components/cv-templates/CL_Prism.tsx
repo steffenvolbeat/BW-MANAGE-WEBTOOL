@@ -50,7 +50,7 @@ export default function CL_Prism() {
           background-size: 200% auto;
         }
         @media print {
-          @page{size:A4 portrait;margin:0;}html,body{height:0!important;overflow:visible!important;margin:0!important;padding:0!important;}
+          @page{size:A4 portrait;margin:0;}
           *,*::before,*::after{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
           body *{visibility:hidden!important;}
           .clpr-doc,.clpr-doc *{visibility:visible!important;}
