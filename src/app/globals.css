@@ -256,7 +256,7 @@ textarea::placeholder,
     --muted: #555555;
   }
   header, aside, nav, footer, .no-print { display: none !important; }
-  body { background: #fff !important; color: #000 !important; }
+  body:not(:has([class*="-doc"])) { background: #fff !important; color: #000 !important; }
 
   /* ── Nuclear: auf Seiten mit einem druckbaren Dokument ────────────────── */
   /* Alles ausblenden – nur das Dokument bleibt sichtbar                    */
@@ -280,6 +280,7 @@ textarea::placeholder,
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
+    background: transparent !important;
   }
 }
 
