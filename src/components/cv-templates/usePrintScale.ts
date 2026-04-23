@@ -10,15 +10,19 @@ import { RefObject, useCallback, useEffect } from "react";
 export function usePrintScale(
   docRef: RefObject<HTMLDivElement | null>,
   maxPx = 1202,
-  baseZoom = 0.934
+  baseZoom = 0.934,
+  sizeScale = 1,
+  minFinalZoom = 0.78
 ) {
   const applyScale = useCallback(() => {
     const el = docRef.current;
     if (!el) return;
     const h = el.scrollHeight;
-    const zoom = h > maxPx ? (baseZoom * maxPx) / h : baseZoom;
-    el.style.zoom = zoom.toFixed(5);
-  }, [docRef, maxPx, baseZoom]);
+    const targetZoom = baseZoom * sizeScale;
+    const fitZoom = h > maxPx ? (targetZoom * maxPx) / h : targetZoom;
+    const finalZoom = Math.max(minFinalZoom, fitZoom);
+    el.style.zoom = finalZoom.toFixed(5);
+  }, [docRef, maxPx, baseZoom, sizeScale, minFinalZoom]);
 
   const resetScale = useCallback(() => {
     const el = docRef.current;

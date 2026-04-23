@@ -77,7 +77,7 @@ export default function CV_Typewriter() {
   const scale=curSize.scale;
   const photoInputRef=useRef<HTMLInputElement>(null);
   const docRef=useRef<HTMLDivElement>(null);
-  const handlePrint = usePrintScale(docRef);
+  const handlePrint = usePrintScale(docRef, 1202, 0.934, scale);
   const setP=(p:Partial<CVData["personal"]>)=>setData(d=>({...d,personal:{...d.personal,...p}}));
   const updProj=(id:string,p:Partial<typeof data.projects[0]>)=>setData(d=>({...d,projects:d.projects.map(x=>x.id===id?{...x,...p}:x)}));
   const updEdu=(id:string,p:Partial<typeof data.education[0]>)=>setData(d=>({...d,education:d.education.map(x=>x.id===id?{...x,...p}:x)}));
