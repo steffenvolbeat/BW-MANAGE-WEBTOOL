@@ -11,18 +11,19 @@ export function usePrintScale(
   docRef: RefObject<HTMLDivElement | null>,
   maxPx = 1202,
   baseZoom = 0.934,
-  sizeScale = 1,
+  _sizeScale = 1,   // nur noch Screen-Zoom, kein Einfluss auf Print
   minFinalZoom = 0.78
 ) {
   const applyScale = useCallback(() => {
     const el = docRef.current;
     if (!el) return;
     const h = el.scrollHeight;
-    const targetZoom = baseZoom * sizeScale;
-    const fitZoom = h > maxPx ? (targetZoom * maxPx) / h : targetZoom;
+    // Immer baseZoom verwenden – sizeScale wirkt nur auf Screen (zoom-div),
+    // nicht auf den Print-Zoom des doc-Elements.
+    const fitZoom = h > maxPx ? (baseZoom * maxPx) / h : baseZoom;
     const finalZoom = Math.max(minFinalZoom, fitZoom);
     el.style.zoom = finalZoom.toFixed(5);
-  }, [docRef, maxPx, baseZoom, sizeScale, minFinalZoom]);
+  }, [docRef, maxPx, baseZoom, minFinalZoom]);
 
   const resetScale = useCallback(() => {
     const el = docRef.current;

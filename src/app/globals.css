@@ -259,28 +259,24 @@ textarea::placeholder,
   body:not(:has([class*="-doc"])) { background: #fff !important; color: #000 !important; }
 
   /* ── Nuclear: auf Seiten mit einem druckbaren Dokument ────────────────── */
-  /* Alles ausblenden – nur das Dokument bleibt sichtbar                    */
-  body:has(.cl-doc) *,
-  body:has(.cv-doc) * {
+  /* Alles ausblenden – nur das Dokument bleibt sichtbar
+     [class*="-doc"] trifft cgl-doc, ccy-doc, cpr-doc, ccst-doc usw.     */
+  body:has([class*="-doc"]) * {
     visibility: hidden !important;
   }
-  body:has(.cl-doc) .cl-doc,
-  body:has(.cl-doc) .cl-doc *,
-  body:has(.cv-doc) .cv-doc,
-  body:has(.cv-doc) .cv-doc * {
+  body:has([class*="-doc"]) [class*="-doc"],
+  body:has([class*="-doc"]) [class*="-doc"] * {
     visibility: visible !important;
   }
 
-  /* Hard cap auf exakt 1 DIN A4 Seite – gilt für alle CV- und CL-Templates
-     ([class*="-doc"] trifft cgl-doc, ccy-doc, cpr-doc, ctw-doc, ccst-doc usw.) */
+  /* Hintergrund transparent halten damit Template-Farben durchkommen;
+     kein overflow:hidden/height-cap – position:fixed + @page{margin:0}
+     sorgt bereits dafür, dass alles auf genau 1 A4-Seite bleibt.        */
   html:has([class*="-doc"]),
   body:has([class*="-doc"]) {
-    height: 297mm !important;
-    max-height: 297mm !important;
-    overflow: hidden !important;
+    background: transparent !important;
     margin: 0 !important;
     padding: 0 !important;
-    background: transparent !important;
   }
 }
 
