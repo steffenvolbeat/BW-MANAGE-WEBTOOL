@@ -77,6 +77,26 @@ import CL_Bamboo from "@/components/cv-templates/CL_Bamboo";
 import CL_Dusk from "@/components/cv-templates/CL_Dusk";
 import CL_Scarlet from "@/components/cv-templates/CL_Scarlet";
 import CL_Papyrus from "@/components/cv-templates/CL_Papyrus";
+import CL_Isometric from "@/components/cv-templates/CL_Isometric";
+import CL_Risograph from "@/components/cv-templates/CL_Risograph";
+import CL_Holographic from "@/components/cv-templates/CL_Holographic";
+import CL_Botanical from "@/components/cv-templates/CL_Botanical";
+import CL_Dashboard from "@/components/cv-templates/CL_Dashboard";
+import CL_Washi from "@/components/cv-templates/CL_Washi";
+import CL_Engraving from "@/components/cv-templates/CL_Engraving";
+import CL_Atomic from "@/components/cv-templates/CL_Atomic";
+import CL_StainedGlass from "@/components/cv-templates/CL_StainedGlass";
+import CL_Cassette from "@/components/cv-templates/CL_Cassette";
+import CL_DeepSea from "@/components/cv-templates/CL_DeepSea";
+import CL_Cairo from "@/components/cv-templates/CL_Cairo";
+import CL_Constructivist from "@/components/cv-templates/CL_Constructivist";
+import CL_Lava from "@/components/cv-templates/CL_Lava";
+import CL_Solarpunk from "@/components/cv-templates/CL_Solarpunk";
+import CL_Kodachrome from "@/components/cv-templates/CL_Kodachrome";
+import CL_Manuscript from "@/components/cv-templates/CL_Manuscript";
+import CL_Mondrian from "@/components/cv-templates/CL_Mondrian";
+import CL_NeoNoir from "@/components/cv-templates/CL_NeoNoir";
+import CL_Bento from "@/components/cv-templates/CL_Bento";
 
 const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   midnight: CL_Midnight,
@@ -149,6 +169,26 @@ const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   cldsk: CL_Dusk,
   clsclt: CL_Scarlet,
   clppy: CL_Papyrus,
+  cliso: CL_Isometric,
+  clriso: CL_Risograph,
+  clholo: CL_Holographic,
+  clbotan: CL_Botanical,
+  cldash: CL_Dashboard,
+  clwashi: CL_Washi,
+  clengr: CL_Engraving,
+  clatom: CL_Atomic,
+  clstgls: CL_StainedGlass,
+  clcass: CL_Cassette,
+  cldsea: CL_DeepSea,
+  clcairo: CL_Cairo,
+  clcstr: CL_Constructivist,
+  cllava: CL_Lava,
+  clsplnk: CL_Solarpunk,
+  clkoda: CL_Kodachrome,
+  clmanu: CL_Manuscript,
+  clmond: CL_Mondrian,
+  clnnoir: CL_NeoNoir,
+  clbento: CL_Bento,
 };
 
 function AnschreibenContent() {

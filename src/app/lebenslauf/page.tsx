@@ -75,6 +75,26 @@ import CV_Bamboo from "@/components/cv-templates/CV_Bamboo";
 import CV_Dusk from "@/components/cv-templates/CV_Dusk";
 import CV_Scarlet from "@/components/cv-templates/CV_Scarlet";
 import CV_Papyrus from "@/components/cv-templates/CV_Papyrus";
+import CV_Isometric from "@/components/cv-templates/CV_Isometric";
+import CV_Risograph from "@/components/cv-templates/CV_Risograph";
+import CV_Holographic from "@/components/cv-templates/CV_Holographic";
+import CV_Botanical from "@/components/cv-templates/CV_Botanical";
+import CV_Dashboard from "@/components/cv-templates/CV_Dashboard";
+import CV_Washi from "@/components/cv-templates/CV_Washi";
+import CV_Engraving from "@/components/cv-templates/CV_Engraving";
+import CV_Atomic from "@/components/cv-templates/CV_Atomic";
+import CV_StainedGlass from "@/components/cv-templates/CV_StainedGlass";
+import CV_Cassette from "@/components/cv-templates/CV_Cassette";
+import CV_DeepSea from "@/components/cv-templates/CV_DeepSea";
+import CV_Cairo from "@/components/cv-templates/CV_Cairo";
+import CV_Constructivist from "@/components/cv-templates/CV_Constructivist";
+import CV_Lava from "@/components/cv-templates/CV_Lava";
+import CV_Solarpunk from "@/components/cv-templates/CV_Solarpunk";
+import CV_Kodachrome from "@/components/cv-templates/CV_Kodachrome";
+import CV_Manuscript from "@/components/cv-templates/CV_Manuscript";
+import CV_Mondrian from "@/components/cv-templates/CV_Mondrian";
+import CV_NeoNoir from "@/components/cv-templates/CV_NeoNoir";
+import CV_Bento from "@/components/cv-templates/CV_Bento";
 
 const CV_MAP: Record<string, React.ComponentType> = {
   novoresume: LebenslaufTemplate,
@@ -148,6 +168,26 @@ const CV_MAP: Record<string, React.ComponentType> = {
   dusk: CV_Dusk,
   scarlet: CV_Scarlet,
   papyrus: CV_Papyrus,
+  iso: CV_Isometric,
+  riso: CV_Risograph,
+  holo: CV_Holographic,
+  botan: CV_Botanical,
+  dash: CV_Dashboard,
+  washi: CV_Washi,
+  engr: CV_Engraving,
+  atom: CV_Atomic,
+  stgls: CV_StainedGlass,
+  cass: CV_Cassette,
+  dsea: CV_DeepSea,
+  cairo: CV_Cairo,
+  cstr: CV_Constructivist,
+  lava: CV_Lava,
+  splnk: CV_Solarpunk,
+  koda: CV_Kodachrome,
+  manu: CV_Manuscript,
+  mond: CV_Mondrian,
+  nnoir: CV_NeoNoir,
+  bento: CV_Bento,
 };
 
 function LebenslaufContent() {
