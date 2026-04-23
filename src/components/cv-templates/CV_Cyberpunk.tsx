@@ -95,7 +95,7 @@ export default function CV_Cyberpunk() {
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }
-          .${PFX}-doc { position:absolute!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934; box-shadow:none!important; margin:0!important; background: linear-gradient(to right, #080015 600px, #060010 600px) !important; }
+          .${PFX}-doc { position:absolute!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; max-height:1202px!important; overflow:hidden!important; zoom:0.934; box-shadow:none!important; margin:0!important; background: linear-gradient(to right, #080015 600px, #060010 600px) !important; }
           .${PFX}-zoom { zoom:1!important; width:100%!important; }
           .${PFX}-ctrl { display:none!important; }
           .${PFX}-sidebar { background:transparent!important; }
