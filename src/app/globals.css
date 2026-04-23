@@ -270,6 +270,17 @@ textarea::placeholder,
   body:has(.cv-doc) .cv-doc * {
     visibility: visible !important;
   }
+
+  /* Hard cap auf exakt 1 DIN A4 Seite – gilt für alle CV- und CL-Templates
+     ([class*="-doc"] trifft cgl-doc, ccy-doc, cpr-doc, ctw-doc, ccst-doc usw.) */
+  html:has([class*="-doc"]),
+  body:has([class*="-doc"]) {
+    height: 297mm !important;
+    max-height: 297mm !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 }
 
 /* Smooth theme transition */
