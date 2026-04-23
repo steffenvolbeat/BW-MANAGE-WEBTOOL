@@ -4,6 +4,7 @@ import { useState, useRef, useContext, createContext } from "react";
 import { PrinterIcon, PencilSquareIcon, CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FONTS, FONT_SIZES, PHOTO_SHAPES, CVData, DEFAULT_CV_DATA, uid } from "./shared";
 import { useCVStorage } from "./useCV";
+import { usePrintScale } from "./usePrintScale";
 
 const DEFAULT_COLORS = { A:"#8B4513", BG:"#f5f0e8", S2:"#ede8dd", S3:"#e2ddd0", SBG:"#ede6d4", CT:"#2c1810", CB:"#4a3020", CM:"#7a6050" };
 const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
@@ -75,6 +76,8 @@ export default function CV_Typewriter() {
   const fnt="'Courier New',Courier,monospace";
   const scale=curSize.scale;
   const photoInputRef=useRef<HTMLInputElement>(null);
+  const docRef=useRef<HTMLDivElement>(null);
+  usePrintScale(docRef);
   const setP=(p:Partial<CVData["personal"]>)=>setData(d=>({...d,personal:{...d.personal,...p}}));
   const updProj=(id:string,p:Partial<typeof data.projects[0]>)=>setData(d=>({...d,projects:d.projects.map(x=>x.id===id?{...x,...p}:x)}));
   const updEdu=(id:string,p:Partial<typeof data.education[0]>)=>setData(d=>({...d,education:d.education.map(x=>x.id===id?{...x,...p}:x)}));
@@ -90,7 +93,7 @@ export default function CV_Typewriter() {
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }
-          .${PFX}-doc { position:absolute!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934!important; box-shadow:none!important; margin:0!important; }
+          .${PFX}-doc { position:absolute!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934; box-shadow:none!important; margin:0!important; }
           .${PFX}-zoom { zoom:1!important; width:100%!important; }
           .${PFX}-ctrl { display:none!important; }
         }
@@ -145,7 +148,7 @@ export default function CV_Typewriter() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"4px 4px 20px rgba(0,0,0,0.3)",overflow: "visible",fontFamily:fnt,border:`2px solid ${A}`}}>
+      <div ref={docRef} className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:BG,boxShadow:"4px 4px 20px rgba(0,0,0,0.3)",overflow: "visible",fontFamily:fnt,border:`2px solid ${A}`}}>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Typewriter header strip */}
           <div style={{height:6,background:A}}/>

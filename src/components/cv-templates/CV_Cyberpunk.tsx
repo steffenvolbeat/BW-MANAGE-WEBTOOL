@@ -4,6 +4,7 @@ import { useState, useRef, useContext, createContext } from "react";
 import { PrinterIcon, PencilSquareIcon, CheckIcon, PlusIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FONTS, FONT_SIZES, PHOTO_SHAPES, CVData, DEFAULT_CV_DATA, uid } from "./shared";
 import { useCVStorage } from "./useCV";
+import { usePrintScale } from "./usePrintScale";
 
 const DEFAULT_COLORS = { A:"#f900ff", BG:"#080015", S2:"#0d001f", S3:"#120026", SBG:"#060010", CT:"#ffffff", CB:"#00ffe7", CM:"#b800ff" };
 const hex2rgba = (hex:string,a:number) => { const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return `rgba(${r},${g},${b},${a})`; };
@@ -76,6 +77,8 @@ export default function CV_Cyberpunk() {
   const fnt="'Courier New', monospace";
   const scale=curSize.scale;
   const photoInputRef=useRef<HTMLInputElement>(null);
+  const docRef=useRef<HTMLDivElement>(null);
+  usePrintScale(docRef);
   const setP=(p:Partial<CVData["personal"]>)=>setData(d=>({...d,personal:{...d.personal,...p}}));
   const updProj=(id:string,p:Partial<typeof data.projects[0]>)=>setData(d=>({...d,projects:d.projects.map(x=>x.id===id?{...x,...p}:x)}));
   const updEdu=(id:string,p:Partial<typeof data.education[0]>)=>setData(d=>({...d,education:d.education.map(x=>x.id===id?{...x,...p}:x)}));
@@ -92,7 +95,7 @@ export default function CV_Cyberpunk() {
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }
-          .${PFX}-doc { position:absolute!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934!important; box-shadow:none!important; margin:0!important; background: linear-gradient(to right, #080015 600px, #060010 600px) !important; }
+          .${PFX}-doc { position:absolute!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934; box-shadow:none!important; margin:0!important; background: linear-gradient(to right, #080015 600px, #060010 600px) !important; }
           .${PFX}-zoom { zoom:1!important; width:100%!important; }
           .${PFX}-ctrl { display:none!important; }
           .${PFX}-sidebar { background:transparent!important; }
@@ -122,7 +125,7 @@ export default function CV_Cyberpunk() {
         )}
       </div>
 
-      <div className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:"#080015",boxShadow:"0 0 40px rgba(249,0,255,0.3), 0 0 80px rgba(0,255,231,0.1), inset 0 0 40px rgba(249,0,255,0.03)",overflow: "visible",fontFamily:fnt,border:"1px solid rgba(249,0,255,0.3)",position:"relative"}}>
+      <div ref={docRef} className={`${PFX}-doc`} style={{width:850, minHeight: 1202,margin:"0 auto",backgroundColor:"#080015",boxShadow:"0 0 40px rgba(249,0,255,0.3), 0 0 80px rgba(0,255,231,0.1), inset 0 0 40px rgba(249,0,255,0.03)",overflow: "visible",fontFamily:fnt,border:"1px solid rgba(249,0,255,0.3)",position:"relative"}}>
         <div className={`${PFX}-scanlines`} style={{position:"absolute",top:0,left:0,right:0,bottom:0,zIndex:1,pointerEvents:"none"}}/>
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale,position:"relative",zIndex:2}}>
           <div style={{height:2,background:"linear-gradient(90deg,#f900ff,#00ffe7,#f900ff)"}}/>

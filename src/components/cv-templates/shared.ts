@@ -183,7 +183,7 @@ export const DEFAULT_CV_DATA: CVData = {
   personal: {
     name:     "Steffen Lorenz",
     subtitle: "Webentwickler / Fullstack",
-    bio:      "Als motivierter und engagierter Web-Entwickler mit Fokus auf strukturierte, semantische und performante Weblösungen. Meine Schwerpunkte liegen in HTML5, CSS3, JavaScript, Next.js und SQL. Durch meine IT-Umschulung und vielseitige Praxiserfahrung arbeite ich analytisch, zuverlässig und lösungsorientiert. Eigene Projekte und ständiges Lernen treiben mich an – ebenso wie Musik, E-Gitarren und Laufen.",
+    bio:      "Motivierter Web-Entwickler mit Fokus auf strukturierte, performante Weblösungen. Schwerpunkte: HTML5, CSS3, JavaScript, Next.js und SQL. Analytisch, zuverlässig und lösungsorientiert – angetrieben durch eigene Projekte und ständiges Lernen.",
     email:    "steffen.konstanz@gmx.ch",
     phone:    "0173 4235651",
     location: "Erfurt, Deutschland",
