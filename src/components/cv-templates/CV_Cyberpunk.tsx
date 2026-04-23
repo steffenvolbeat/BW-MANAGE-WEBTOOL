@@ -92,9 +92,10 @@ export default function CV_Cyberpunk() {
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }
-          .${PFX}-doc { position:absolute!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934!important; box-shadow:none!important; margin:0!important; }
+          .${PFX}-doc { position:absolute!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934!important; box-shadow:none!important; margin:0!important; background: linear-gradient(to right, #080015 600px, #060010 600px) !important; }
           .${PFX}-zoom { zoom:1!important; width:100%!important; }
           .${PFX}-ctrl { display:none!important; }
+          .${PFX}-sidebar { background:transparent!important; }
         }
       `}</style>
 
@@ -200,7 +201,7 @@ export default function CV_Cyberpunk() {
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,education:[...d.education,{id:uid(),degree:"EDU_001",institution:"INST_001",period:"",location:"",type:"",bullets:[]}]}))} style={{fontSize:11,color:"#00ffe7",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontFamily:"'Courier New',monospace"}}><PlusIcon style={{width:12,height:12}}/>+ NEW</button>}
               </div>
             </div>
-            <div style={{width:250,flexShrink:0,backgroundColor:"#060010",padding:"24px 18px 40px",borderLeft:"1px solid rgba(249,0,255,0.3)"}}>
+            <div className={`${PFX}-sidebar`} style={{width:250,flexShrink:0,backgroundColor:"#060010",padding:"24px 18px 40px",borderLeft:"1px solid rgba(249,0,255,0.3)"}} >
               {[
                 {title:"Skills",c:<TagList tags={data.skills} onChange={t=>setData(d=>({...d,skills:t}))} editing={editing}/>},
                 {title:"Tech",c:<div>{data.technicalSkills.map(ts=>(<div key={ts.id} style={{marginBottom:7}}><E value={ts.name} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,name:v}:t)}))} editing={editing} style={{fontSize:12,fontWeight:700,color:"#00ffe7",display:"block"}}/><E value={ts.description} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,description:v}:t)}))} editing={editing} style={{fontSize:10,color:"#b800ff",display:"block"}}/>{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:d.technicalSkills.filter(t=>t.id!==ts.id)}))} style={{fontSize:10,color:"#f87171",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:2}}><XMarkIcon style={{width:10,height:10}}/>Del</button>}</div>))}{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:[...d.technicalSkills,{id:uid(),name:"TECH",description:"v1.0"}]}))} style={{fontSize:11,color:"#00ffe7",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontFamily:"monospace"}}><PlusIcon style={{width:11,height:11}}/>+ ADD</button>}</div>},
