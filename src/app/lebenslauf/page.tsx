@@ -55,6 +55,26 @@ import CV_Coastal from "@/components/cv-templates/CV_Coastal";
 import CV_Mono from "@/components/cv-templates/CV_Mono";
 import CV_Wine from "@/components/cv-templates/CV_Wine";
 import CV_Titanium from "@/components/cv-templates/CV_Titanium";
+import CV_Origami from "@/components/cv-templates/CV_Origami";
+import CV_Brutalist from "@/components/cv-templates/CV_Brutalist";
+import CV_Retrowave from "@/components/cv-templates/CV_Retrowave";
+import CV_Swiss from "@/components/cv-templates/CV_Swiss";
+import CV_Memphis from "@/components/cv-templates/CV_Memphis";
+import CV_Newspaper from "@/components/cv-templates/CV_Newspaper";
+import CV_Pixel from "@/components/cv-templates/CV_Pixel";
+import CV_Watercolor from "@/components/cv-templates/CV_Watercolor";
+import CV_Galaxy from "@/components/cv-templates/CV_Galaxy";
+import CV_Chalk from "@/components/cv-templates/CV_Chalk";
+import CV_Steampunk from "@/components/cv-templates/CV_Steampunk";
+import CV_Vaporwave from "@/components/cv-templates/CV_Vaporwave";
+import CV_Topographic from "@/components/cv-templates/CV_Topographic";
+import CV_Amber from "@/components/cv-templates/CV_Amber";
+import CV_Sage from "@/components/cv-templates/CV_Sage";
+import CV_Quartz from "@/components/cv-templates/CV_Quartz";
+import CV_Bamboo from "@/components/cv-templates/CV_Bamboo";
+import CV_Dusk from "@/components/cv-templates/CV_Dusk";
+import CV_Scarlet from "@/components/cv-templates/CV_Scarlet";
+import CV_Papyrus from "@/components/cv-templates/CV_Papyrus";
 
 const CV_MAP: Record<string, React.ComponentType> = {
   novoresume: LebenslaufTemplate,
@@ -108,6 +128,26 @@ const CV_MAP: Record<string, React.ComponentType> = {
   mono: CV_Mono,
   wine: CV_Wine,
   titanium: CV_Titanium,
+  origami: CV_Origami,
+  brutalist: CV_Brutalist,
+  retrowave: CV_Retrowave,
+  swiss: CV_Swiss,
+  memphis: CV_Memphis,
+  newspaper: CV_Newspaper,
+  pixel: CV_Pixel,
+  watercolor: CV_Watercolor,
+  galaxy: CV_Galaxy,
+  chalk: CV_Chalk,
+  steampunk: CV_Steampunk,
+  vaporwave: CV_Vaporwave,
+  topographic: CV_Topographic,
+  amber: CV_Amber,
+  sage: CV_Sage,
+  quartz: CV_Quartz,
+  bamboo: CV_Bamboo,
+  dusk: CV_Dusk,
+  scarlet: CV_Scarlet,
+  papyrus: CV_Papyrus,
 };
 
 function LebenslaufContent() {

@@ -57,6 +57,26 @@ import CL_Coastal from "@/components/cv-templates/CL_Coastal";
 import CL_Mono from "@/components/cv-templates/CL_Mono";
 import CL_Wine from "@/components/cv-templates/CL_Wine";
 import CL_Titanium from "@/components/cv-templates/CL_Titanium";
+import CL_Origami from "@/components/cv-templates/CL_Origami";
+import CL_Brutalist from "@/components/cv-templates/CL_Brutalist";
+import CL_Retrowave from "@/components/cv-templates/CL_Retrowave";
+import CL_Swiss from "@/components/cv-templates/CL_Swiss";
+import CL_Memphis from "@/components/cv-templates/CL_Memphis";
+import CL_Newspaper from "@/components/cv-templates/CL_Newspaper";
+import CL_Pixel from "@/components/cv-templates/CL_Pixel";
+import CL_Watercolor from "@/components/cv-templates/CL_Watercolor";
+import CL_Galaxy from "@/components/cv-templates/CL_Galaxy";
+import CL_Chalk from "@/components/cv-templates/CL_Chalk";
+import CL_Steampunk from "@/components/cv-templates/CL_Steampunk";
+import CL_Vaporwave from "@/components/cv-templates/CL_Vaporwave";
+import CL_Topographic from "@/components/cv-templates/CL_Topographic";
+import CL_Amber from "@/components/cv-templates/CL_Amber";
+import CL_Sage from "@/components/cv-templates/CL_Sage";
+import CL_Quartz from "@/components/cv-templates/CL_Quartz";
+import CL_Bamboo from "@/components/cv-templates/CL_Bamboo";
+import CL_Dusk from "@/components/cv-templates/CL_Dusk";
+import CL_Scarlet from "@/components/cv-templates/CL_Scarlet";
+import CL_Papyrus from "@/components/cv-templates/CL_Papyrus";
 
 const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   midnight: CL_Midnight,
@@ -109,6 +129,26 @@ const CL_CUSTOM_MAP: Record<string, React.ComponentType> = {
   mono: CL_Mono,
   wine: CL_Wine,
   titanium: CL_Titanium,
+  clori: CL_Origami,
+  clbru: CL_Brutalist,
+  clrwave: CL_Retrowave,
+  clswi: CL_Swiss,
+  clmem: CL_Memphis,
+  clnws: CL_Newspaper,
+  clpix: CL_Pixel,
+  clwclr: CL_Watercolor,
+  clglx: CL_Galaxy,
+  clchk: CL_Chalk,
+  clstmp: CL_Steampunk,
+  clvpw: CL_Vaporwave,
+  cltopo: CL_Topographic,
+  clamb: CL_Amber,
+  clsge: CL_Sage,
+  clqtz: CL_Quartz,
+  clbam: CL_Bamboo,
+  cldsk: CL_Dusk,
+  clsclt: CL_Scarlet,
+  clppy: CL_Papyrus,
 };
 
 function AnschreibenContent() {
