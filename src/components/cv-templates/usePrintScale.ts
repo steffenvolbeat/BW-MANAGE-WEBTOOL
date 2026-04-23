@@ -1,4 +1,4 @@
-import { RefObject, useEffect } from "react";
+import { RefObject, useCallback, useEffect } from "react";
 
 /**
  * Passt den zoom des .doc-Elements vor dem Drucken automatisch an,
@@ -12,24 +12,37 @@ export function usePrintScale(
   maxPx = 1202,
   baseZoom = 0.934
 ) {
+  const applyScale = useCallback(() => {
+    const el = docRef.current;
+    if (!el) return;
+    const h = el.scrollHeight;
+    const zoom = h > maxPx ? (baseZoom * maxPx) / h : baseZoom;
+    el.style.zoom = zoom.toFixed(5);
+  }, [docRef, maxPx, baseZoom]);
+
+  const resetScale = useCallback(() => {
+    const el = docRef.current;
+    if (el) el.style.zoom = "";
+  }, [docRef]);
+
+  const printNow = useCallback(() => {
+    applyScale();
+    // Zwei Frames warten, damit der Browser die inline-Skalierung sicher übernimmt.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        window.print();
+      });
+    });
+  }, [applyScale]);
+
   useEffect(() => {
-    const before = () => {
-      const el = docRef.current;
-      if (!el) return;
-      const h = el.scrollHeight;
-      const zoom = h > maxPx ? (baseZoom * maxPx) / h : baseZoom;
-      el.style.zoom = zoom.toFixed(5);
-    };
-    const after = () => {
-      const el = docRef.current;
-      if (el) el.style.zoom = "";
-    };
-    window.addEventListener("beforeprint", before);
-    window.addEventListener("afterprint", after);
+    window.addEventListener("beforeprint", applyScale);
+    window.addEventListener("afterprint", resetScale);
     return () => {
-      window.removeEventListener("beforeprint", before);
-      window.removeEventListener("afterprint", after);
+      window.removeEventListener("beforeprint", applyScale);
+      window.removeEventListener("afterprint", resetScale);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [applyScale, resetScale]);
+
+  return printNow;
 }

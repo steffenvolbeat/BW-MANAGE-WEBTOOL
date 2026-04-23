@@ -77,7 +77,7 @@ export default function CV_Terminal() {
   const scale=curSize.scale;
   const photoInputRef=useRef<HTMLInputElement>(null);
   const docRef=useRef<HTMLDivElement>(null);
-  usePrintScale(docRef);
+  const handlePrint = usePrintScale(docRef);
   const setP=(p:Partial<CVData["personal"]>)=>setData(d=>({...d,personal:{...d.personal,...p}}));
   const updProj=(id:string,p:Partial<typeof data.projects[0]>)=>setData(d=>({...d,projects:d.projects.map(x=>x.id===id?{...x,...p}:x)}));
   const updEdu=(id:string,p:Partial<typeof data.education[0]>)=>setData(d=>({...d,education:d.education.map(x=>x.id===id?{...x,...p}:x)}));
@@ -95,7 +95,7 @@ export default function CV_Terminal() {
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }
-          .${PFX}-doc { position:fixed!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:hidden!important; zoom:0.934; box-shadow:none!important; margin:0!important; }
+          .${PFX}-doc { position:fixed!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934; box-shadow:none!important; margin:0!important; }
           .${PFX}-zoom { zoom:1!important; width:100%!important; }
           .${PFX}-ctrl { display:none!important; }
         }
@@ -105,7 +105,7 @@ export default function CV_Terminal() {
         <button onClick={()=>setEditing(e=>!e)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:2,fontSize:13,cursor:"pointer",border:`1px solid ${editing?"#16a34a":"rgba(0,255,65,0.5)"}`,backgroundColor:editing?"#16a34a":"rgba(0,255,65,0.1)",color:editing?"white":A,fontFamily:"'Courier New',monospace"}}>
           {editing?<CheckIcon style={{width:16,height:16}}/>:<PencilSquareIcon style={{width:16,height:16}}/>}$ {editing?"exit":"vim"}
         </button>
-        <button onClick={()=>window.print()} style={{padding:"7px 16px",borderRadius:2,fontSize:13,cursor:"pointer",border:"1px solid rgba(0,255,65,0.3)",backgroundColor:"rgba(0,255,65,0.06)",color:A,display:"flex",alignItems:"center",gap:6,fontFamily:"'Courier New',monospace"}}>
+        <button onClick={handlePrint} style={{padding:"7px 16px",borderRadius:2,fontSize:13,cursor:"pointer",border:"1px solid rgba(0,255,65,0.3)",backgroundColor:"rgba(0,255,65,0.06)",color:A,display:"flex",alignItems:"center",gap:6,fontFamily:"'Courier New',monospace"}}>
           <PrinterIcon style={{width:16,height:16}}/>$ lp
         </button>
         <button onClick={()=>setShowDesign(v=>!v)} style={{padding:"7px 16px",borderRadius:2,fontSize:13,cursor:"pointer",border:`1px solid ${showDesign?"rgba(0,255,65,0.5)":"rgba(0,255,65,0.1)"}`,backgroundColor:showDesign?"rgba(0,255,65,0.08)":"transparent",color:showDesign?A:"#444",fontFamily:"'Courier New',monospace"}}>

@@ -77,7 +77,7 @@ export default function CV_Typewriter() {
   const scale=curSize.scale;
   const photoInputRef=useRef<HTMLInputElement>(null);
   const docRef=useRef<HTMLDivElement>(null);
-  usePrintScale(docRef);
+  const handlePrint = usePrintScale(docRef);
   const setP=(p:Partial<CVData["personal"]>)=>setData(d=>({...d,personal:{...d.personal,...p}}));
   const updProj=(id:string,p:Partial<typeof data.projects[0]>)=>setData(d=>({...d,projects:d.projects.map(x=>x.id===id?{...x,...p}:x)}));
   const updEdu=(id:string,p:Partial<typeof data.education[0]>)=>setData(d=>({...d,education:d.education.map(x=>x.id===id?{...x,...p}:x)}));
@@ -93,7 +93,7 @@ export default function CV_Typewriter() {
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }
-          .${PFX}-doc { position:fixed!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:hidden!important; zoom:0.934; box-shadow:none!important; margin:0!important; }
+          .${PFX}-doc { position:fixed!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934; box-shadow:none!important; margin:0!important; }
           .${PFX}-zoom { zoom:1!important; width:100%!important; }
           .${PFX}-ctrl { display:none!important; }
         }
@@ -103,7 +103,7 @@ export default function CV_Typewriter() {
         <button onClick={()=>setEditing(e=>!e)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:4,fontSize:13,fontWeight:600,cursor:"pointer",border:`2px solid ${A}`,backgroundColor:editing?"#16a34a":A,color:BG,fontFamily:fnt}}>
           {editing?<CheckIcon style={{width:16,height:16}}/>:<PencilSquareIcon style={{width:16,height:16}}/>}{editing?"Fertig":"Bearbeiten"}
         </button>
-        <button onClick={()=>window.print()} style={{padding:"7px 16px",borderRadius:4,fontSize:13,cursor:"pointer",border:`2px solid ${A}`,backgroundColor:"transparent",color:A,display:"flex",alignItems:"center",gap:6,fontFamily:fnt}}>
+        <button onClick={handlePrint} style={{padding:"7px 16px",borderRadius:4,fontSize:13,cursor:"pointer",border:`2px solid ${A}`,backgroundColor:"transparent",color:A,display:"flex",alignItems:"center",gap:6,fontFamily:fnt}}>
           <PrinterIcon style={{width:16,height:16}}/>Drucken
         </button>
         <button onClick={()=>setShowDesign(v=>!v)} style={{padding:"7px 16px",borderRadius:4,fontSize:13,cursor:"pointer",border:`2px dashed ${showDesign?A:"#999"}`,backgroundColor:"transparent",color:showDesign?A:"#888",fontFamily:fnt}}>

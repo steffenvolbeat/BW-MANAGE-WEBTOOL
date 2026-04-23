@@ -43,7 +43,7 @@ export default function CV_Coastal() {
   const fnt=curFont.family;const scale=curSize.scale;
   const photoInputRef=useRef<HTMLInputElement>(null);
   const docRef=useRef<HTMLDivElement>(null);
-  usePrintScale(docRef);
+  const handlePrint = usePrintScale(docRef);
   const setP=(p:Partial<CVData["personal"]>)=>setData(d=>({...d,personal:{...d.personal,...p}}));
   const updProj=(id:string,p:Partial<typeof data.projects[0]>)=>setData(d=>({...d,projects:d.projects.map(x=>x.id===id?{...x,...p}:x)}));
   const updEdu=(id:string,p:Partial<typeof data.education[0]>)=>setData(d=>({...d,education:d.education.map(x=>x.id===id?{...x,...p}:x)}));
@@ -60,14 +60,14 @@ export default function CV_Coastal() {
           *,*::before,*::after{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
           body *{visibility:hidden!important;}
           .${PFX}-doc,.${PFX}-doc *{visibility:visible!important;}
-          .${PFX}-doc{position:fixed!important;top:0!important;left:0!important;width:850px!important;min-height:1202px!important;overflow:hidden!important;zoom:0.934;box-shadow:none!important;margin:0!important;}
+          .${PFX}-doc{position:fixed!important;top:0!important;left:0!important;width:850px!important;min-height:1202px!important;overflow:visible!important;zoom:0.934;box-shadow:none!important;margin:0!important;}
           .${PFX}-zoom{zoom:1!important;width:100%!important;}
           .${PFX}-ctrl{display:none!important;}
         }
       `}</style>
       <div className={`${PFX}-ctrl`} style={{maxWidth:850,margin:"0 auto 16px",display:"flex",gap:8,flexWrap:"wrap"}}>
         <button onClick={()=>setEditing(e=>!e)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:3,fontSize:13,fontWeight:600,cursor:"pointer",border:`1px solid ${editing?"#16a34a":A}`,backgroundColor:editing?"#16a34a":"transparent",color:editing?"white":A}}>{editing?<CheckIcon style={{width:16,height:16}}/>:<PencilSquareIcon style={{width:16,height:16}}/>}{editing?"Fertig":"Bearbeiten"}</button>
-        <button onClick={()=>window.print()} style={{padding:"7px 16px",borderRadius:3,fontSize:13,fontWeight:600,cursor:"pointer",border:`1px solid ${CT}`,backgroundColor:"transparent",color:CT,display:"flex",alignItems:"center",gap:6}}><PrinterIcon style={{width:16,height:16}}/>Drucken</button>
+        <button onClick={handlePrint} style={{padding:"7px 16px",borderRadius:3,fontSize:13,fontWeight:600,cursor:"pointer",border:`1px solid ${CT}`,backgroundColor:"transparent",color:CT,display:"flex",alignItems:"center",gap:6}}><PrinterIcon style={{width:16,height:16}}/>Drucken</button>
         <button onClick={()=>setShowDesign(v=>!v)} style={{padding:"7px 16px",borderRadius:3,fontSize:13,cursor:"pointer",border:`1px solid ${showDesign?A:"#ccc"}`,backgroundColor:"transparent",color:showDesign?A:CM}}>🎨 Design</button>
         <button onClick={()=>{resetStorage();setData(JSON.parse(JSON.stringify(DEFAULT_CV_DATA)));setPhotoSrc("");setFontKey("inter");setSizeKey("md");setPhotoShapeKey("circle");setClrs(DEFAULT_COLORS);setShowDesign(false);}} style={{padding:"7px 16px",borderRadius:3,fontSize:13,cursor:"pointer",border:"1px solid #ccc",backgroundColor:"transparent",color:CM,display:"flex",alignItems:"center",gap:6}}><XMarkIcon style={{width:16,height:16}}/>Reset</button>
         {showDesign&&(<div style={{width:"100%",background:BG,border:`1px solid ${S3}`,borderRadius:4,padding:"14px 18px",display:"flex",gap:24,flexWrap:"wrap"}}>

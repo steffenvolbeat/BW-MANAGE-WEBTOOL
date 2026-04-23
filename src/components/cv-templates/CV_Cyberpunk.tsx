@@ -78,7 +78,7 @@ export default function CV_Cyberpunk() {
   const scale=curSize.scale;
   const photoInputRef=useRef<HTMLInputElement>(null);
   const docRef=useRef<HTMLDivElement>(null);
-  usePrintScale(docRef);
+  const handlePrint = usePrintScale(docRef);
   const setP=(p:Partial<CVData["personal"]>)=>setData(d=>({...d,personal:{...d.personal,...p}}));
   const updProj=(id:string,p:Partial<typeof data.projects[0]>)=>setData(d=>({...d,projects:d.projects.map(x=>x.id===id?{...x,...p}:x)}));
   const updEdu=(id:string,p:Partial<typeof data.education[0]>)=>setData(d=>({...d,education:d.education.map(x=>x.id===id?{...x,...p}:x)}));
@@ -95,7 +95,7 @@ export default function CV_Cyberpunk() {
           *, *::before, *::after { -webkit-print-color-adjust:exact!important; print-color-adjust:exact!important; }
           body * { visibility:hidden!important; }
           .${PFX}-doc, .${PFX}-doc * { visibility:visible!important; }
-          .${PFX}-doc { position:fixed!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:hidden!important; zoom:0.934; box-shadow:none!important; margin:0!important; background: linear-gradient(to right, #080015 600px, #060010 600px) !important; }
+          .${PFX}-doc { position:fixed!important; top:0!important; left:0!important; width:850px!important; min-height:1202px!important; overflow:visible!important; zoom:0.934; box-shadow:none!important; margin:0!important; background: linear-gradient(to right, #080015 600px, #060010 600px) !important; }
           .${PFX}-zoom { zoom:1!important; width:100%!important; }
           .${PFX}-ctrl { display:none!important; }
           .${PFX}-sidebar { background:transparent!important; }
@@ -106,7 +106,7 @@ export default function CV_Cyberpunk() {
         <button onClick={()=>setEditing(e=>!e)} style={{display:"flex",alignItems:"center",gap:6,padding:"7px 16px",borderRadius:2,fontSize:13,fontWeight:600,cursor:"pointer",border:`1px solid ${editing?"#16a34a":"#f900ff"}`,backgroundColor:editing?"#16a34a":"rgba(249,0,255,0.15)",color:editing?"white":"#f900ff",textShadow:editing?"none":"0 0 8px rgba(249,0,255,0.8)",fontFamily:"'Courier New',monospace"}}>
           {editing?<CheckIcon style={{width:16,height:16}}/>:<PencilSquareIcon style={{width:16,height:16}}/>}{editing?"DONE":"EDIT"}
         </button>
-        <button onClick={()=>window.print()} style={{padding:"7px 16px",borderRadius:2,fontSize:13,cursor:"pointer",border:"1px solid rgba(0,255,231,0.6)",backgroundColor:"rgba(0,255,231,0.07)",color:"#00ffe7",display:"flex",alignItems:"center",gap:6,fontFamily:"'Courier New',monospace",textShadow:"0 0 8px rgba(0,255,231,0.6)"}}>
+        <button onClick={handlePrint} style={{padding:"7px 16px",borderRadius:2,fontSize:13,cursor:"pointer",border:"1px solid rgba(0,255,231,0.6)",backgroundColor:"rgba(0,255,231,0.07)",color:"#00ffe7",display:"flex",alignItems:"center",gap:6,fontFamily:"'Courier New',monospace",textShadow:"0 0 8px rgba(0,255,231,0.6)"}}>
           <PrinterIcon style={{width:16,height:16}}/>PRINT
         </button>
         <button onClick={()=>setShowDesign(v=>!v)} style={{padding:"7px 16px",borderRadius:2,fontSize:13,cursor:"pointer",border:`1px solid ${showDesign?"rgba(249,0,255,0.6)":"rgba(255,255,255,0.1)"}`,backgroundColor:showDesign?"rgba(249,0,255,0.1)":"transparent",color:showDesign?"#f900ff":"#555",fontFamily:"'Courier New',monospace"}}>
