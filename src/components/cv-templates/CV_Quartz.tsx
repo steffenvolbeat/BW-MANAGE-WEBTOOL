@@ -120,7 +120,7 @@ export default function CV_Quartz() {
                 <div style={{marginBottom:6}}>{editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:12,color:ROSE,fontFamily:"inherit",background:hex2rgba(ROSE,0.08),border:`1.5px dashed ${ROSE}55`,padding:"1px 6px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
                   :<div style={{fontSize:12,color:ROSE,letterSpacing:"0.08em"}}>{data.personal.subtitle}</div>}</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:12}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:ICE,opacity:0.7}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:ICE,opacity:0.7}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

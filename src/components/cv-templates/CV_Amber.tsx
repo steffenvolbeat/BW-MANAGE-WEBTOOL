@@ -120,7 +120,7 @@ export default function CV_Amber() {
                 <div style={{marginBottom:6}}>{editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:13,color:WARM,fontFamily:"inherit",background:"rgba(255,255,255,0.1)",border:"1.5px dashed rgba(255,255,255,0.3)",padding:"2px 6px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
                   :<div style={{fontSize:13,color:WARM}}>{data.personal.subtitle}</div>}</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"rgba(255,255,255,0.85)"}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"rgba(255,255,255,0.85)"}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

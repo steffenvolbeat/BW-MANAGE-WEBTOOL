@@ -123,7 +123,7 @@ export default function CV_Vaporwave() {
                   :<div style={{fontSize:12,color:TEAL,fontStyle:"italic"}}>{data.personal.subtitle}</div>}</div>
                 <E value={data.personal.bio} onChange={v=>setP({bio:v})} editing={editing} multiline rows={2} style={{fontSize:11,color:CM,lineHeight:1.7,display:"block",marginBottom:8}}/>
                 <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
-                  {(["email","phone","location"] as const).map((k,i)=>data.personal[k]?<span key={k} style={{fontSize:10,color:[PNK,TEAL,PRP][i],fontStyle:"italic"}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map((k,i)=>data.personal[k]?<span key={k} style={{fontSize:10,color:[PNK,TEAL,PRP][i%3],fontStyle:"italic"}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

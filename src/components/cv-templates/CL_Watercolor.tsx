@@ -62,7 +62,7 @@ export default function CL_Watercolor(){
               <E value={data.personal.name} onChange={v=>setP({name:v})} editing={editing} style={{fontSize:28,fontWeight:700,color:CT,display:"block",letterSpacing:"0.02em"}}/>
               <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:11,color:ROSE,display:"block",marginTop:4,fontStyle:"italic"}}/>
               <div style={{marginTop:10,display:"flex",gap:20,flexWrap:"wrap"}}>
-                {(["email","phone","location"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM}}/>)}
+                {(["email","phone","location","linkedin","github"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM}}/>)}
               </div>
             </div>
           </div>

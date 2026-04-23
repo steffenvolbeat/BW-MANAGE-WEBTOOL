@@ -120,7 +120,7 @@ export default function CV_Scarlet() {
                 <div style={{marginBottom:6}}>{editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:12,color:"rgba(255,255,255,0.85)",fontFamily:"inherit",background:"rgba(255,255,255,0.1)",border:"1px dashed rgba(255,255,255,0.3)",padding:"1px 5px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
                   :<div style={{fontSize:12,color:"rgba(255,255,255,0.85)",letterSpacing:"0.08em",textTransform:"uppercase"}}>{data.personal.subtitle}</div>}</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:12}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"rgba(255,255,255,0.8)"}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"rgba(255,255,255,0.8)"}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

@@ -131,7 +131,7 @@ export default function CV_Swiss() {
                 </div>
                 <input ref={photoInputRef} type="file" accept="image/*" style={{display:"none"}} onChange={e=>{const f=e.target.files?.[0];if(!f)return;const r=new FileReader();r.onload=ev=>setPhotoSrc((ev.target?.result as string)??"");r.readAsDataURL(f);}}/>
                 <div style={{marginTop:10,display:"flex",flexDirection:"column",gap:3}}>
-                  {(["email","phone","location","website"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:9,color:CM,borderBottom:`1px solid ${S3}`,paddingBottom:2}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","website","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:9,color:CM,borderBottom:`1px solid ${S3}`,paddingBottom:2}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

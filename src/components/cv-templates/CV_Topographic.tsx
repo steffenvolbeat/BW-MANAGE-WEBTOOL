@@ -143,7 +143,7 @@ export default function CV_Topographic() {
                   :<div style={{fontSize:13,color:SAGE,letterSpacing:"0.04em"}}>{data.personal.subtitle}</div>}</div>
                 <E value={data.personal.bio} onChange={v=>setP({bio:v})} editing={editing} multiline rows={2} style={{fontSize:11,color:CM,lineHeight:1.7,display:"block",marginBottom:8}}/>
                 <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:UMBER}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:UMBER}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

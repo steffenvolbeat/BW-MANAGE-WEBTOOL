@@ -94,7 +94,7 @@ export default function CL_Marble() {
                 <E value={data.personal.subtitle} onChange={v => setP({ subtitle: v })} editing={editing} style={{ fontSize: 12, color: A, letterSpacing: "0.06em", display: "block" }} />
               </div>
               <div style={{ textAlign: "right" }}>
-                {[data.personal.email, data.personal.phone, data.personal.location, data.personal.website].map((v, i) => <E key={i} value={v} onChange={nv => setP([{ email: nv }, { phone: nv }, { location: nv }, { website: nv }][i])} editing={editing} style={{ fontSize: 10, color: CM, display: "block", marginBottom: 2 }} />)}
+                {[data.personal.email, data.personal.phone, data.personal.location, data.personal.website, data.personal.linkedin, data.personal.github].map((v, i) => <E key={i} value={v} onChange={nv => setP([{ email: nv }, { phone: nv }, { location: nv }, { website: nv }, { linkedin: nv }, { github: nv }][i])} editing={editing} style={{ fontSize: 10, color: CM, display: "block", marginBottom: 2 }} />)}
               </div>
             </div>
           </div>

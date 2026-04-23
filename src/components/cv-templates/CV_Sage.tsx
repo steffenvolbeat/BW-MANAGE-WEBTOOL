@@ -123,7 +123,7 @@ export default function CV_Sage() {
                 <div style={{marginBottom:8}}>{editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:11,color:SAGE,textAlign:"center",fontFamily:"inherit",background:hex2rgba(SAGE,0.06),border:`1.5px dashed ${SAGE}88`,padding:"1px 4px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
                   :<div style={{fontSize:11,color:SAGE,textAlign:"center"}}>{data.personal.subtitle}</div>}</div>
                 <div style={{height:1,background:`${SAGE}55`,marginBottom:8}}/>
-                {(["email","phone","location"] as const).map(k=>data.personal[k]?<div key={k} style={{fontSize:9,color:STONE,marginBottom:2,textAlign:"center"}}>{data.personal[k]}</div>:null)}
+                {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<div key={k} style={{fontSize:9,color:STONE,marginBottom:2,textAlign:"center"}}>{data.personal[k]}</div>:null)}
               </div>
               <div style={{marginBottom:14}}><SecH title="Skills" color={SAGE}/><TagList tags={data.skills} onChange={s=>setData(d=>({...d,skills:s}))} editing={editing}/></div>
               <div style={{marginBottom:14}}>

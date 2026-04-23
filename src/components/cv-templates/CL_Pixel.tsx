@@ -61,7 +61,7 @@ export default function CL_Pixel(){
             <E value={data.personal.name} onChange={v=>setP({name:v})} editing={editing} style={{fontSize:26,fontWeight:900,color:GREEN,display:"block",fontFamily:"monospace",textShadow:`0 0 12px ${GREEN}`,letterSpacing:"0.04em"}}/>
             <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:10,color:YELLOW,fontFamily:"monospace",display:"block",marginTop:4}}/>
             <div style={{marginTop:10,display:"flex",gap:20}}>
-              {(["email","phone","location"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:8,color:CM,fontFamily:"monospace"}}/>)}
+              {(["email","phone","location","linkedin","github"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:8,color:CM,fontFamily:"monospace"}}/>)}
             </div>
           </div>
 

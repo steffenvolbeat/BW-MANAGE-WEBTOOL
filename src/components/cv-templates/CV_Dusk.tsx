@@ -123,7 +123,7 @@ export default function CV_Dusk() {
                 <div style={{marginBottom:6}}>{editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:12,color:STAR,fontFamily:"inherit",background:hex2rgba(AMBER,0.08),border:`1px dashed ${AMBER}55`,padding:"1px 5px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
                   :<div style={{fontSize:12,color:STAR,letterSpacing:"0.06em"}}>{data.personal.subtitle}</div>}</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:12}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

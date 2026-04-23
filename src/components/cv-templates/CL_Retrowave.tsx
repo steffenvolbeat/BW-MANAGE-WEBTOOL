@@ -63,7 +63,7 @@ export default function CL_Retrowave(){
               <E value={data.personal.name} onChange={v=>setP({name:v})} editing={editing} style={{fontSize:30,fontWeight:900,color:CT,display:"block",textShadow:`0 0 20px ${MAGENTA}`,letterSpacing:"0.04em"}}/>
               <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:11,color:CYAN,letterSpacing:"0.14em",display:"block",marginTop:4,textTransform:"uppercase" as const,textShadow:`0 0 10px ${CYAN}`}}/>
               <div style={{marginTop:10,display:"flex",gap:20}}>
-                {(["email","phone","location"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM}}/>)}
+                {(["email","phone","location","linkedin","github"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM}}/>)}
               </div>
             </div>
           </div>

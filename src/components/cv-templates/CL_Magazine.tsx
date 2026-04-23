@@ -101,8 +101,8 @@ export default function CL_Magazine() {
 
           {/* Contact strip */}
           <div style={{backgroundColor:A,padding:"8px 48px",display:"flex",gap:20,flexWrap:"wrap"}}>
-            {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website].map((v,i)=>(
-              <E key={i} value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv}][i])} editing={editing} style={{fontSize:10,color:"white",fontWeight:600}}/>
+            {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website,data.personal.linkedin,data.personal.github].map((v,i)=>(
+              <E key={i} value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv},{linkedin:nv},{github:nv}][i])} editing={editing} style={{fontSize:10,color:"white",fontWeight:600}}/>
             ))}
           </div>
 

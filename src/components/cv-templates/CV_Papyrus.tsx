@@ -127,7 +127,7 @@ export default function CV_Papyrus() {
             <div style={{marginTop:4}}>{editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:12,color:SIENNA,textAlign:"center",fontStyle:"italic",fontFamily:"inherit",background:hex2rgba(PAPYRUS,0.06),border:`1px dashed ${PAPYRUS}55`,padding:"1px 5px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
               :<div style={{fontSize:12,color:SIENNA,fontStyle:"italic",letterSpacing:"0.04em"}}>{data.personal.subtitle}</div>}</div>
             <div style={{marginTop:8,display:"flex",justifyContent:"center",flexWrap:"wrap",gap:16}}>
-              {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:9,color:PAPYRUS}}>{data.personal[k]}</span>:null)}
+              {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:9,color:PAPYRUS}}>{data.personal[k]}</span>:null)}
             </div>
           </div>
           <div style={{background:S3,padding:"5px 36px 5px",borderTop:`1px solid ${GOLD}77`,textAlign:"center"}}>

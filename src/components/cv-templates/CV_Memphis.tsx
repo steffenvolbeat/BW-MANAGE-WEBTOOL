@@ -140,7 +140,7 @@ export default function CV_Memphis() {
                 </div>
                 <E value={data.personal.bio} onChange={v=>setP({bio:v})} editing={editing} multiline rows={2} style={{fontSize:11,color:CM,lineHeight:1.6}}/>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:8}}>
-                  {(["email","phone","location"] as const).map((k,i)=>data.personal[k]?<span key={k} style={{fontSize:10,color:"white",background:[TEAL,PURP,ORNG][i%3],padding:"2px 8px"}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map((k,i)=>data.personal[k]?<span key={k} style={{fontSize:10,color:"white",background:[TEAL,PURP,ORNG][i%3],padding:"2px 8px"}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

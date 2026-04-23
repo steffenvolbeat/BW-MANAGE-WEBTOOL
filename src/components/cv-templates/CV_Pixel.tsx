@@ -144,7 +144,7 @@ export default function CV_Pixel() {
                     :<div style={{fontSize:12,color:CYAN,letterSpacing:"1px"}}>&gt; {data.personal.subtitle}</div>}</div>
                   <E value={data.personal.bio} onChange={v=>setP({bio:v})} editing={editing} multiline rows={2} style={{fontSize:11,color:CM,lineHeight:1.6,fontFamily:"monospace"}}/>
                   <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:6}}>
-                    {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:YEL,fontFamily:"monospace"}}>{`[${data.personal[k]}]`}</span>:null)}
+                    {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:YEL,fontFamily:"monospace"}}>{`[${data.personal[k]}]`}</span>:null)}
                   </div>
                 </div>
               </div>

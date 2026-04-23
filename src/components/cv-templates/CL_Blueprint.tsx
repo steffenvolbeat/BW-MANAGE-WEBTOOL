@@ -107,10 +107,10 @@ export default function CL_Blueprint() {
               <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:13,color:A,display:"block",marginTop:4,letterSpacing:"0.08em",textTransform:"uppercase"}}/>
             </div>
             <div style={{display:"flex",gap:20,flexWrap:"wrap",marginTop:14,paddingTop:12,borderTop:`1px dashed ${A}55`}}>
-              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website].map((v,i)=>(
+              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website,data.personal.linkedin,data.personal.github].map((v,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
                   <span style={{color:A,fontSize:8,fontFamily:"monospace"}}>◈</span>
-                  <E value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv}][i])} editing={editing} style={{fontSize:11,color:CM}}/>
+                  <E value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv},{linkedin:nv},{github:nv}][i])} editing={editing} style={{fontSize:11,color:CM}}/>
                 </div>
               ))}
             </div>

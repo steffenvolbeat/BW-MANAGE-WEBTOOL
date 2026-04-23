@@ -59,7 +59,7 @@ export default function CL_Newspaper(){
             <div style={{fontSize:8,color:CM,letterSpacing:"0.15em",textTransform:"uppercase" as const,marginBottom:4}}>BEWERBUNGSSCHREIBEN</div>
             <E value={data.personal.name} onChange={v=>setP({name:v})} editing={editing} style={{fontSize:32,fontWeight:900,color:CT,letterSpacing:"0.05em"}}/>
             <div style={{borderTop:`1px solid ${CT}`,borderBottom:`1px solid ${CT}`,margin:"6px 0",padding:"3px 0",display:"flex",justifyContent:"center",gap:24}}>
-              {(["email","phone","location"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:8,color:CM}}/>)}
+              {(["email","phone","location","linkedin","github"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:8,color:CM}}/>)}
             </div>
           </div>
           <div style={{padding:"8px 48px",borderBottom:`2px solid ${CT}`,display:"flex",justifyContent:"space-between",alignItems:"center",background:HD}}>

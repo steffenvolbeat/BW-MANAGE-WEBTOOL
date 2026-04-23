@@ -65,7 +65,7 @@ export default function CL_Memphis(){
             <E value={data.personal.name} onChange={v=>setP({name:v})} editing={editing} style={{fontSize:28,fontWeight:900,color:CT,display:"block",position:"relative"}}/>
             <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:11,color:A,fontWeight:700,letterSpacing:"0.08em",display:"block",marginTop:4,position:"relative"}}/>
             <div style={{marginTop:10,display:"flex",gap:20,position:"relative"}}>
-              {(["email","phone","location"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM}}/>)}
+              {(["email","phone","location","linkedin","github"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM}}/>)}
             </div>
           </div>
 

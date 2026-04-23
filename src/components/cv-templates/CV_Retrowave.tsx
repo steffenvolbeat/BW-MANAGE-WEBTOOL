@@ -139,7 +139,7 @@ export default function CV_Retrowave() {
                   :<div style={{fontSize:14,fontWeight:600,color:A,marginBottom:10,textShadow:`0 0 15px ${A}`,letterSpacing:"0.1em"}}>{data.personal.subtitle}</div>}
                 <E value={data.personal.bio} onChange={v=>setP({bio:v})} editing={editing} multiline rows={2} style={{fontSize:11,color:CB,lineHeight:1.6}}/>
                 <div style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:8}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:CYAN,background:hex2rgba(CYAN,0.08),border:`1px solid ${CYAN}44`,padding:"2px 8px"}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:CYAN,background:hex2rgba(CYAN,0.08),border:`1px solid ${CYAN}44`,padding:"2px 8px"}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

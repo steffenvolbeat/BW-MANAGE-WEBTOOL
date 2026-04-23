@@ -102,8 +102,8 @@ export default function CL_Typewriter() {
               <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontFamily:monoFamily,fontSize:11,color:A,display:"block",textAlign:"center",marginTop:4,letterSpacing:"0.12em"}}/>
             </div>
             <div style={{borderTop:`1px solid ${A}66`,borderBottom:`1px solid ${A}66`,padding:"8px 0",marginTop:12,display:"flex",justifyContent:"center",gap:24,flexWrap:"wrap"}}>
-              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website].map((v,i)=>(
-                <E key={i} value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv}][i])} editing={editing} style={{fontFamily:monoFamily,fontSize:10,color:CM,textAlign:"center"}}/>
+              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website,data.personal.linkedin,data.personal.github].map((v,i)=>(
+                <E key={i} value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv},{linkedin:nv},{github:nv}][i])} editing={editing} style={{fontFamily:monoFamily,fontSize:10,color:CM,textAlign:"center"}}/>
               ))}
             </div>
           </div>

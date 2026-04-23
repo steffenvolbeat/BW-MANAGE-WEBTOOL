@@ -60,7 +60,7 @@ export default function CL_Brutalist(){
             <E value={data.personal.name} onChange={v=>setP({name:v})} editing={editing} style={{fontSize:42,fontWeight:900,color:CT,display:"block",letterSpacing:"-0.02em",lineHeight:1.1}}/>
             <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:12,color:A,letterSpacing:"0.2em",textTransform:"uppercase" as const,display:"block",marginTop:6,fontWeight:800}}/>
             <div style={{marginTop:12,display:"flex",gap:24}}>
-              {(["email","phone","location"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM,fontWeight:700,letterSpacing:"0.1em"}}/>)}
+              {(["email","phone","location","linkedin","github"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM,fontWeight:700,letterSpacing:"0.1em"}}/>)}
             </div>
           </div>
 

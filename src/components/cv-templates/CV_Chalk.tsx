@@ -123,7 +123,7 @@ export default function CV_Chalk() {
                 <div style={{marginBottom:6}}>{editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:13,color:YEL,fontFamily:"inherit",background:"rgba(255,255,255,0.05)",border:"1.5px dashed rgba(255,255,255,0.2)",padding:"2px 6px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
                   :<div style={{fontSize:13,color:YEL}}>{data.personal.subtitle}</div>}</div>
                 <div style={{display:"flex",flexWrap:"wrap",gap:12}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:CHALK,opacity:0.7}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:CHALK,opacity:0.7}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

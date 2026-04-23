@@ -66,7 +66,7 @@ export default function CL_Swiss(){
           </div>
           {/* Contact strip */}
           <div style={{background:S2,borderBottom:`1px solid #ddd`,padding:"8px 48px",display:"flex",gap:28}}>
-            {(["email","phone","location"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM}}/>)}
+            {(["email","phone","location","linkedin","github"] as const).map(k=><E key={k} value={data.personal[k]} onChange={v=>setP({[k]:v})} editing={editing} style={{fontSize:9,color:CM}}/>)}
           </div>
 
           <div style={{padding:"32px 48px 48px"}}>

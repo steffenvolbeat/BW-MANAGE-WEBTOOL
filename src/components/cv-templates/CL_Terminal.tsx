@@ -116,10 +116,10 @@ export default function CL_Terminal() {
               <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:10,color:CM,fontFamily:"monospace"}}/>
             </div>
             <div style={{marginTop:12,display:"flex",gap:20,flexWrap:"wrap"}}>
-              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website].map((v,i)=>(
+              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website,data.personal.linkedin,data.personal.github].map((v,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"center",gap:4}}>
                   <span style={{color:A,fontFamily:"monospace",fontSize:10}}>{["✉","✆","⌖","⚬"][i]}</span>
-                  <E value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv}][i])} editing={editing} style={{fontSize:10,color:CB,fontFamily:"monospace"}}/>
+                  <E value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv},{linkedin:nv},{github:nv}][i])} editing={editing} style={{fontSize:10,color:CB,fontFamily:"monospace"}}/>
                 </div>
               ))}
             </div>

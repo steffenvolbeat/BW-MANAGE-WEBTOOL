@@ -135,7 +135,7 @@ export default function CV_Watercolor() {
                   :<div style={{fontSize:13,color:A,fontStyle:"italic"}}>{data.personal.subtitle}</div>}</div>
                 <E value={data.personal.bio} onChange={v=>setP({bio:v})} editing={editing} multiline rows={2} style={{fontSize:11,color:CM,lineHeight:1.7,display:"block",marginBottom:8}}/>
                 <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                  {(["email","phone","location"] as const).map((k,i)=>data.personal[k]?<span key={k} style={{fontSize:10,color:[A,ROSE,MINT][i],background:hex2rgba([A,ROSE,MINT][i],0.1),padding:"2px 10px",borderRadius:20}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map((k,i)=>data.personal[k]?<span key={k} style={{fontSize:10,color:[A,ROSE,MINT][i%3],background:hex2rgba([A,ROSE,MINT][i%3],0.1),padding:"2px 10px",borderRadius:20}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

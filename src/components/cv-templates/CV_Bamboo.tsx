@@ -122,7 +122,7 @@ export default function CV_Bamboo() {
               <div style={{marginBottom:6}}>{editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:12,color:"rgba(255,255,255,0.8)",fontFamily:"inherit",background:"rgba(255,255,255,0.08)",border:"1px dashed rgba(255,255,255,0.3)",padding:"1px 5px",outline:"none",width:"100%",boxSizing:"border-box"}}/>
                 :<div style={{fontSize:12,color:"rgba(255,255,255,0.8)",letterSpacing:"0.05em"}}>{data.personal.subtitle}</div>}</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:12}}>
-                {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>{data.personal[k]}</span>:null)}
+                {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"rgba(255,255,255,0.7)"}}>{data.personal[k]}</span>:null)}
               </div>
             </div>
           </div>

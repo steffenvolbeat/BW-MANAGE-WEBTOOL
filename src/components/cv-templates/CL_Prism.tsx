@@ -112,10 +112,10 @@ export default function CL_Prism() {
             </div>
             <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:12,color:A,display:"block",marginTop:4,fontWeight:500,letterSpacing:"0.06em"}}/>
             <div style={{display:"flex",gap:20,flexWrap:"wrap",marginTop:14,paddingTop:12,borderTop:`1px solid ${A}22`}}>
-              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website].map((v,i)=>(
+              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website,data.personal.linkedin,data.personal.github].map((v,i)=>(
                 <div key={i} style={{display:"flex",alignItems:"center",gap:5}}>
                   <span style={{fontSize:12,display:"inline-block",background:RAINBOW,backgroundSize:"400% auto",WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>◆</span>
-                  <E value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv}][i])} editing={editing} style={{fontSize:11,color:CM}}/>
+                  <E value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv},{linkedin:nv},{github:nv}][i])} editing={editing} style={{fontSize:11,color:CM}}/>
                 </div>
               ))}
             </div>

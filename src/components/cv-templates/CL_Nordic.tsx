@@ -98,8 +98,8 @@ export default function CL_Nordic() {
             <div style={{width:48,height:2,backgroundColor:A,margin:"12px 0 10px"}}/>
             <E value={data.personal.subtitle} onChange={v=>setP({subtitle:v})} editing={editing} style={{fontSize:12,color:CM,display:"block",fontWeight:400,letterSpacing:"0.04em"}}/>
             <div style={{display:"flex",gap:24,flexWrap:"wrap",marginTop:20}}>
-              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website].map((v,i)=>(
-                <E key={i} value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv}][i])} editing={editing} style={{fontSize:11,color:CM}}/>
+              {[data.personal.email,data.personal.phone,data.personal.location,data.personal.website,data.personal.linkedin,data.personal.github].map((v,i)=>(
+                <E key={i} value={v} onChange={nv=>setP([{email:nv},{phone:nv},{location:nv},{website:nv},{linkedin:nv},{github:nv}][i])} editing={editing} style={{fontSize:11,color:CM}}/>
               ))}
             </div>
           </div>

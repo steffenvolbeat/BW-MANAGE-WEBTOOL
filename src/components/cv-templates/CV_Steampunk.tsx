@@ -138,7 +138,7 @@ export default function CV_Steampunk() {
                   :<div style={{fontSize:13,color:GOLD,fontStyle:"italic"}}>{data.personal.subtitle}</div>}</div>
                 <E value={data.personal.bio} onChange={v=>setP({bio:v})} editing={editing} multiline rows={2} style={{fontSize:11,color:CM,lineHeight:1.7,display:"block",marginBottom:8}}/>
                 <div style={{display:"flex",flexWrap:"wrap",gap:10}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:COPPER}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:COPPER}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

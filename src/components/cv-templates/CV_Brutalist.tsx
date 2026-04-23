@@ -126,7 +126,7 @@ export default function CV_Brutalist() {
                 {editing?<input value={data.personal.subtitle} onChange={e=>setP({subtitle:e.target.value})} style={{display:"block",fontSize:14,color:A,marginBottom:8,fontFamily:"inherit",background:"transparent",border:`2px dashed ${A}44`,padding:"2px 6px",outline:"none",width:"100%",boxSizing:"border-box",textTransform:"uppercase"}}/>
                   :<div style={{fontSize:14,fontWeight:700,color:A,marginBottom:8,textTransform:"uppercase",letterSpacing:"0.15em"}}>{data.personal.subtitle}</div>}
                 <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                  {(["email","phone","location"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"#aaa",fontWeight:600}}>{data.personal[k]}</span>:null)}
+                  {(["email","phone","location","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:"#aaa",fontWeight:600}}>{data.personal[k]}</span>:null)}
                 </div>
               </div>
             </div>

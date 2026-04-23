@@ -120,7 +120,7 @@ export default function CV_Newspaper() {
             </div>
             <div style={{height:1,background:"#111",marginBottom:4}}/>
             <div style={{display:"flex",justifyContent:"center",gap:16,flexWrap:"wrap"}}>
-              {(["email","phone","location","website"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:CM}}>{data.personal[k]}</span>:null)}
+              {(["email","phone","location","website","linkedin","github"] as const).map(k=>data.personal[k]?<span key={k} style={{fontSize:10,color:CM}}>{data.personal[k]}</span>:null)}
             </div>
           </div>
 
