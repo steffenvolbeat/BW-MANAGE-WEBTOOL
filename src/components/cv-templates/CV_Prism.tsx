@@ -129,7 +129,7 @@ export default function CV_Prism() {
           {/* Rainbow top band */}
           <div style={{height:4,background:RAINBOW}}/>
           {/* Header */}
-          <div style={{background:`linear-gradient(135deg,${BG},${S2})`,padding:"28px 40px 24px",borderBottom:`1px solid ${hex2rgba(A,0.2)}`}}>
+          <div style={{background:`linear-gradient(135deg,${BG},${S2})`,padding:"20px 40px 14px",borderBottom:`1px solid ${hex2rgba(A,0.2)}`}}>
             <div style={{display:"flex",gap:24,alignItems:"flex-start"}}>
               <div style={{position:"relative",flexShrink:0}}>
                 <div style={{width:curShape.w,height:curShape.h,borderRadius:curShape.br,clipPath:curShape.clip??"",overflow:"hidden",backgroundColor:S3,background:`linear-gradient(135deg,${hex2rgba(A,0.2)},${hex2rgba("#6366f1",0.3)})`,display:"flex",alignItems:"center",justifyContent:"center",cursor:editing?"pointer":"default"}} onClick={()=>editing&&photoInputRef.current?.click()}>
@@ -155,11 +155,11 @@ export default function CV_Prism() {
           </div>
 
           <div style={{display:"flex"}}>
-            <div style={{flex:1,padding:"22px 28px 40px 40px",minWidth:0}}>
-              <div style={{marginBottom:20}}>
+            <div style={{flex:1,padding:"16px 28px 18px 40px",minWidth:0}}>
+              <div style={{marginBottom:12}}>
                 <SecH title="Projekte"/>
                 {data.projects.map(p=>(
-                  <div key={p.id} style={{marginBottom:13,background:hex2rgba(A,0.04),border:`1px solid ${hex2rgba(A,0.1)}`,borderRadius:6,padding:"10px 12px",position:"relative"}}>
+                  <div key={p.id} style={{marginBottom:8,background:hex2rgba(A,0.04),border:`1px solid ${hex2rgba(A,0.1)}`,borderRadius:6,padding:"5px 10px",position:"relative"}}>
                     <div style={{position:"absolute",top:0,left:0,bottom:0,width:3,background:RAINBOW,borderRadius:"6px 0 0 6px"}}/>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:2,gap:8}}>
                       <E value={p.title} onChange={v=>updProj(p.id,{title:v})} editing={editing} style={{fontSize:13,fontWeight:800,color:CT}}/>
@@ -171,10 +171,10 @@ export default function CV_Prism() {
                 ))}
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,projects:[...d.projects,{id:uid(),title:"Neues Projekt",period:"",bullets:[],link:""}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontWeight:700}}><PlusIcon style={{width:12,height:12}}/>Projekt hinzufügen</button>}
               </div>
-              <div style={{marginBottom:20}}>
+              <div style={{marginBottom:12}}>
                 <SecH title="Berufserfahrung"/>
                 {data.experience.map(ex=>(
-                  <div key={ex.id} style={{marginBottom:13,background:hex2rgba(A,0.04),border:`1px solid ${hex2rgba(A,0.1)}`,borderRadius:6,padding:"10px 12px",position:"relative"}}>
+                  <div key={ex.id} style={{marginBottom:8,background:hex2rgba(A,0.04),border:`1px solid ${hex2rgba(A,0.1)}`,borderRadius:6,padding:"5px 10px",position:"relative"}}>
                     <div style={{position:"absolute",top:0,left:0,bottom:0,width:3,background:RAINBOW,borderRadius:"6px 0 0 6px"}}/>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:2,gap:8,alignItems:"flex-start"}}>
                       <div>
@@ -192,7 +192,7 @@ export default function CV_Prism() {
               <div>
                 <SecH title="Ausbildung"/>
                 {data.education.map(e=>(
-                  <div key={e.id} style={{marginBottom:10,background:hex2rgba(A,0.04),border:`1px solid ${hex2rgba(A,0.1)}`,borderRadius:6,padding:"8px 12px",position:"relative"}}>
+                  <div key={e.id} style={{marginBottom:8,background:hex2rgba(A,0.04),border:`1px solid ${hex2rgba(A,0.1)}`,borderRadius:6,padding:"4px 10px",position:"relative"}}>
                     <div style={{position:"absolute",top:0,left:0,bottom:0,width:3,background:RAINBOW,borderRadius:"6px 0 0 6px"}}/>
                     <E value={e.degree} onChange={v=>updEdu(e.id,{degree:v})} editing={editing} style={{fontSize:13,fontWeight:800,color:CT,display:"block",marginBottom:1}}/>
                     <E value={e.institution} onChange={v=>updEdu(e.id,{institution:v})} editing={editing} style={{fontSize:11,color:CB,display:"block",marginBottom:1}}/>
@@ -203,7 +203,7 @@ export default function CV_Prism() {
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,education:[...d.education,{id:uid(),degree:"Abschluss",institution:"Institut",period:"",location:"",type:"",bullets:[]}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontWeight:700}}><PlusIcon style={{width:12,height:12}}/>Ausbildung hinzufügen</button>}
               </div>
             </div>
-            <div style={{width:250,flexShrink:0,backgroundColor:SBG,padding:"22px 18px 40px",borderLeft:`1px solid ${hex2rgba(A,0.15)}`}}>
+            <div style={{width:250,flexShrink:0,backgroundColor:SBG,padding:"18px 18px 18px",borderLeft:`1px solid ${hex2rgba(A,0.15)}`}}>
               {[
                 {title:"Fähigkeiten",c:<TagList tags={data.skills} onChange={t=>setData(d=>({...d,skills:t}))} editing={editing}/>},
                 {title:"Technisch",c:<div>{data.technicalSkills.map(ts=>(<div key={ts.id} style={{marginBottom:6}}><E value={ts.name} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,name:v}:t)}))} editing={editing} style={{fontSize:12,fontWeight:700,color:CT,display:"block"}}/><E value={ts.description} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,description:v}:t)}))} editing={editing} style={{fontSize:10,color:CM,display:"block"}}/>{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:d.technicalSkills.filter(t=>t.id!==ts.id)}))} style={{fontSize:10,color:"#f87171",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:2}}><XMarkIcon style={{width:10,height:10}}/>Entfernen</button>}</div>))}{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:[...d.technicalSkills,{id:uid(),name:"Technologie",description:"Beschreibung"}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontWeight:700}}><PlusIcon style={{width:11,height:11}}/>Hinzufügen</button>}</div>},

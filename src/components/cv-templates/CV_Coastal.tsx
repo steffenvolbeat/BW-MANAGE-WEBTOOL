@@ -79,7 +79,7 @@ export default function CV_Coastal() {
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Ocean wave top */}
           <div style={{height:6,background:`linear-gradient(90deg,${A},#0096c7,#00b4d8,${A})`}}/>
-          <div style={{backgroundColor:S2,padding:"32px 48px 26px"}}>
+          <div style={{backgroundColor:S2,padding:"20px 48px 14px"}}>
             <div style={{display:"flex",gap:28,alignItems:"center"}}>
               <div style={{width:curShape.w,height:curShape.h,borderRadius:curShape.br,clipPath:curShape.clip??"",overflow:"hidden",flexShrink:0,backgroundColor:S3,border:`3px solid white`,boxShadow:`0 0 0 2px ${A}`,display:"flex",alignItems:"center",justifyContent:"center",cursor:editing?"pointer":"default"}} onClick={()=>editing&&photoInputRef.current?.click()}>
                 {photoSrc?<img src={photoSrc} alt="Foto" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span style={{fontSize:10,color:A,textAlign:"center"}}>{editing?"📷":"Foto"}</span>}
@@ -98,12 +98,12 @@ export default function CV_Coastal() {
           {/* Wave divider */}
           <div style={{height:3,background:`linear-gradient(90deg,transparent,${A},${hex2rgba(A,0.4)},${A},transparent)`}}/>
           <div style={{display:"flex"}}>
-            <div style={{flex:1,padding:"24px 24px 48px 48px",minWidth:0}}>
-              <div style={{marginBottom:20}}><SecH title="Projekte"/>
+            <div style={{flex:1,padding:"18px 24px 20px 48px",minWidth:0}}>
+              <div style={{marginBottom:12}}><SecH title="Projekte"/>
                 {data.projects.map(p=>(<div key={p.id} style={{marginBottom:14,paddingBottom:12,borderBottom:`1px solid ${S3}`}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:3,gap:8}}><E value={p.title} onChange={v=>updProj(p.id,{title:v})} editing={editing} style={{fontSize:13,fontWeight:700,color:CT}}/><E value={p.period} onChange={v=>updProj(p.id,{period:v})} editing={editing} style={{fontSize:10,color:CM,flexShrink:0}}/></div><BulletList bullets={p.bullets} onChange={b=>updProj(p.id,{bullets:b})} editing={editing}/>{editing&&<button type="button" onClick={()=>setData(d=>({...d,projects:d.projects.filter(x=>x.id!==p.id)}))} style={{fontSize:10,color:"#ef4444",background:"none",border:"none",cursor:"pointer",marginTop:3,display:"flex",alignItems:"center",gap:3}}><TrashIcon style={{width:10,height:10}}/>Entfernen</button>}</div>))}
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,projects:[...d.projects,{id:uid(),title:"Neues Projekt",period:"",bullets:[],link:""}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><PlusIcon style={{width:12,height:12}}/>Projekt hinzufügen</button>}
               </div>
-              <div style={{marginBottom:20}}><SecH title="Berufserfahrung"/>
+              <div style={{marginBottom:12}}><SecH title="Berufserfahrung"/>
                 {data.experience.map(ex=>(<div key={ex.id} style={{marginBottom:14,paddingBottom:12,borderBottom:`1px solid ${S3}`}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:2,gap:8,alignItems:"flex-start"}}><div><E value={ex.position} onChange={v=>updExp(ex.id,{position:v})} editing={editing} style={{fontSize:13,fontWeight:700,color:CT,display:"block",marginBottom:1}}/><E value={ex.company} onChange={v=>updExp(ex.id,{company:v})} editing={editing} style={{fontSize:12,color:A}}/></div><E value={ex.period} onChange={v=>updExp(ex.id,{period:v})} editing={editing} style={{fontSize:10,color:CM,flexShrink:0}}/></div><BulletList bullets={ex.bullets} onChange={b=>updExp(ex.id,{bullets:b})} editing={editing}/>{editing&&<button type="button" onClick={()=>setData(d=>({...d,experience:d.experience.filter(x=>x.id!==ex.id)}))} style={{fontSize:10,color:"#ef4444",background:"none",border:"none",cursor:"pointer",marginTop:3,display:"flex",alignItems:"center",gap:3}}><TrashIcon style={{width:10,height:10}}/>Entfernen</button>}</div>))}
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,experience:[...d.experience,{id:uid(),position:"Position",company:"Unternehmen",period:"",location:"",description:"",type:"",bullets:[],contact:""}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><PlusIcon style={{width:12,height:12}}/>Erfahrung hinzufügen</button>}
               </div>
@@ -112,7 +112,7 @@ export default function CV_Coastal() {
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,education:[...d.education,{id:uid(),degree:"Abschluss",institution:"Institut",period:"",location:"",type:"",bullets:[]}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><PlusIcon style={{width:12,height:12}}/>Ausbildung hinzufügen</button>}
               </div>
             </div>
-            <div style={{width:235,flexShrink:0,backgroundColor:SBG,padding:"24px 18px 48px",borderLeft:`2px solid ${S3}`}}>
+            <div style={{width:235,flexShrink:0,backgroundColor:SBG,padding:"20px 18px 20px",borderLeft:`2px solid ${S3}`}}>
               {[
                 {title:"Fähigkeiten",c:<TagList tags={data.skills} onChange={t=>setData(d=>({...d,skills:t}))} editing={editing}/>},
                 {title:"Technisch",c:<div>{data.technicalSkills.map(ts=>(<div key={ts.id} style={{marginBottom:7}}><E value={ts.name} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,name:v}:t)}))} editing={editing} style={{fontSize:12,fontWeight:700,color:CT,display:"block"}}/><E value={ts.description} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,description:v}:t)}))} editing={editing} style={{fontSize:10,color:CM,display:"block"}}/>{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:d.technicalSkills.filter(t=>t.id!==ts.id)}))} style={{fontSize:10,color:"#ef4444",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:2}}><XMarkIcon style={{width:10,height:10}}/>Entfernen</button>}</div>))}{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:[...d.technicalSkills,{id:uid(),name:"Technologie",description:"Beschreibung"}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><PlusIcon style={{width:11,height:11}}/>Hinzufügen</button>}</div>},

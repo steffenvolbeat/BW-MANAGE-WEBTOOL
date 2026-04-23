@@ -127,7 +127,7 @@ export default function CV_Glassmorphism() {
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           <div style={{height:2,background:"linear-gradient(90deg,#818cf8,#c084fc,#e879f9,#c084fc,#818cf8)"}}/>
           {/* Glass header */}
-          <div style={{background:"rgba(255,255,255,0.06)",backdropFilter:"blur(20px)",padding:"28px 40px 22px",borderBottom:"1px solid rgba(192,132,252,0.2)"}}>
+          <div style={{background:"rgba(255,255,255,0.06)",backdropFilter:"blur(20px)",padding:"20px 40px 14px",borderBottom:"1px solid rgba(192,132,252,0.2)"}} >
             <div style={{display:"flex",gap:24,alignItems:"flex-start"}}>
               <div style={{width:curShape.w,height:curShape.h,borderRadius:curShape.br,clipPath:curShape.clip??"",overflow:"hidden",flexShrink:0,backgroundColor:"rgba(255,255,255,0.08)",border:"1px solid rgba(192,132,252,0.4)",display:"flex",alignItems:"center",justifyContent:"center",cursor:editing?"pointer":"default",backdropFilter:"blur(8px)"}} onClick={()=>editing&&photoInputRef.current?.click()}>
                 {photoSrc?<img src={photoSrc} alt="Foto" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span style={{fontSize:10,color:CM,textAlign:"center"}}>{editing?"📷":"Foto"}</span>}
@@ -150,11 +150,11 @@ export default function CV_Glassmorphism() {
           </div>
 
           <div style={{display:"flex"}}>
-            <div style={{flex:1,padding:"24px 28px 40px 40px",minWidth:0}}>
-              <div style={{marginBottom:22}}>
+            <div style={{flex:1,padding:"18px 28px 18px 40px",minWidth:0}}>
+              <div style={{marginBottom:14}}>
                 <SecH title="Projekte"/>
                 {data.projects.map(p=>(
-                  <div key={p.id} style={{marginBottom:14,padding:"10px 12px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(192,132,252,0.15)",borderRadius:8,backdropFilter:"blur(8px)"}}>
+                  <div key={p.id} style={{marginBottom:10,padding:"5px 10px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(192,132,252,0.15)",borderRadius:8,backdropFilter:"blur(8px)"}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:2,gap:8}}>
                       <E value={p.title} onChange={v=>updProj(p.id,{title:v})} editing={editing} style={{fontSize:13,fontWeight:700,color:CT}}/>
                       <E value={p.period} onChange={v=>updProj(p.id,{period:v})} editing={editing} style={{fontSize:10,color:A,flexShrink:0}}/>
@@ -166,10 +166,10 @@ export default function CV_Glassmorphism() {
                 ))}
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,projects:[...d.projects,{id:uid(),title:"Neues Projekt",period:"",bullets:[],link:""}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><PlusIcon style={{width:12,height:12}}/>Projekt hinzufügen</button>}
               </div>
-              <div style={{marginBottom:22}}>
+              <div style={{marginBottom:14}}>
                 <SecH title="Berufserfahrung"/>
                 {data.experience.map(ex=>(
-                  <div key={ex.id} style={{marginBottom:14,padding:"10px 12px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(192,132,252,0.15)",borderRadius:8,backdropFilter:"blur(8px)"}}>
+                  <div key={ex.id} style={{marginBottom:10,padding:"5px 10px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(192,132,252,0.15)",borderRadius:8,backdropFilter:"blur(8px)"}}>
                     <E value={ex.position} onChange={v=>updExp(ex.id,{position:v})} editing={editing} style={{fontSize:13,fontWeight:700,color:CT,display:"block",marginBottom:1}}/>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:2,gap:8}}>
                       <E value={ex.company} onChange={v=>updExp(ex.id,{company:v})} editing={editing} style={{fontSize:12,color:A}}/>
@@ -186,7 +186,7 @@ export default function CV_Glassmorphism() {
               <div>
                 <SecH title="Ausbildung"/>
                 {data.education.map(e=>(
-                  <div key={e.id} style={{marginBottom:12,padding:"10px 12px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(192,132,252,0.15)",borderRadius:8,backdropFilter:"blur(8px)"}}>
+                  <div key={e.id} style={{marginBottom:8,padding:"5px 10px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(192,132,252,0.15)",borderRadius:8,backdropFilter:"blur(8px)"}}>
                     <E value={e.degree} onChange={v=>updEdu(e.id,{degree:v})} editing={editing} style={{fontSize:13,fontWeight:700,color:CT,display:"block",marginBottom:1}}/>
                     <E value={e.institution} onChange={v=>updEdu(e.id,{institution:v})} editing={editing} style={{fontSize:12,color:A,display:"block",marginBottom:2}}/>
                     <div style={{display:"flex",justifyContent:"space-between",gap:8}}>
@@ -200,7 +200,7 @@ export default function CV_Glassmorphism() {
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,education:[...d.education,{id:uid(),degree:"Abschluss",institution:"Institut",period:"",location:"",type:"",bullets:[]}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><PlusIcon style={{width:12,height:12}}/>Ausbildung hinzufügen</button>}
               </div>
             </div>
-            <div className={`${PFX}-sidebar`} style={{width:250,flexShrink:0,backgroundColor:"rgba(255,255,255,0.04)",padding:"24px 18px 40px",borderLeft:"1px solid rgba(192,132,252,0.15)",backdropFilter:"blur(8px)"}}>
+            <div className={`${PFX}-sidebar`} style={{width:250,flexShrink:0,backgroundColor:"rgba(255,255,255,0.04)",padding:"20px 18px 18px",borderLeft:"1px solid rgba(192,132,252,0.15)",backdropFilter:"blur(8px)"}}>
               {[
                 {title:"Fähigkeiten",c:<TagList tags={data.skills} onChange={t=>setData(d=>({...d,skills:t}))} editing={editing}/>},
                 {title:"Technisch",c:<div>{data.technicalSkills.map(ts=>(<div key={ts.id} style={{marginBottom:7}}><E value={ts.name} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,name:v}:t)}))} editing={editing} style={{fontSize:12,fontWeight:700,color:CT,display:"block"}}/><E value={ts.description} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,description:v}:t)}))} editing={editing} style={{fontSize:10,color:CM,display:"block"}}/>{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:d.technicalSkills.filter(t=>t.id!==ts.id)}))} style={{fontSize:10,color:"#f87171",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:2}}><XMarkIcon style={{width:10,height:10}}/>Entfernen</button>}</div>))}{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:[...d.technicalSkills,{id:uid(),name:"Technologie",description:"Beschreibung"}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4}}><PlusIcon style={{width:11,height:11}}/>Hinzufügen</button>}</div>},

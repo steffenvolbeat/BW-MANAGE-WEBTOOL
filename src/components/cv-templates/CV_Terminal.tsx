@@ -131,7 +131,7 @@ export default function CV_Terminal() {
             <span style={{marginLeft:12,fontSize:11,color:"#444",fontFamily:"'Courier New',monospace",letterSpacing:"0.06em"}}>~/curriculum_vitae — bash</span>
           </div>
           {/* Terminal header */}
-          <div style={{background:"#0a0a0a",padding:"20px 40px 18px"}}>
+          <div style={{background:"#0a0a0a",padding:"16px 40px 12px"}}>
             <div style={{fontSize:11,color:"rgba(0,255,65,0.5)",fontFamily:"monospace",marginBottom:12}}>
               Last login: {new Date().toDateString()} on ttys001
             </div>
@@ -158,11 +158,11 @@ export default function CV_Terminal() {
           </div>
 
           <div style={{display:"flex"}}>
-            <div style={{flex:1,padding:"16px 28px 40px 40px",minWidth:0}}>
-              <div style={{marginBottom:20}}>
+            <div style={{flex:1,padding:"14px 28px 16px 40px",minWidth:0}}>
+              <div style={{marginBottom:12}}>
                 <SecH title="projects"/>
                 {data.projects.map(p=>(
-                  <div key={p.id} style={{marginBottom:12,paddingLeft:12,borderLeft:"1px solid rgba(0,255,65,0.2)"}}>
+                  <div key={p.id} style={{marginBottom:8,paddingLeft:12,borderLeft:"1px solid rgba(0,255,65,0.2)"}}>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:1,gap:8}}>
                       <E value={p.title} onChange={v=>updProj(p.id,{title:v})} editing={editing} style={{fontSize:12,fontWeight:700,color:CT}}/>
                       <E value={p.period} onChange={v=>updProj(p.id,{period:v})} editing={editing} style={{fontSize:10,color:CM,flexShrink:0}}/>
@@ -173,10 +173,10 @@ export default function CV_Terminal() {
                 ))}
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,projects:[...d.projects,{id:uid(),title:"new_project",period:"",bullets:[],link:""}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontFamily:"'Courier New',monospace"}}><PlusIcon style={{width:12,height:12}}/>mkdir proj</button>}
               </div>
-              <div style={{marginBottom:20}}>
+              <div style={{marginBottom:12}}>
                 <SecH title="experience"/>
                 {data.experience.map(ex=>(
-                  <div key={ex.id} style={{marginBottom:12,paddingLeft:12,borderLeft:"1px solid rgba(0,255,65,0.2)"}}>
+                  <div key={ex.id} style={{marginBottom:8,paddingLeft:12,borderLeft:"1px solid rgba(0,255,65,0.2)"}}>
                     <E value={ex.position} onChange={v=>updExp(ex.id,{position:v})} editing={editing} style={{fontSize:12,fontWeight:700,color:CT,display:"block",marginBottom:1}}/>
                     <div style={{display:"flex",justifyContent:"space-between",marginBottom:1,gap:8}}>
                       <E value={ex.company} onChange={v=>updExp(ex.id,{company:v})} editing={editing} style={{fontSize:11,color:CB}}/>
@@ -191,7 +191,7 @@ export default function CV_Terminal() {
               <div>
                 <SecH title="education"/>
                 {data.education.map(e=>(
-                  <div key={e.id} style={{marginBottom:10,paddingLeft:12,borderLeft:"1px solid rgba(0,255,65,0.2)"}}>
+                  <div key={e.id} style={{marginBottom:6,paddingLeft:12,borderLeft:"1px solid rgba(0,255,65,0.2)"}}>
                     <E value={e.degree} onChange={v=>updEdu(e.id,{degree:v})} editing={editing} style={{fontSize:12,fontWeight:700,color:CT,display:"block",marginBottom:1}}/>
                     <E value={e.institution} onChange={v=>updEdu(e.id,{institution:v})} editing={editing} style={{fontSize:11,color:CB,display:"block",marginBottom:1}}/>
                     <E value={e.period} onChange={v=>updEdu(e.id,{period:v})} editing={editing} style={{fontSize:10,color:CM,fontStyle:"italic"}}/>
@@ -201,7 +201,7 @@ export default function CV_Terminal() {
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,education:[...d.education,{id:uid(),degree:"degree",institution:"inst",period:"",location:"",type:"",bullets:[]}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontFamily:"'Courier New',monospace"}}><PlusIcon style={{width:12,height:12}}/>mkdir edu</button>}
               </div>
             </div>
-            <div style={{width:250,flexShrink:0,backgroundColor:"#080808",padding:"16px 18px 40px",borderLeft:"1px solid rgba(0,255,65,0.15)"}}>
+            <div style={{width:250,flexShrink:0,backgroundColor:"#080808",padding:"14px 18px 16px",borderLeft:"1px solid rgba(0,255,65,0.15)"}}>
               {[
                 {title:"skills",c:<TagList tags={data.skills} onChange={t=>setData(d=>({...d,skills:t}))} editing={editing}/>},
                 {title:"tech",c:<div>{data.technicalSkills.map(ts=>(<div key={ts.id} style={{marginBottom:6}}><E value={ts.name} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,name:v}:t)}))} editing={editing} style={{fontSize:11,fontWeight:700,color:CT,display:"block"}}/><E value={ts.description} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,description:v}:t)}))} editing={editing} style={{fontSize:10,color:CM,display:"block"}}/>{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:d.technicalSkills.filter(t=>t.id!==ts.id)}))} style={{fontSize:10,color:"#f87171",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:2}}><XMarkIcon style={{width:10,height:10}}/>rm</button>}</div>))}{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:[...d.technicalSkills,{id:uid(),name:"tool",description:"v1"}]}))} style={{fontSize:11,color:A,background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontFamily:"monospace"}}><PlusIcon style={{width:11,height:11}}/>+</button>}</div>},

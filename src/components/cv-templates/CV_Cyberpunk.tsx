@@ -127,7 +127,7 @@ export default function CV_Cyberpunk() {
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale,position:"relative",zIndex:2}}>
           <div style={{height:2,background:"linear-gradient(90deg,#f900ff,#00ffe7,#f900ff)"}}/>
           {/* Cyberpunk header */}
-          <div style={{background:"linear-gradient(135deg,#0d001f,#120026)",padding:"28px 40px 22px",borderBottom:"1px solid rgba(249,0,255,0.3)"}}>
+          <div style={{background:"linear-gradient(135deg,#0d001f,#120026)",padding:"20px 40px 14px",borderBottom:"1px solid rgba(249,0,255,0.3)"}}>
             <div style={{display:"flex",gap:24,alignItems:"flex-start"}}>
               <div style={{position:"relative",width:curShape.w,height:curShape.h,flexShrink:0}}>
                 <div style={{width:"100%",height:"100%",borderRadius:curShape.br,clipPath:curShape.clip??"",overflow:"hidden",backgroundColor:"#120026",border:"1px solid rgba(249,0,255,0.5)",display:"flex",alignItems:"center",justifyContent:"center",cursor:editing?"pointer":"default",boxShadow:"0 0 20px rgba(249,0,255,0.4)"}} onClick={()=>editing&&photoInputRef.current?.click()}>
@@ -152,7 +152,7 @@ export default function CV_Cyberpunk() {
           </div>
 
           <div style={{display:"flex"}}>
-            <div style={{flex:1,padding:"24px 28px 40px 40px",minWidth:0}}>
+            <div style={{flex:1,padding:"18px 28px 18px 40px",minWidth:0}}>
               <div style={{marginBottom:22}}>
                 <SecH title="Projekte"/>
                 {data.projects.map(p=>(
@@ -201,7 +201,7 @@ export default function CV_Cyberpunk() {
                 {editing&&<button type="button" onClick={()=>setData(d=>({...d,education:[...d.education,{id:uid(),degree:"EDU_001",institution:"INST_001",period:"",location:"",type:"",bullets:[]}]}))} style={{fontSize:11,color:"#00ffe7",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontFamily:"'Courier New',monospace"}}><PlusIcon style={{width:12,height:12}}/>+ NEW</button>}
               </div>
             </div>
-            <div className={`${PFX}-sidebar`} style={{width:250,flexShrink:0,backgroundColor:"#060010",padding:"24px 18px 40px",borderLeft:"1px solid rgba(249,0,255,0.3)"}} >
+            <div className={`${PFX}-sidebar`} style={{width:250,flexShrink:0,backgroundColor:"#060010",padding:"20px 18px 18px",borderLeft:"1px solid rgba(249,0,255,0.3)"}} >
               {[
                 {title:"Skills",c:<TagList tags={data.skills} onChange={t=>setData(d=>({...d,skills:t}))} editing={editing}/>},
                 {title:"Tech",c:<div>{data.technicalSkills.map(ts=>(<div key={ts.id} style={{marginBottom:7}}><E value={ts.name} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,name:v}:t)}))} editing={editing} style={{fontSize:12,fontWeight:700,color:"#00ffe7",display:"block"}}/><E value={ts.description} onChange={v=>setData(d=>({...d,technicalSkills:d.technicalSkills.map(t=>t.id===ts.id?{...t,description:v}:t)}))} editing={editing} style={{fontSize:10,color:"#b800ff",display:"block"}}/>{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:d.technicalSkills.filter(t=>t.id!==ts.id)}))} style={{fontSize:10,color:"#f87171",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:2}}><XMarkIcon style={{width:10,height:10}}/>Del</button>}</div>))}{editing&&<button type="button" onClick={()=>setData(d=>({...d,technicalSkills:[...d.technicalSkills,{id:uid(),name:"TECH",description:"v1.0"}]}))} style={{fontSize:11,color:"#00ffe7",background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:4,fontFamily:"monospace"}}><PlusIcon style={{width:11,height:11}}/>+ ADD</button>}</div>},

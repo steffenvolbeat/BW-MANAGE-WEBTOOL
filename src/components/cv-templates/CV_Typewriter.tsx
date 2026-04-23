@@ -149,7 +149,7 @@ export default function CV_Typewriter() {
         <div className={`${PFX}-zoom`} style={{width:Math.round(850/scale),zoom:scale}}>
           {/* Typewriter header strip */}
           <div style={{height:6,background:A}}/>
-          <div style={{background:S2,padding:"28px 40px 20px",borderBottom:`2px dashed ${A}`}}>
+          <div style={{background:S2,padding:"20px 40px 14px",borderBottom:`2px dashed ${A}`}}>
             <div style={{display:"flex",gap:24,alignItems:"flex-start"}}>
               <div style={{width:curShape.w,height:curShape.h,borderRadius:curShape.br,clipPath:curShape.clip??"",overflow:"hidden",flexShrink:0,backgroundColor:S3,border:`2px dashed ${A}`,display:"flex",alignItems:"center",justifyContent:"center",cursor:editing?"pointer":"default"}} onClick={()=>editing&&photoInputRef.current?.click()}>
                 {photoSrc?<img src={photoSrc} alt="Foto" style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span style={{fontSize:10,color:CM,textAlign:"center"}}>{editing?"📷":"Foto"}</span>}
@@ -174,7 +174,7 @@ export default function CV_Typewriter() {
 
           <div style={{display:"flex"}}>
             {/* Main content */}
-            <div style={{flex:1,padding:"24px 28px 40px 40px",minWidth:0}}>
+            <div style={{flex:1,padding:"18px 28px 18px 40px",minWidth:0}}>
               <div style={{marginBottom:22}}>
                 <SecH title="Projekte"/>
                 {data.projects.map(p=>(
@@ -230,7 +230,7 @@ export default function CV_Typewriter() {
               </div>
             </div>
             {/* Sidebar */}
-            <div style={{width:250,flexShrink:0,backgroundColor:SBG,padding:"24px 18px 40px",borderLeft:`2px dashed ${A}`}}>
+            <div style={{width:250,flexShrink:0,backgroundColor:SBG,padding:"20px 18px 18px",borderLeft:`2px dashed ${A}`}}>
               {[
                 {title:"Fähigkeiten",content:<TagList tags={data.skills} onChange={t=>setData(d=>({...d,skills:t}))} editing={editing}/>},
                 {title:"Technisch",content:(
