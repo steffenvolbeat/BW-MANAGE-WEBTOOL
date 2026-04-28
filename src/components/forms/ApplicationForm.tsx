@@ -282,6 +282,123 @@ Mit freundlichen Grüßen
     });
   };
 
+  // Vordefinierte IT-Stellentitel gruppiert nach Bereich
+  const itPositionVorlagen: Record<string, string[]> = {
+    frontend: [
+      "Frontend Developer",
+      "Senior Frontend Developer",
+      "Junior Frontend Developer",
+      "React Developer",
+      "Angular Developer",
+      "Vue.js Developer",
+      "UI Developer",
+    ],
+    backend: [
+      "Backend Developer",
+      "Senior Backend Developer",
+      "Junior Backend Developer",
+      "Java Developer",
+      "Node.js Developer",
+      "Python Developer",
+      "PHP Developer",
+      ".NET Developer",
+    ],
+    fullstack: [
+      "Full-Stack Developer",
+      "Senior Full-Stack Developer",
+      "Junior Full-Stack Developer",
+      "Full-Stack Engineer",
+      "Software Developer",
+      "Software Engineer",
+    ],
+    devops: [
+      "DevOps Engineer",
+      "Senior DevOps Engineer",
+      "Cloud Engineer",
+      "Site Reliability Engineer (SRE)",
+      "Platform Engineer",
+      "Infrastructure Engineer",
+      "Kubernetes Engineer",
+    ],
+    datascience: [
+      "Data Scientist",
+      "Machine Learning Engineer",
+      "AI Engineer",
+      "Data Analyst",
+      "Business Intelligence Analyst",
+      "Data Engineer",
+      "MLOps Engineer",
+    ],
+    security: [
+      "IT-Security Analyst",
+      "Cybersecurity Engineer",
+      "Penetration Tester",
+      "Security Architect",
+      "SOC Analyst",
+      "Information Security Manager",
+    ],
+    projektmanagement: [
+      "IT-Projektmanager",
+      "Scrum Master",
+      "Product Owner",
+      "Agile Coach",
+      "IT-Consultant",
+      "Projektleiter IT",
+    ],
+    sysadmin: [
+      "Systemadministrator",
+      "IT-Systemadministrator",
+      "Linux Administrator",
+      "Windows Administrator",
+      "Netzwerkadministrator",
+      "IT-Infrastruktur Engineer",
+    ],
+    qa: [
+      "QA Engineer",
+      "Testingenieur",
+      "Software Tester",
+      "Quality Assurance Analyst",
+      "Automation Test Engineer",
+      "SDET (Software Developer in Test)",
+    ],
+    mobile: [
+      "Mobile Developer",
+      "iOS Developer",
+      "Android Developer",
+      "React Native Developer",
+      "Flutter Developer",
+      "Mobile App Engineer",
+    ],
+    architektur: [
+      "Software Architect",
+      "Solution Architect",
+      "Enterprise Architect",
+      "Cloud Architect",
+      "Technical Lead",
+      "Principal Engineer",
+    ],
+    erp: [
+      "SAP Consultant",
+      "SAP ABAP Developer",
+      "ERP Consultant",
+      "SAP S/4HANA Consultant",
+      "SAP Basis Administrator",
+    ],
+    embedded: [
+      "Embedded Software Engineer",
+      "Firmware Developer",
+      "Embedded Systems Engineer",
+      "IoT Developer",
+      "FPGA Engineer",
+    ],
+    ux: [
+      "UX Engineer",
+      "Frontend UI Engineer",
+      "Design Systems Engineer",
+      "UX/UI Developer",
+    ],
+  };
+
   const jobTypes = [
     { value: "FULLTIME", label: "Vollzeit" },
     { value: "PARTTIME", label: "Teilzeit" },
@@ -595,6 +712,22 @@ Mit freundlichen Grüßen
               >
                 Position *
               </label>
+              {/* Vorlage-Picker: gefüllt aus aktuellem itBereich oder alle */}
+              <select
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg shadow-sm bg-gray-50 text-gray-600 text-sm mb-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                value=""
+                onChange={(e) => {
+                  if (e.target.value) handleInputChange({ target: { name: "position", value: e.target.value } } as React.ChangeEvent<HTMLInputElement>);
+                }}
+              >
+                <option value="">— Stellentitel aus Liste wählen (optional) —</option>
+                {(formData.itBereich && itPositionVorlagen[formData.itBereich]
+                  ? itPositionVorlagen[formData.itBereich]
+                  : Object.values(itPositionVorlagen).flat()
+                ).map((titel) => (
+                  <option key={titel} value={titel}>{titel}</option>
+                ))}
+              </select>
               <input
                 type="text"
                 id="position"
@@ -626,7 +759,13 @@ Mit freundlichen Grüßen
                 id="itBereich"
                 name="itBereich"
                 value={formData.itBereich}
-                onChange={handleInputChange}
+                onChange={(e) => {
+                  handleInputChange(e);
+                  // Wenn Position noch leer: automatisch ersten Stellentitel vorschlagen
+                  if (!formData.position && e.target.value && itPositionVorlagen[e.target.value]) {
+                    setFormData((prev) => ({ ...prev, position: itPositionVorlagen[e.target.value][0] }));
+                  }
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
               >
                 {itBereiche.map((b) => (
@@ -635,6 +774,11 @@ Mit freundlichen Grüßen
                   </option>
                 ))}
               </select>
+              {formData.itBereich && itPositionVorlagen[formData.itBereich] && (
+                <p className="text-xs text-gray-400 mt-1">
+                  Stellentitel-Vorschläge für diesen Bereich im Position-Feld verfügbar ↑
+                </p>
+              )}
             </div>
 
             {/* Beworben am */}
