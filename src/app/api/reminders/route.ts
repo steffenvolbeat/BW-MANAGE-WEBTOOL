@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, handleGuardError, blockReadOnlyRoles } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
 import { Priority } from "@prisma/client";
 
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   let user;
   try {
-    user = await requireActiveUser();
+    user = await blockReadOnlyRoles();
   } catch (err) {
     return handleGuardError(err);
   }
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   let user;
   try {
-    user = await requireActiveUser();
+    user = await blockReadOnlyRoles();
   } catch (err) {
     return handleGuardError(err);
   }
@@ -132,7 +132,7 @@ export async function PATCH(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   let user;
   try {
-    user = await requireActiveUser();
+    user = await blockReadOnlyRoles();
   } catch (err) {
     return handleGuardError(err);
   }

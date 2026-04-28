@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { scopedPrisma } from "@/lib/security/scope";
 import { ContactType } from "@prisma/client";
-import { requireActiveUser, assertSameUser, handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, assertSameUser, handleGuardError, blockReadOnlyRoles } from "@/lib/security/guard";
 
 // GET - Retrieve all contacts for a user
 export async function GET(request: Request) {
@@ -45,8 +45,7 @@ export async function GET(request: Request) {
 // POST - Create new contact
 export async function POST(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles();
     const db = scopedPrisma(user.id);
 
     const data = await request.json();
@@ -110,8 +109,7 @@ export async function POST(request: Request) {
 // PUT - Update contact
 export async function PUT(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles();
     const db = scopedPrisma(user.id);
 
     const data = await request.json();
@@ -178,8 +176,7 @@ export async function PUT(request: Request) {
 // DELETE - Delete contact
 export async function DELETE(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles();
     const db = scopedPrisma(user.id);
 
     const { searchParams } = new URL(request.url);

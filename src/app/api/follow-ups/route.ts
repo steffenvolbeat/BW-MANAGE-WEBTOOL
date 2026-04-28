@@ -59,6 +59,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
+    if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+      return NextResponse.json({ error: "Keine Schreibrechte" }, { status: 403 });
+    }
     const { applicationId, contactId, dueAt, type = "EMAIL", subject, generateDraft, context } = await req.json();
 
     if (!dueAt || !subject) {

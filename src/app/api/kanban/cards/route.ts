@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import { ApplicationStatus } from "@prisma/client";
 
 export const revalidate = 0;
@@ -18,7 +18,7 @@ const COLUMN_TO_STATUS: Record<string, ApplicationStatus> = {
 // POST /api/kanban/cards — Karte erstellen
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const { boardId, columnId, title, description } = await req.json();
 
     if (!boardId || !columnId || !title?.trim()) {
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 // PUT /api/kanban/cards — Karte verschieben oder aktualisieren
 export async function PUT(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const { id, columnId, title, description, status } = await req.json();
 
     if (!id) return NextResponse.json({ error: "id erforderlich" }, { status: 400 });
@@ -124,7 +124,7 @@ export async function PUT(req: NextRequest) {
 // DELETE /api/kanban/cards?id=xxx
 export async function DELETE(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: "id erforderlich" }, { status: 400 });

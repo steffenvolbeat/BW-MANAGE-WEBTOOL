@@ -10,6 +10,9 @@ import { prisma } from "@/lib/database";
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
+    if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+      return NextResponse.json({ error: "Keine Schreibrechte" }, { status: 403 });
+    }
     const { id } = await params;
     const body = await req.json();
 
@@ -38,6 +41,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getCurrentUser();
+    if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+      return NextResponse.json({ error: "Keine Schreibrechte" }, { status: 403 });
+    }
     const { id } = await params;
 
     const existing = await prisma.followUp.findFirst({ where: { id, userId: user.id } });

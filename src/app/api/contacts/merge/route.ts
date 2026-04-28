@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
 import { prisma } from "@/lib/database";
 
@@ -10,7 +10,7 @@ function coalesce<T>(a: T | null | undefined, b: T | null | undefined): T | null
 export async function POST(request: Request) {
   let user;
   try {
-    user = await requireActiveUser();
+    user = await blockReadOnlyRoles();
   } catch (err) {
     return handleGuardError(err);
   }

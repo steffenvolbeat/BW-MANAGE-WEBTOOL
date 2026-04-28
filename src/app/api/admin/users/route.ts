@@ -38,7 +38,7 @@ export async function PATCH(req: Request) {
     const body = await req.json();
     const { userId, role, status } = body as {
       userId: string;
-      role?: "USER" | "ADMIN";
+      role?: typeof VALID_ROLES[number];
       status?: "ACTIVE" | "INACTIVE" | "SUSPENDED";
     };
 

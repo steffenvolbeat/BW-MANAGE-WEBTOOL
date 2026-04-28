@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { requireActiveUser, resolveTargetUserId } from "@/lib/security/guard";
+import { requireActiveUser, resolveTargetUserId, blockReadOnlyRoles } from "@/lib/security/guard";
 import { handleGuardError } from "@/lib/security/guard";
 import { enforceRateLimit } from "@/lib/security/rateLimit";
 import { TimelineEntryType } from "@prisma/client";
@@ -42,8 +42,9 @@ export async function GET(req: NextRequest) {
 // POST /api/timeline
 export async function POST(req: NextRequest) {
   try {
-    await enforceRateLimit(req, "timeline:create", { max: 120, windowMs: 60 * 60_000 });
-    const user = await requireActiveUser();
+    const rl = enforceRateLimit(req, "timeline:create", { max: 120, windowMs: 60 * 60_000 });
+    if (rl) return rl;
+    const user = await blockReadOnlyRoles();
     const body = await req.json();
     const { applicationId, type, title, content, status, itBereich, week, date, noteId, coverId, eventId, activityId } = body;
 
