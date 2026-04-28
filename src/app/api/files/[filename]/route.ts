@@ -24,9 +24,14 @@ export async function GET(
     return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
   }
 
-  // IDOR-Schutz: Prüfe ob die Datei einem anderen User gehört
-  const doc = await prisma.document.findFirst({ where: { fileName: safeName } });
-  if (doc && doc.userId !== user.id) {
+  // IDOR-Schutz: filePath enthält den safeName (z.B. "/uploads/1234_file.pdf" oder "/api/files/1234_file.pdf")
+  // fileName in DB = original name → kein Match mit safeName → deshalb über filePath suchen
+  const doc = await prisma.document.findFirst({
+    where: { filePath: { contains: safeName } },
+    select: { userId: true },
+  });
+  // Wenn kein DB-Eintrag gefunden → Zugriff verweigern (kein Orphaned-File-Access)
+  if (!doc || doc.userId !== user.id) {
     return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 

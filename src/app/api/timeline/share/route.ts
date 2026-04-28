@@ -27,11 +27,15 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ token: share.token, url: `/timeline/share/${share.token}` });
 }
 
+const VALID_TIMELINE_TYPES = ["STATUS_CHANGE", "NOTE", "COVER_LETTER", "CV_UPDATE", "ACTIVITY", "CALENDAR_EVENT", "MANUAL"] as const;
+// CUID tokens are ~25 chars; 100 chars is a safe upper bound
+const MAX_TOKEN_LENGTH = 100;
+
 // GET /api/timeline/share?token=XYZ — Öffentlicher Share abrufen
 export async function GET(req: NextRequest) {
   const token = new URL(req.url).searchParams.get("token");
-  if (!token) {
-    return NextResponse.json({ error: "Token fehlt" }, { status: 400 });
+  if (!token || token.length > MAX_TOKEN_LENGTH) {
+    return NextResponse.json({ error: "Token fehlt oder ungültig" }, { status: 400 });
   }
 
   const share = await prisma.timelineShare.findUnique({
@@ -48,7 +52,10 @@ export async function GET(req: NextRequest) {
   }
 
   const where: Record<string, unknown> = { userId: share.userId };
-  if (share.typeFilter) where.type = share.typeFilter;
+  // Nur bekannte Enum-Werte als Filter akzeptieren (verhindert unerwartete DB-Queries)
+  if (share.typeFilter && (VALID_TIMELINE_TYPES as readonly string[]).includes(share.typeFilter)) {
+    where.type = share.typeFilter;
+  }
   const companyFilter = share.companyFilter ?? null;
 
   const allEntries = await prisma.applicationTimeline.findMany({
