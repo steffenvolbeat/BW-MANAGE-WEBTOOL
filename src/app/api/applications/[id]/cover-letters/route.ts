@@ -48,9 +48,10 @@ export async function POST(req: Request, { params }: Params) {
     } catch {
       return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
     }
-    const { title, itBereich, content, senderAddress, recipientAddress } = body as {
+    const { title, itBereich, content, senderAddress, recipientAddress, letterDate } = body as {
       title?: string; itBereich?: string | null; content?: string;
       senderAddress?: string | null; recipientAddress?: string | null;
+      letterDate?: string | null;
     };
 
     const coverLetter = await prisma.coverLetter.create({
@@ -59,6 +60,7 @@ export async function POST(req: Request, { params }: Params) {
         itBereich: itBereich || null,
         senderAddress: (typeof senderAddress === "string" && senderAddress.trim()) || null,
         recipientAddress: (typeof recipientAddress === "string" && recipientAddress.trim()) || null,
+        letterDate: (typeof letterDate === "string" && letterDate.trim()) || null,
         content: typeof content === "string" ? content : "",
         applicationId,
       },
@@ -98,7 +100,7 @@ export async function PUT(req: Request, { params }: Params) {
     const app = await db.application.findFirst({ where: { id: applicationId } });
     if (!app) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    const { letterId, title, itBereich, content, senderAddress, recipientAddress } = await req.json();
+    const { letterId, title, itBereich, content, senderAddress, recipientAddress, letterDate } = await req.json();
     if (!letterId) return NextResponse.json({ error: "letterId is required" }, { status: 400 });
 
     const existing = await prisma.coverLetter.findFirst({
@@ -113,6 +115,7 @@ export async function PUT(req: Request, { params }: Params) {
         ...(itBereich !== undefined && { itBereich: itBereich || null }),
         ...(senderAddress !== undefined && { senderAddress: (typeof senderAddress === "string" && senderAddress.trim()) || null }),
         ...(recipientAddress !== undefined && { recipientAddress: (typeof recipientAddress === "string" && recipientAddress.trim()) || null }),
+        ...(letterDate !== undefined && { letterDate: (typeof letterDate === "string" && letterDate.trim()) || null }),
         ...(content !== undefined && content !== null && { content: typeof content === "string" ? content : "" }),
       },
     });

@@ -23,6 +23,7 @@ import {
   ChevronDownIcon,
   DocumentTextIcon,
   ChatBubbleLeftEllipsisIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter, useSearchParams } from "next/navigation";
 interface Application {
@@ -68,6 +69,7 @@ interface CoverLetterEntry {
   itBereich: string;
   senderAddress?: string;
   recipientAddress?: string;
+  letterDate?: string;
   content: string;
   _new?: boolean;
   _dirty?: boolean;
@@ -148,10 +150,10 @@ export default function ApplicationsOverview() {
 
   // Cover Letters – row expand
   const [rowCLExpanded, setRowCLExpanded] = useState<string | null>(null);
-  const [rowCLData, setRowCLData] = useState<Record<string, { id: string; title: string; itBereich?: string; senderAddress?: string; recipientAddress?: string; content?: string }[]>>({});
+  const [rowCLData, setRowCLData] = useState<Record<string, { id: string; title: string; itBereich?: string; senderAddress?: string; recipientAddress?: string; letterDate?: string; content?: string }[]>>({});
   const [rowCLLoading, setRowCLLoading] = useState<string | null>(null);
   const [rowCLError, setRowCLError] = useState<string | null>(null);
-  const [clPreview, setClPreview] = useState<{ appId: string; application: Application; cl: { id: string; title: string; itBereich?: string; senderAddress?: string; recipientAddress?: string; content?: string } } | null>(null);
+  const [clPreview, setClPreview] = useState<{ appId: string; application: Application; cl: { id: string; title: string; itBereich?: string; senderAddress?: string; recipientAddress?: string; letterDate?: string; content?: string } } | null>(null);
   const [clPreviewSaving, setClPreviewSaving] = useState(false);
   const [clDeleting, setClDeleting] = useState<string | null>(null);
 
@@ -170,6 +172,9 @@ export default function ApplicationsOverview() {
   const [quickDateId, setQuickDateId] = useState<string | null>(null);
   const [quickDateVal, setQuickDateVal] = useState<string>("");
   const [savingQuickDate, setSavingQuickDate] = useState(false);
+
+  // Gruppierung nach Firma
+  const [groupByCompany, setGroupByCompany] = useState(false);
 
   // Schnell-Notiz Modal
   const [notesModalId, setNotesModalId] = useState<string | null>(null);
@@ -398,7 +403,7 @@ export default function ApplicationsOverview() {
     setCoverLettersLoading(true);
     fetch(`/api/applications/${app.id}/cover-letters`)
       .then((r) => { if (!r.ok) throw new Error(`Status ${r.status}`); return r.json(); })
-      .then((data: { id: string; title: string; itBereich: string | null; senderAddress: string | null; recipientAddress: string | null; content: string }[]) => {
+      .then((data: { id: string; title: string; itBereich: string | null; senderAddress: string | null; recipientAddress: string | null; letterDate?: string | null; content: string }[]) => {
         setEditCoverLetters(
           (Array.isArray(data) ? data : []).map((cl) => ({
             id: cl.id,
@@ -406,6 +411,7 @@ export default function ApplicationsOverview() {
             itBereich: cl.itBereich ?? "",
             senderAddress: cl.senderAddress ?? "",
             recipientAddress: cl.recipientAddress ?? "",
+            letterDate: cl.letterDate ?? "",
             content: cl.content,
           }))
         );
@@ -527,7 +533,7 @@ export default function ApplicationsOverview() {
           const r = await fetch(`/api/applications/${appId}/cover-letters`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content ?? "" }),
+            body: JSON.stringify({ title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, letterDate: cl.letterDate || null, content: cl.content ?? "" }),
           });
           if (!r.ok) {
             const errBody = await r.json().catch(() => null);
@@ -538,7 +544,7 @@ export default function ApplicationsOverview() {
           const r = await fetch(`/api/applications/${appId}/cover-letters`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content ?? "" }),
+            body: JSON.stringify({ letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, letterDate: cl.letterDate || null, content: cl.content ?? "" }),
           });
           if (!r.ok) {
             const errBody = await r.json().catch(() => null);
@@ -587,6 +593,19 @@ export default function ApplicationsOverview() {
         }
       },
     });
+  };
+
+  const handleReapply = async (app: Application) => {
+    if (!userId) return;
+    try {
+      const res = await fetch(`/api/applications/${app.id}/clone`, { method: "POST" });
+      if (!res.ok) throw new Error(`Klonen fehlgeschlagen (${res.status})`);
+      const cloned = await res.json();
+      setApplications((prev) => [cloned, ...prev]);
+      showToast("Erneute Bewerbung angelegt.");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Fehler beim Klonen.", "error");
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -677,8 +696,8 @@ export default function ApplicationsOverview() {
     try {
       const method = cl.id ? "PUT" : "POST";
       const body = cl.id
-        ? { letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content ?? "" }
-        : { title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, content: cl.content ?? "" };
+        ? { letterId: cl.id, title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, letterDate: cl.letterDate || null, content: cl.content ?? "" }
+        : { title: cl.title, itBereich: cl.itBereich || null, senderAddress: cl.senderAddress || null, recipientAddress: cl.recipientAddress || null, letterDate: cl.letterDate || null, content: cl.content ?? "" };
       const res = await fetch(`/api/applications/${appId}/cover-letters`, {
         method,
         headers: { "Content-Type": "application/json" },
@@ -701,6 +720,7 @@ export default function ApplicationsOverview() {
           itBereich: saved.itBereich ?? "",
           senderAddress: saved.senderAddress ?? "",
           recipientAddress: saved.recipientAddress ?? "",
+          letterDate: saved.letterDate ?? "",
           content: saved.content ?? "",
         },
       } : p);
@@ -1352,6 +1372,16 @@ export default function ApplicationsOverview() {
       </div>
 
       {/* Applications Table */}
+      <div className="flex items-center gap-3 px-4 py-2 bg-white border border-gray-200 rounded-lg shadow-sm mb-2">
+        <button
+          onClick={() => setGroupByCompany((v) => !v)}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${groupByCompany ? "bg-indigo-600 text-white border-indigo-700" : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50"}`}
+          title="Bewerbungen nach Firma gruppieren"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5M3.75 6h16.5M3.75 18h16.5" /></svg>
+          {groupByCompany ? "Gruppierung aufheben" : "Nach Firma gruppieren"}
+        </button>
+      </div>
       <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
         {showEdit && editingId && (
           <div className="fixed inset-0 bg-black/40 z-30 flex items-center justify-center px-4 py-6">
@@ -1746,6 +1776,16 @@ export default function ApplicationsOverview() {
                           </div>
                         </div>
                         <div>
+                          <label htmlFor={`cl-date-${activeCoverIdx}`} className="block text-xs font-medium text-gray-700 mb-1">Datum des Anschreibens</label>
+                          <input
+                            type="date"
+                            id={`cl-date-${activeCoverIdx}`}
+                            value={cl.letterDate ?? ""}
+                            onChange={(e) => update({ letterDate: e.target.value })}
+                            className="px-2 py-1.5 text-sm border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </div>
+                        <div>
                           <label htmlFor={`cl-content-${activeCoverIdx}`} className="block text-xs font-medium text-gray-700 mb-1">Anschreiben-Text</label>
                           <textarea
                             id={`cl-content-${activeCoverIdx}`}
@@ -1846,8 +1886,28 @@ export default function ApplicationsOverview() {
                   </td>
                 </tr>
               ) : (
-                filteredApplications.map((application) => (
-                  <Fragment key={application.id}>
+                // Gruppiert nach Firmenname oder normal
+                (() => {
+                  const groups: Record<string, typeof filteredApplications> = {};
+                  const sortedApps = groupByCompany
+                    ? [...filteredApplications].sort((a, b) => a.companyName.localeCompare(b.companyName))
+                    : filteredApplications;
+                  sortedApps.forEach((a) => {
+                    const key = groupByCompany ? (a.companyName || "—") : "__all__";
+                    if (!groups[key]) groups[key] = [];
+                    groups[key].push(a);
+                  });
+                  return Object.entries(groups).flatMap(([company, apps]) => [
+                    ...(groupByCompany ? [
+                      <tr key={`grp-${company}`} className="bg-indigo-50 border-t-2 border-indigo-200">
+                        <td colSpan={8} className="px-4 py-2 text-xs font-bold text-indigo-700 uppercase tracking-wide">
+                          {company}
+                          <span className="ml-2 text-indigo-400 font-normal normal-case">{apps.length} Bewerbung{apps.length !== 1 ? "en" : ""}</span>
+                        </td>
+                      </tr>
+                    ] : []),
+                    ...apps.map((application) => (
+                      <Fragment key={application.id}>
                     <tr
                       className="hover:bg-gray-50"
                       onDragOver={(e) => e.preventDefault()}
@@ -2120,6 +2180,14 @@ export default function ApplicationsOverview() {
                             <PencilSquareIcon className="w-4 h-4" />
                           </button>
                           <button
+                            className="text-emerald-600 hover:text-emerald-900 p-1 disabled:opacity-60"
+                            onClick={() => handleReapply(application)}
+                            title="Erneut bewerben (Klonen)"
+                            style={isReadOnly ? { display: "none" } : undefined}
+                          >
+                            <DocumentDuplicateIcon className="w-4 h-4" />
+                          </button>
+                          <button
                             className="text-gray-600 hover:text-gray-900 p-1 disabled:opacity-60"
                             onClick={() => handleUpdateStatus(application)}
                             disabled={updatingId === application.id}
@@ -2239,6 +2307,8 @@ export default function ApplicationsOverview() {
                     )}
                   </Fragment>
                 ))
+                // end group map
+              ])})()
               )}
             </tbody>
           </table>
@@ -2717,6 +2787,15 @@ export default function ApplicationsOverview() {
                     placeholder="Muster GmbH&#10;z.Hd. Frau Muster&#10;Firmenstraße 2"
                   />
                 </div>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Datum des Anschreibens</label>
+                <input
+                  type="date"
+                  value={clPreview.cl.letterDate ?? ""}
+                  onChange={(e) => setClPreview((p) => p ? { ...p, cl: { ...p.cl, letterDate: e.target.value } } : p)}
+                  className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">Inhalt</label>

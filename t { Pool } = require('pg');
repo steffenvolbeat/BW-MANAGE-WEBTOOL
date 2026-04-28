@@ -1,0 +1,37 @@
+                     Liste der Tabellen
+ Schema |         Name          |   Typ   |    Eigentümer    
+--------+-----------------------+---------+------------------
+ public | _prisma_migrations    | Tabelle | prisma_migration
+ public | achievements          | Tabelle | prisma_migration
+ public | activities            | Tabelle | prisma_migration
+ public | application_documents | Tabelle | prisma_migration
+ public | application_timelines | Tabelle | prisma_migration
+ public | applications          | Tabelle | prisma_migration
+ public | classroom_entries     | Tabelle | prisma_migration
+ public | contacts              | Tabelle | prisma_migration
+ public | cover_letters         | Tabelle | prisma_migration
+ public | documents             | Tabelle | prisma_migration
+ public | events                | Tabelle | prisma_migration
+ public | file_folders          | Tabelle | prisma_migration
+ public | follow_ups            | Tabelle | prisma_migration
+ public | interview_messages    | Tabelle | prisma_migration
+ public | interview_sessions    | Tabelle | prisma_migration
+ public | kanban_board_members  | Tabelle | prisma_migration
+ public | kanban_boards         | Tabelle | prisma_migration
+ public | kanban_cards          | Tabelle | prisma_migration
+ public | kanban_columns        | Tabelle | prisma_migration
+ public | legal_contracts       | Tabelle | prisma_migration
+ public | meetings              | Tabelle | prisma_migration
+ public | mentor_profiles       | Tabelle | prisma_migration
+ public | mentoring_sessions    | Tabelle | prisma_migration
+ public | mood_entries          | Tabelle | prisma_migration
+ public | notes                 | Tabelle | prisma_migration
+ public | peer_reviews          | Tabelle | prisma_migration
+ public | portfolio_profiles    | Tabelle | prisma_migration
+ public | reminders             | Tabelle | prisma_migration
+ public | timeline_comments     | Tabelle | prisma_migration
+ public | timeline_shares       | Tabelle | prisma_migration
+ public | users                 | Tabelle | prisma_migration
+ public | webauthn_credentials  | Tabelle | prisma_migration
+(32 Zeilen)
+
