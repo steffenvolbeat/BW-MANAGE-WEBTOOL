@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/currentUser";
-import { prisma } from "@/lib/database";
+import { requireActiveUser, blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -26,7 +25,8 @@ export interface OutboxReminder {
   createdAt: string;
 }
 
-// In-memory outbox store (replace with Prisma model in production)
+// ⚠️  PRODUCTION WARNING: In-memory store — data is lost on every cold start / serverless restart.
+// TODO: Persist reminders via a ReminderOutbox Prisma model instead of this Map.
 const outboxStore = new Map<string, OutboxReminder[]>();
 
 function getUserReminders(userId: string): OutboxReminder[] {
@@ -44,8 +44,8 @@ function attemptDelivery(reminder: OutboxReminder): { success: boolean; reason?:
 // ─── GET /api/reminders/outbox ────────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let user;
+  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
 
   const status = req.nextUrl.searchParams.get("status") as ReminderStatus | null;
   const all = getUserReminders(user.id);
@@ -73,8 +73,8 @@ export async function GET(req: NextRequest) {
 // ─── POST /api/reminders/outbox ───────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let user;
+  try { user = await blockReadOnlyRoles(); } catch (err) { return handleGuardError(err); }
 
   let body: {
     title?: string;
@@ -138,8 +138,8 @@ export async function POST(req: NextRequest) {
 // ─── PATCH /api/reminders/outbox?id=... (retry / cancel / update) ─────────────
 
 export async function PATCH(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let user;
+  try { user = await blockReadOnlyRoles(); } catch (err) { return handleGuardError(err); }
 
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
@@ -192,8 +192,8 @@ export async function PATCH(req: NextRequest) {
 // ─── DELETE /api/reminders/outbox?id=... ──────────────────────────────────────
 
 export async function DELETE(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  let user;
+  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
 
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });

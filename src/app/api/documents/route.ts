@@ -102,6 +102,34 @@ export async function POST(request: Request) {
     if (!ALLOWED_EXTENSIONS.has(ext)) {
       return NextResponse.json({ error: `Dateityp .${ext} ist nicht erlaubt.` }, { status: 415 });
     }
+
+    // Magic bytes validation (prevent extension spoofing)
+    const MAGIC_BYTES: Record<string, number[][]> = {
+      pdf:  [[0x25, 0x50, 0x44, 0x46]],                    // %PDF
+      jpg:  [[0xFF, 0xD8, 0xFF]],
+      jpeg: [[0xFF, 0xD8, 0xFF]],
+      png:  [[0x89, 0x50, 0x4E, 0x47]],
+      gif:  [[0x47, 0x49, 0x46, 0x38]],                    // GIF8
+      zip:  [[0x50, 0x4B, 0x03, 0x04]],                    // PK (also docx/xlsx/pptx/odt)
+      docx: [[0x50, 0x4B, 0x03, 0x04]],
+      xlsx: [[0x50, 0x4B, 0x03, 0x04]],
+      pptx: [[0x50, 0x4B, 0x03, 0x04]],
+      odt:  [[0x50, 0x4B, 0x03, 0x04]],
+      doc:  [[0xD0, 0xCF, 0x11, 0xE0]],                    // OLE2 compound
+      xls:  [[0xD0, 0xCF, 0x11, 0xE0]],
+      ppt:  [[0xD0, 0xCF, 0x11, 0xE0]],
+      webp: [[0x52, 0x49, 0x46, 0x46]],                    // RIFF
+    };
+    const expectedMagic = MAGIC_BYTES[ext];
+    if (expectedMagic) {
+      const header = Array.from(buffer.slice(0, 8));
+      const valid = expectedMagic.some((magic) =>
+        magic.every((byte, i) => header[i] === byte)
+      );
+      if (!valid) {
+        return NextResponse.json({ error: "Dateiinhalt entspricht nicht der Dateiendung." }, { status: 415 });
+      }
+    }
     const baseName = file.name
       .replace(/\.[^.]+$/, "")
       .replace(/\s+/g, "_")

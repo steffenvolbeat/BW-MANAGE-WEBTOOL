@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/currentUser";
+import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
 import { prisma } from "@/lib/database";
 import { analyzeContract } from "@/lib/ai/legalAnalyzer";
 import type { ContractType } from "@prisma/client";
 
 // POST /api/ai/legal-analysis – Erstellt neue Vertragsanalyse
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) {
-    return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
-  }
+  let user;
+  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
 
   const { contractText, contractName, contractType, documentId } = await req.json() as {
     contractText: string;
@@ -81,10 +79,8 @@ export async function POST(req: NextRequest) {
 
 // GET /api/ai/legal-analysis – Alle Analysen
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) {
-    return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
-  }
+  let user;
+  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
 
   try {
     const contracts = await prisma.legalContract.findMany({

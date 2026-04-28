@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/currentUser";
-import { prisma } from "@/lib/database";
+import { requireActiveUser, blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 
 // ─── Automation Rule Types ────────────────────────────────────────────────────
 
@@ -33,9 +32,8 @@ export interface AutomationRule {
   createdAt: string;
 }
 
-// In-memory store (production: persist in DB via Prisma)
-// The production schema should have a KanbanAutomation model.
-// Here we simulate persistence via a module-level map keyed by userId.
+// ⚠️  PRODUCTION WARNING: In-memory store — data is lost on every cold start / serverless restart.
+// TODO: Persist automations via a KanbanAutomation Prisma model instead of this Map.
 const store = new Map<string, AutomationRule[]>();
 
 function getRules(userId: string): AutomationRule[] {
@@ -49,8 +47,8 @@ function setRules(userId: string, rules: AutomationRule[]): void {
 // ─── GET /api/kanban/automations ──────────────────────────────────────────────
 
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauth" }, { status: 401 });
+  let user;
+  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
 
   return NextResponse.json(getRules(user.id));
 }
@@ -58,8 +56,8 @@ export async function GET(req: NextRequest) {
 // ─── POST /api/kanban/automations ─────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauth" }, { status: 401 });
+  let user;
+  try { user = await blockReadOnlyRoles(); } catch (err) { return handleGuardError(err); }
 
   let body: Partial<AutomationRule>;
   try {
@@ -100,8 +98,8 @@ export async function POST(req: NextRequest) {
 // ─── PATCH /api/kanban/automations?id=... ─────────────────────────────────────
 
 export async function PATCH(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauth" }, { status: 401 });
+  let user;
+  try { user = await blockReadOnlyRoles(); } catch (err) { return handleGuardError(err); }
 
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id fehlt." }, { status: 400 });
@@ -132,8 +130,8 @@ export async function PATCH(req: NextRequest) {
 // ─── DELETE /api/kanban/automations?id=... ────────────────────────────────────
 
 export async function DELETE(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) return NextResponse.json({ error: "Unauth" }, { status: 401 });
+  let user;
+  try { user = await blockReadOnlyRoles(); } catch (err) { return handleGuardError(err); }
 
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id fehlt." }, { status: 400 });

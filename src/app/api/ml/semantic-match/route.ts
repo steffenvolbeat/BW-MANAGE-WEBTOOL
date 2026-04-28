@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/currentUser";
+import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
 import { prisma } from "@/lib/database";
 import { batchMatchApplications } from "@/lib/ml/semanticMatch";
 
 // GET /api/ml/semantic-match?profile=... – Batch-Matching aller Bewerbungen
 export async function GET(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) {
-    return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
-  }
+  let user;
+  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
 
   const profileText = req.nextUrl.searchParams.get("profile") ?? "";
 
@@ -47,10 +45,8 @@ export async function GET(req: NextRequest) {
 
 // POST /api/ml/semantic-match – Einzelne Stelle analysieren
 export async function POST(req: NextRequest) {
-  const user = await getCurrentUser();
-  if (!user.id) {
-    return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
-  }
+  let user;
+  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
 
   try {
     const { profileText, applicationId } = await req.json();

@@ -1,18 +1,7 @@
 import { NextResponse } from "next/server";
 import { scopedPrisma } from "@/lib/security/scope";
 import { prisma } from "@/lib/database";
-import { requireActiveUser, assertSameUser } from "@/lib/security/guard";
-
-function handleGuardError(error: unknown) {
-  const code = (error as any)?.code;
-  if (code === "FORBIDDEN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  if (code === "RISK_BLOCKED") {
-    return NextResponse.json({ error: "Request blocked due to risk" }, { status: 403 });
-  }
-  return null;
-}
+import { requireActiveUser, assertSameUser, handleGuardError } from "@/lib/security/guard";
 
 // GET - Retrieve notes for a user with optional filters
 export async function GET(request: Request) {

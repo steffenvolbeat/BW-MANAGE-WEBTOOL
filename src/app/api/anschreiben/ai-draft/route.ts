@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/currentUser";
+import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
 
 // ─── PII Stripping (keep text structure, remove identifiable data) ─────────────
 const PII_PATTERNS: [RegExp, string][] = [
@@ -85,10 +85,8 @@ const RATE_WINDOW_MS = 60_000;
 
 export async function POST(req: NextRequest) {
   // Auth check
-  const user = await getCurrentUser();
-  if (!user.id) {
-    return NextResponse.json({ error: "Nicht authentifiziert." }, { status: 401 });
-  }
+  let user;
+  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
 
   // Rate limiting
   const now = Date.now();

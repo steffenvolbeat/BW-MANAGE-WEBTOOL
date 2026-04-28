@@ -24,7 +24,7 @@ export async function GET() {
       prisma.peerReview.findMany({
         where: { authorId: { not: user.id }, targetId: { not: user.id } },
         select: {
-          id: true, documentType: true, documentText: true, createdAt: true,
+          id: true, documentType: true, createdAt: true,
           target: { select: { name: true } },
         },
         orderBy: { createdAt: "desc" },
