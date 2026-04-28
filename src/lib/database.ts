@@ -22,10 +22,9 @@ const pool = globalForPrisma.pool ?? new Pool({
 const adapter = globalForPrisma.adapter ?? new PrismaPg(pool);
 const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-  globalForPrisma.pool = pool;
-  globalForPrisma.adapter = adapter;
-}
+// In production (Vercel Serverless) globalThis caching vermeidet Connection-Pool-Flooding
+globalForPrisma.prisma = prisma;
+globalForPrisma.pool = pool;
+globalForPrisma.adapter = adapter;
 
 export { prisma };

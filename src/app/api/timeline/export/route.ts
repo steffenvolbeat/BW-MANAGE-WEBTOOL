@@ -16,7 +16,6 @@ export async function GET(req: NextRequest) {
   const type = searchParams.get("type") || undefined;
 
   const where: Record<string, unknown> = { userId: user.id };
-  if (company) where["applicationId"] = undefined; // will use include filter below
   if (type) where.type = type;
 
   const entries = await prisma.applicationTimeline.findMany({
