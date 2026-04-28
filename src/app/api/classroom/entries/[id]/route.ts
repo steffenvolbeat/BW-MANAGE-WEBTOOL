@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { requireActiveUser } from "@/lib/security/guard";
+import { blockReadOnlyRoles } from "@/lib/security/guard";
 import { handleGuardError } from "@/lib/security/guard";
 
 // DELETE /api/classroom/entries/[id]
@@ -9,7 +9,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const { id } = await params;
 
     const existing = await prisma.classroomEntry.findFirst({
@@ -32,7 +32,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const { id } = await params;
     const body = await req.json();
     const { title, content } = body;

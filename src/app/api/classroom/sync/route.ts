@@ -11,7 +11,7 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import { EventType } from "@prisma/client";
 import { WEEKS_SCHEDULE, getWeekStart, computeCurrentWeek } from "@/lib/classroom/schedule";
 
@@ -21,7 +21,7 @@ const EVENT_COMPANY = "DCI Classroom";
 
 export async function POST() {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
 
     /* ────────────────────────── KALENDER ────────────────────────────────── */
 

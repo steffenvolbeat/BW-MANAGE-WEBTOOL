@@ -48,7 +48,8 @@ export async function GET(req: NextRequest) {
 // POST /api/classroom/entries — upsert (create or update by unique key)
 export async function POST(req: NextRequest) {
   try {
-    await enforceRateLimit(req, "classroom:entries", { max: 240, windowMs: 60 * 60_000 });
+    const rl = enforceRateLimit(req, "classroom:entries", { max: 240, windowMs: 60 * 60_000 });
+    if (rl) return rl;
     const user = await blockReadOnlyRoles();
     const body = await req.json();
     const { week, day, type, title, content } = body;

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { scopedPrisma } from "@/lib/security/scope";
 import { prisma } from "@/lib/database";
-import { requireActiveUser } from "@/lib/security/guard";
+import { requireActiveUser, blockReadOnlyRoles } from "@/lib/security/guard";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -33,8 +33,8 @@ export async function GET(_req: Request, { params }: Params) {
 // POST /api/applications/[id]/cover-letters
 export async function POST(req: Request, { params }: Params) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles().catch(() => null);
+    if (!user) return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
 
     const { id: applicationId } = await params;
     const db = scopedPrisma(user.id);
@@ -91,8 +91,8 @@ export async function POST(req: Request, { params }: Params) {
 // PUT /api/applications/[id]/cover-letters  (body: { letterId, title, itBereich, content })
 export async function PUT(req: Request, { params }: Params) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles().catch(() => null);
+    if (!user) return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
 
     const { id: applicationId } = await params;
     const db = scopedPrisma(user.id);
@@ -130,8 +130,8 @@ export async function PUT(req: Request, { params }: Params) {
 // DELETE /api/applications/[id]/cover-letters?letterId=xxx
 export async function DELETE(req: Request, { params }: Params) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles().catch(() => null);
+    if (!user) return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
 
     const { id: applicationId } = await params;
     const db = scopedPrisma(user.id);

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveUser } from "@/lib/security/guard";
+import { requireActiveUser, blockReadOnlyRoles } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
 import { promises as fs } from "fs";
 import path from "path";
@@ -64,8 +64,8 @@ export async function GET(req: NextRequest) {
 
 // PATCH /api/files/items — Datei in anderen Ordner verschieben
 export async function PATCH(req: NextRequest) {
-  const user = await requireActiveUser().catch(() => null);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await blockReadOnlyRoles().catch(() => null);
+  if (!user) return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
 
   const body = await req.json() as { id?: string; fileBrowserFolderId?: string | null };
   const { id, fileBrowserFolderId } = body;
@@ -87,8 +87,8 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE /api/files/items?id=xxx
 export async function DELETE(req: NextRequest) {
-  const user = await requireActiveUser().catch(() => null);
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const user = await blockReadOnlyRoles().catch(() => null);
+  if (!user) return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
 
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });

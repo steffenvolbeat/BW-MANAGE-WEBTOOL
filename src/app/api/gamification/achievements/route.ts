@@ -51,6 +51,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
+    if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+      return NextResponse.json({ error: "Keine Schreibrechte" }, { status: 403 });
+    }
     const { type } = await req.json();
 
     const def = ACHIEVEMENT_DEFINITIONS.find((d) => d.type === type);

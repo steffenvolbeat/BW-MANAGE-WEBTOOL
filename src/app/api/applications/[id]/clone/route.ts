@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/database";
-import { requireActiveUser } from "@/lib/security/guard";
+import { blockReadOnlyRoles } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
 
 type Params = { params: Promise<{ id: string }> };
@@ -8,8 +8,8 @@ type Params = { params: Promise<{ id: string }> };
 // POST /api/applications/[id]/clone  – Bewerbung klonen ("Erneut bewerben")
 export async function POST(_req: Request, { params }: Params) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles().catch(() => null);
+    if (!user) return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
 
     const { id: applicationId } = await params;
     const db = scopedPrisma(user.id);

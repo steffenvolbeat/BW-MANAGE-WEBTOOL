@@ -57,6 +57,9 @@ export async function POST(req: NextRequest) {
     if (rl) return rl;
 
     const user = await getCurrentUser();
+    if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+      return NextResponse.json({ error: "Keine Schreibrechte" }, { status: 403 });
+    }
     const { mood, energy, stress, note } = await req.json();
 
     if (

@@ -3,7 +3,7 @@ import { scopedPrisma } from "@/lib/security/scope";
 import { promises as fs } from "fs";
 import path from "path";
 import { DocumentType } from "@prisma/client";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import { put } from "@vercel/blob"; // Vercel Blob Storage SDK
 
 // GET
@@ -51,8 +51,7 @@ export async function GET(request: Request) {
 // POST
 export async function POST(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles();
 
     const db = scopedPrisma(user.id);
 
@@ -192,8 +191,8 @@ export async function POST(request: Request) {
 // PUT
 export async function PUT(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles().catch(() => null);
+    if (!user) return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
 
     const data = await request.json();
     const { id, userId, ...updateData } = data;
@@ -240,8 +239,8 @@ export async function PUT(request: Request) {
 // DELETE
 export async function DELETE(request: Request) {
   try {
-    const user = await requireActiveUser().catch(() => null);
-    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const user = await blockReadOnlyRoles().catch(() => null);
+    if (!user) return NextResponse.json({ error: "Keine Berechtigung" }, { status: 403 });
 
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");

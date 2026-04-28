@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import { scopedPrisma } from "@/lib/security/scope";
 
 const DEFAULT_FOLDERS = [
@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
 // ─── POST /api/files/folders ─────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const db = scopedPrisma(user.id);
     const body = await req.json() as { name?: string; parentId?: string | null; color?: string; icon?: string };
     if (!body.name?.trim()) return NextResponse.json({ error: "Name fehlt" }, { status: 400 });
@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
 // ─── PATCH /api/files/folders?id=... ─────────────────────────────────────────
 export async function PATCH(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
 
@@ -152,7 +152,7 @@ export async function PATCH(req: NextRequest) {
 // ─── DELETE /api/files/folders?id=... ────────────────────────────────────────
 export async function DELETE(req: NextRequest) {
   try {
-    const user = await requireActiveUser();
+    const user = await blockReadOnlyRoles();
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });
 

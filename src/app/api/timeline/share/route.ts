@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import { prisma } from "@/lib/database";
 import { enforceRateLimit } from "@/lib/security/rateLimit";
 
@@ -7,16 +7,13 @@ import { enforceRateLimit } from "@/lib/security/rateLimit";
 export async function POST(req: NextRequest) {
   let user;
   try {
-    user = await requireActiveUser();
+    user = await blockReadOnlyRoles();
   } catch (err) {
     return handleGuardError(err);
   }
 
-  try {
-    await enforceRateLimit(req, "timeline-share", { max: 20, windowMs: 60 * 60 * 1000 });
-  } catch {
-    return NextResponse.json({ error: "Zu viele Anfragen" }, { status: 429 });
-  }
+  const rl = enforceRateLimit(req, "timeline-share", { max: 20, windowMs: 60 * 60 * 1000 });
+  if (rl) return rl;
 
   const body = await req.json().catch(() => ({}));
   const companyFilter = body.companyFilter?.toString().trim().slice(0, 200) || null;

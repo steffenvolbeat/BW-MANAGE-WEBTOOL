@@ -49,6 +49,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
+    if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+      return NextResponse.json({ error: "Keine Schreibrechte" }, { status: 403 });
+    }
     const { documentType, documentText, reviewId, feedback, rating, isAnonymous = true } = await req.json();
 
     // Fall 1: Dokument zur Review einreichen (targetId = eigene ID, authorId wird beim Review gesetzt)

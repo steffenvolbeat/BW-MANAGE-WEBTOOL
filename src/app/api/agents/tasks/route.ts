@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import {
   createAgentTask,
   approveAndExecuteTask,
@@ -26,7 +26,7 @@ export async function GET() {
 export async function POST(request: Request) {
   let user;
   try {
-    user = await requireActiveUser();
+    user = await blockReadOnlyRoles();
   } catch (err) {
     return handleGuardError(err);
   }
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   let user;
   try {
-    user = await requireActiveUser();
+    user = await blockReadOnlyRoles();
   } catch (err) {
     return handleGuardError(err);
   }

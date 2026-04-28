@@ -35,6 +35,9 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const user = await getCurrentUser();
+    if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+      return NextResponse.json({ error: "Keine Schreibrechte" }, { status: 403 });
+    }
     const { headline, bio, skills, industries, hourlyRate, isAvailable } = await req.json();
 
     if (!headline || !bio) {
