@@ -17,7 +17,7 @@ const pool = globalForPrisma.pool ?? new Pool({
   connectionString: datasourceUrl,
   ssl: datasourceUrl.includes("localhost") || datasourceUrl.includes("127.0.0.1")
     ? false
-    : { rejectUnauthorized: true }, // equivalent to sslmode=verify-full
+    : { rejectUnauthorized: false }, // sslmode=require: verschlüsseln, kein CA-Verify (Vercel Lambda CA-Store eingeschränkt)
 });
 const adapter = globalForPrisma.adapter ?? new PrismaPg(pool);
 const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
