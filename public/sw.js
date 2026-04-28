@@ -11,7 +11,7 @@
  * Sicherheit: Kein Caching von Auth/PII-Daten. Sessions werden niemals gecached.
  */
 
-const CACHE_VERSION = "v8";
+const CACHE_VERSION = "v9";
 const STATIC_CACHE = `bw-manage-static-${CACHE_VERSION}`;
 const PAGE_CACHE = `bw-manage-pages-${CACHE_VERSION}`;
 const SYNC_TAG = "bw-manage-sync";
@@ -65,6 +65,9 @@ self.addEventListener("fetch", (event) => {
 
   if (url.origin !== self.location.origin) return;
   if (NEVER_CACHE.some((p) => url.pathname.startsWith(p))) return;
+
+  // Manifest immer nativ holen – niemals cachen (verhindert Syntax-Fehler durch gecachtes HTML)
+  if (url.pathname === "/manifest.json") return;
 
   // Background Sync für /api/sync POST
   if (url.pathname === "/api/sync" && request.method === "POST") {
