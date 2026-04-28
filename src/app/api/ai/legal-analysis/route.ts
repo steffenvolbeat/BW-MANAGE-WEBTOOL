@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { requireActiveUser, blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import { prisma } from "@/lib/database";
 import { analyzeContract } from "@/lib/ai/legalAnalyzer";
 import type { ContractType } from "@prisma/client";
@@ -7,7 +7,7 @@ import type { ContractType } from "@prisma/client";
 // POST /api/ai/legal-analysis – Erstellt neue Vertragsanalyse
 export async function POST(req: NextRequest) {
   let user;
-  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
+  try { user = await blockReadOnlyRoles(); } catch (err) { return handleGuardError(err); }
 
   const { contractText, contractName, contractType, documentId } = await req.json() as {
     contractText: string;

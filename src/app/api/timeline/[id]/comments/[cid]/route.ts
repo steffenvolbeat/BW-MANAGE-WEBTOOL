@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
+import { blockReadOnlyRoles, handleGuardError } from "@/lib/security/guard";
 import { prisma } from "@/lib/database";
 
 export async function DELETE(
@@ -8,7 +8,7 @@ export async function DELETE(
 ) {
   let user;
   try {
-    user = await requireActiveUser();
+    user = await blockReadOnlyRoles();
   } catch (err) {
     return handleGuardError(err);
   }

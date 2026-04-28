@@ -193,7 +193,7 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   let user;
-  try { user = await requireActiveUser(); } catch (err) { return handleGuardError(err); }
+  try { user = await blockReadOnlyRoles(); } catch (err) { return handleGuardError(err); }
 
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "ID fehlt" }, { status: 400 });

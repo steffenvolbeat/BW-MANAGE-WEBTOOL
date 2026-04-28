@@ -23,6 +23,9 @@ export async function POST(
   } catch {
     return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
   }
+  if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+    return NextResponse.json({ error: "Keine Schreibberechtigung" }, { status: 403 });
+  }
 
   const { sessionId } = await params;
   const { content } = await req.json();

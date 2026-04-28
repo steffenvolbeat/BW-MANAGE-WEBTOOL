@@ -12,6 +12,9 @@ export async function POST(req: NextRequest) {
   } catch {
     return NextResponse.json({ error: "Nicht authentifiziert" }, { status: 401 });
   }
+  if (user.role === "MANAGER" || user.role === "VERMITTLER") {
+    return NextResponse.json({ error: "Keine Schreibberechtigung" }, { status: 403 });
+  }
 
   const { jobTitle, company, difficulty, applicationId, mode } = await req.json() as {
     jobTitle: string;
