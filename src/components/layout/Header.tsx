@@ -12,6 +12,7 @@ import {
   MoonIcon,
   SunIcon,
   ArrowRightOnRectangleIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 
 interface HeaderProps {
@@ -53,7 +54,7 @@ export default function Header({
             </button>
 
             {/* Logo */}
-            <div className="flex items-center ml-4 md:ml-0">
+            <div className="flex items-center ml-4 md:ml-0 gap-3">
               <Link href="/dashboard" className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">IT</span>
@@ -62,6 +63,14 @@ export default function Header({
                   <h1 className="text-xl font-bold">Bewerbungs-Management</h1>
                   <p className="text-xs text-(--muted) -mt-1">für IT-Profis</p>
                 </div>
+              </Link>
+              {/* Dashboard Back-Button — immer sichtbar */}
+              <Link
+                href="/dashboard"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors shadow-sm"
+              >
+                <HomeIcon className="w-4 h-4" />
+                <span>Dashboard</span>
               </Link>
             </div>
           </div>

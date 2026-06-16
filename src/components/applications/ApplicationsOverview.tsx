@@ -1161,18 +1161,33 @@ export default function ApplicationsOverview() {
         </div>
 
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <GlobeEuropeAfricaIcon className="w-5 h-5 text-purple-600" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <GlobeEuropeAfricaIcon className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="ml-4">
+                <p className="text-sm text-gray-600">International</p>
+                <p className="text-xl font-bold text-gray-900">
+                  {loading
+                    ? "…"
+                    : applications.filter((app) => !app.isInland).length}
+                </p>
+              </div>
             </div>
-            <div className="ml-4">
-              <p className="text-sm text-gray-600">International</p>
-              <p className="text-xl font-bold text-gray-900">
-                {loading
-                  ? "…"
-                  : applications.filter((app) => !app.isInland).length}
-              </p>
-            </div>
+            {applications.filter((app) => !app.isInland).length > 0 && (
+              <button
+                onClick={() => {
+                  const intlApp = applications.find((app) => !app.isInland);
+                  if (intlApp) setRelocationApp(intlApp);
+                }}
+                className="flex items-center gap-1 px-2 py-1 bg-teal-600 hover:bg-teal-700 text-white text-xs font-medium rounded-lg transition-colors"
+                title="Umzugsplanung für internationale Bewerbungen"
+              >
+                <GlobeEuropeAfricaIcon className="w-3.5 h-3.5" />
+                Umzug planen
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -2215,15 +2230,12 @@ export default function ApplicationsOverview() {
                           </button>
                           {!application.isInland && (
                             <button
-                              className={`p-1 transition-colors ${
-                                ["OFFER_RECEIVED", "ACCEPTED", "NEGOTIATION"].includes(application.status)
-                                  ? "text-teal-600 hover:text-teal-900"
-                                  : "text-teal-400 hover:text-teal-700"
-                              }`}
-                              title="Umzugsmanagement öffnen"
+                              className="flex items-center gap-1 px-1.5 py-0.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-medium rounded transition-colors"
+                              title="Umzugsplanung öffnen"
                               onClick={() => setRelocationApp(application)}
                             >
-                              <GlobeEuropeAfricaIcon className="w-4 h-4" />
+                              <GlobeEuropeAfricaIcon className="w-3.5 h-3.5" />
+                              <span>Umzug</span>
                             </button>
                           )}
                           <button
