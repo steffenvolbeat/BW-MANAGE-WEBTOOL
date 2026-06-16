@@ -1,19 +1,57 @@
 /**
  * POST /api/agents/job-search
- * KI-gestützter Job-Such-Agent
- *
- * Liest Benutzerprofil + hochgeladene Dokumente, analysiert sie mit Claude
- * und liefert personalisierte Stellenangebote mit Match-Score zurück.
+ * KI-gestützter Job-Such-Agent mit Web-Suche
  *
  * Provider-Chain:
- *  1. Anthropic Claude  (ANTHROPIC_API_KEY)
- *  2. Lokaler Fallback  (regelbasiert)
+ *  1. Brave Search API  (BRAVE_SEARCH_API_KEY) → echte Internet-Treffer
+ *  2. Anthropic Claude  (ANTHROPIC_API_KEY)    → Analyse + Strukturierung
+ *  3. Lokaler Fallback  (regelbasiert)         → wenn kein API-Key
  */
 
 import { NextResponse } from "next/server";
 import { requireActiveUser, handleGuardError } from "@/lib/security/guard";
 import { enforceRateLimit } from "@/lib/security/rateLimit";
 import { scopedPrisma } from "@/lib/security/scope";
+
+// ── Brave Web Search ───────────────────────────────────────────────────────────
+
+interface BraveResult {
+  title: string;
+  url: string;
+  description: string;
+}
+
+async function searchBrave(queries: string[]): Promise<string> {
+  const apiKey = process.env.BRAVE_SEARCH_API_KEY;
+  if (!apiKey) return "";
+
+  const allResults: string[] = [];
+
+  for (const q of queries.slice(0, 3)) {
+    try {
+      const res = await fetch(
+        `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(q)}&count=8&country=de&search_lang=de`,
+        {
+          headers: {
+            "X-Subscription-Token": apiKey,
+            Accept: "application/json",
+          },
+          signal: AbortSignal.timeout(6000),
+        }
+      );
+      if (!res.ok) continue;
+      const data = await res.json() as { web?: { results?: BraveResult[] } };
+      const results = data.web?.results ?? [];
+      for (const r of results) {
+        allResults.push(`• ${r.title}\n  ${r.description}\n  URL: ${r.url}`);
+      }
+    } catch {
+      // weiter mit nächster Query
+    }
+  }
+
+  return allResults.slice(0, 20).join("\n\n");
+}
 
 // ── Typen ─────────────────────────────────────────────────────────────────────
 
@@ -70,16 +108,22 @@ function buildSystemPrompt(
   userName: string,
   applicationSummary: string,
   documentList: string,
-  prefs: SearchPreferences
+  prefs: SearchPreferences,
+  webSearchResults?: string
 ): string {
+  const webSection = webSearchResults
+    ? `\n=== ECHTE INTERNET-SUCHERGEBNISSE (Brave Search) ===\nNutze diese realen Treffer als Basis für die Stellenangebote. Extrahiere Firmennamen, Positionen, Standorte und URLs aus diesen Ergebnissen:\n\n${webSearchResults}\n`
+    : "";
+
   return `Du bist ein hochspezialisierter Job-Such-Agent für IT-Fachkräfte im DACH-Raum.
-Deine Aufgabe: Analysiere das Benutzerprofil und generiere EXAKT 10 realistische, passende Stellenangebote.
+Deine Aufgabe: Analysiere das Benutzerprofil und generiere realistische, passende Stellenangebote — bevorzugt basierend auf echten Internet-Suchergebnissen.
 
 === BENUTZERPROFIL ===
 Name: ${userName}
 Bisherige Bewerbungen (Kontext): ${applicationSummary || "Keine vorhanden"}
 Hochgeladene Dokumente: ${documentList || "Keine"}
 
+${webSection}
 === SUCHPRÄFERENZEN ===
 Standort: ${prefs.location || "Flexibel (DACH)"}
 Arbeitsmodell: ${prefs.workType}
@@ -372,11 +416,22 @@ export async function POST(request: Request) {
       .map((d: { name: string }) => d.name)
       .join(", ");
 
+    // Brave Web Search — echte Internet-Treffer als Kontext
+    const jobTypes = body.jobTypes?.join(" OR ") || "IT Entwickler";
+    const city = body.location || body.countries?.[0] || "Deutschland";
+    const braveQueries = [
+      `${jobTypes} Jobs ${city} Stellenangebote site:linkedin.com OR site:stepstone.de OR site:indeed.de OR site:karriere.at OR site:jobs.ch`,
+      `${city} IT Stellenanzeigen ${body.techStack?.slice(0, 3).join(" ")} Karriere 2025 2026`,
+      `IT Jobs ${city} ${body.jobTypes?.[0] || "Software Engineer"} Unternehmen Stellenangebote`,
+    ];
+    const webSearchResults = await searchBrave(braveQueries);
+
     const systemPrompt = buildSystemPrompt(
       user.name ?? user.email,
       applicationSummary,
       documentList,
-      body
+      body,
+      webSearchResults || undefined
     );
 
     // KI oder Fallback

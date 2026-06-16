@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   XMarkIcon,
   MagnifyingGlassIcon,
+  LinkIcon,
   BriefcaseIcon,
   MapPinIcon,
   CurrencyEuroIcon,
@@ -566,6 +567,12 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // URL-Scanner
+  const [urlInput, setUrlInput] = useState("");
+  const [urlScanning, setUrlScanning] = useState(false);
+  const [urlScanError, setUrlScanError] = useState<string | null>(null);
+  const [urlScanResult, setUrlScanResult] = useState<import("@/app/api/agents/url-scanner/route").ScanResult | null>(null);
+
   useEffect(() => {
     fetch("/api/documents")
       .then((r) => r.json())
@@ -621,6 +628,61 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
       prev.includes(country) ? prev.filter((c) => c !== country) : [...prev, country]
     );
   };
+
+  // URL-Scanner
+  const scanUrl = useCallback(async () => {
+    const url = urlInput.trim();
+    if (!url) return;
+    setUrlScanning(true);
+    setUrlScanError(null);
+    setUrlScanResult(null);
+    try {
+      const res = await fetch("/api/agents/url-scanner", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setUrlScanError(data.error ?? "Scan fehlgeschlagen");
+      } else {
+        setUrlScanResult(data);
+        // URL-Jobs in Hauptliste umwandeln und einfügen
+        if (data.jobs?.length > 0) {
+          const converted: JobMatch[] = data.jobs.map((j: import("@/app/api/agents/url-scanner/route").ScannedJob, i: number) => ({
+            id: `url_${Date.now()}_${i}`,
+            company: data.company ?? new URL(url.startsWith("http") ? url : `https://${url}`).hostname.replace("www.", ""),
+            companySize: "Unbekannt",
+            companyAddress: data.companyAddress ?? "",
+            position: j.position,
+            location: j.location ?? "Laut Website",
+            country: "DACH",
+            workType: (j.workType?.toUpperCase().includes("REMOTE") ? "REMOTE" : j.workType?.toUpperCase().includes("HYBRID") ? "HYBRID" : "ONSITE") as "REMOTE" | "HYBRID" | "ONSITE",
+            salaryMin: 0,
+            salaryMax: 0,
+            currency: "EUR",
+            matchScore: 75,
+            matchReasons: ["Direkt von Unternehmens-Website gescannt", j.department ?? ""].filter(Boolean),
+            requiredSkills: [],
+            matchedSkills: [],
+            missingSkills: [],
+            jobType: j.department ?? "Allgemein",
+            postedDaysAgo: 0,
+            companyDescription: data.companyDescription ?? "",
+            jobDescription: j.description ?? "",
+            benefits: [],
+            applyUrl: j.applyUrl ?? url,
+            isHighPriority: false,
+          }));
+          setJobs((prev) => [...converted, ...prev.filter((j) => !j.id.startsWith("url_"))]);
+        }
+      }
+    } catch {
+      setUrlScanError("Verbindungsfehler beim Scannen der URL");
+    } finally {
+      setUrlScanning(false);
+    }
+  }, [urlInput]);
 
   // Suche starten
   const startSearch = useCallback(async () => {
@@ -812,6 +874,60 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
               <p className="text-[10px] text-blue-500 mt-2">
                 PDF, DOC, DOCX, Bild · Der Agent analysiert deine Unterlagen automatisch bei der nächsten Suche.
               </p>
+            </div>
+
+            {/* ── Unternehmens-URL scannen ─────────────────────────────── */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-3">
+              <h3 className="font-semibold text-blue-800 text-sm flex items-center gap-2">
+                <LinkIcon className="w-4 h-4" />
+                Karriereseite scannen
+              </h3>
+              <p className="text-[11px] text-blue-600 leading-relaxed">
+                Gib die URL einer Unternehmens-Karriereseite ein. Der Agent liest die Seite und extrahiert alle offenen Stellen automatisch.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  id="url-scanner-input"
+                  name="url-scanner-input"
+                  type="url"
+                  value={urlInput}
+                  onChange={(e) => setUrlInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); void scanUrl(); } }}
+                  placeholder="https://careers.beispiel.de"
+                  className="flex-1 min-w-0 bg-white border border-blue-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-blue-400 text-gray-800 placeholder-gray-400"
+                />
+                <button
+                  onClick={() => void scanUrl()}
+                  disabled={urlScanning || !urlInput.trim()}
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-50 shrink-0 flex items-center gap-1"
+                >
+                  {urlScanning ? (
+                    <ArrowPathIcon className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <MagnifyingGlassIcon className="w-3.5 h-3.5" />
+                  )}
+                  {urlScanning ? "Scannt…" : "Scan"}
+                </button>
+              </div>
+
+              {urlScanError && (
+                <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{urlScanError}</p>
+              )}
+
+              {urlScanResult && (
+                <div className="bg-white border border-blue-200 rounded-lg p-3 space-y-1.5">
+                  <p className="text-xs font-semibold text-blue-800">{urlScanResult.company}</p>
+                  {urlScanResult.companyAddress && (
+                    <p className="text-[11px] text-gray-500">{urlScanResult.companyAddress}</p>
+                  )}
+                  <p className="text-[11px] text-green-700 font-medium">
+                    ✓ {urlScanResult.jobs?.length ?? 0} Stellen gefunden — in Ergebnisliste eingefügt
+                  </p>
+                  {urlScanResult.companyDescription && (
+                    <p className="text-[11px] text-gray-600 leading-relaxed">{urlScanResult.companyDescription}</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Profil-Analyse */}
@@ -1141,7 +1257,8 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
                 <div className="mt-6 grid grid-cols-3 gap-4 text-center w-full max-w-sm">
                   {[
                     { icon: "🎯", label: "Profil-Analyse", sub: "Skills & Erfahrung" },
-                    { icon: "🌐", label: "Internet-Suche", sub: "DACH-Unternehmen" },
+                    { icon: "🌐", label: "Web-Suche", sub: "Brave Search · Echte Treffer" },
+                    { icon: "🔗", label: "URL-Scanner", sub: "Karriereseiten direkt lesen" },
                     { icon: "📊", label: "Match-Score", sub: "Passgenaue Vorschläge" },
                   ].map((item) => (
                     <div key={item.label} className="bg-white rounded-xl border border-gray-100 p-3">
