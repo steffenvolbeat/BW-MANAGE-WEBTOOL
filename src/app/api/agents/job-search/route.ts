@@ -21,6 +21,7 @@ export interface JobMatch {
   id: string;
   company: string;
   companySize: string;
+  companyAddress: string;
   position: string;
   location: string;
   country: string;
@@ -85,17 +86,18 @@ Arbeitsmodell: ${prefs.workType}
 Gehaltsrahmen: ${prefs.salaryMin.toLocaleString("de")} – ${prefs.salaryMax.toLocaleString("de")} €/Jahr
 Tech-Stack (gewünscht): ${prefs.techStack.join(", ") || "Allgemein IT"}
 Level: ${prefs.jobLevel}
-Job-Typen: ${prefs.jobTypes.join(", ") || "Alle IT-Bereiche"}
-Länder: ${prefs.countries.join(", ") || "Deutschland, Österreich, Schweiz"}
+Job-Typen: ${prefs.jobTypes.join(", ") || "ALLE IT-Bereiche"}
+Länder (NUR diese): ${prefs.countries.join(", ") || "Deutschland, Österreich, Schweiz"}
 
 === AUFGABE ===
-1. Analysiere das Profil und erkenne Stärken/Skills
-2. Generiere EXAKT 10 realistische Stellenangebote die perfekt passen
-3. Nutze echte Firmennamen aus dem DACH-Raum (SAP, BMW, Siemens, Bosch, Allianz, Deutsche Telekom, Zalando, Wirecard, TeamViewer, Celonis, CHECK24, N26, etc.)
-4. Berechne einen genauen Match-Score (0-100) basierend auf Profil + Präferenzen
-5. Unterscheide klar zwischen matchedSkills (vorhanden) und missingSkills (fehlen noch)
+1. Analysiere Profil genau — erkenne Skills, Erfahrungslevel, Stärken aus Bewerbungshistorie und Dokumenten
+2. Generiere EXAKT 10 Stellen — NUR aus den angegebenen Ländern
+3. Decke ALLE IT-Bereiche ab: Backend, Frontend, Full-Stack, DevOps/Cloud, Mobile, Data/BI, ML/KI, Security/Pentesting, QA/Testing, Embedded/IoT, SAP/ERP, IT-Projektmanagement, Scrum/Agile, Netzwerk/Sysadmin, Blockchain, AR/VR, Game Dev — passe an Job-Typ Präferenz an
+4. Nutze echte Firmen: SAP, BMW, Siemens, Bosch, Allianz, Telekom, Zalando, TeamViewer, Celonis, CHECK24, N26, Porsche Digital, MaibornWolff, msg systems, Capgemini, Accenture, DATEV, Sopra Steria, Atruvia, Dynatrace, Red Hat, SUSE, Wacker Chemie, Evonik, BASF Digital, Roche Informatics, Novartis IT, ABB, Hilti, PostFinance, SIX Group, Swisscom, A1 Telekom Austria, Erste Group, Raiffeisen Bank International
+5. Berechne Match-Score 0-100 — präzise, nicht immer 90+
+6. companyAddress = vollständige Postadresse (Straße, PLZ, Ort)
 
-WICHTIG: Antworte NUR als valides JSON in folgendem Format:
+WICHTIG: Antworte NUR als valides JSON:
 {
   "profileAnalysis": {
     "detectedSkills": ["Skill1", "Skill2"],
@@ -108,24 +110,25 @@ WICHTIG: Antworte NUR als valides JSON in folgendem Format:
       "id": "job_1",
       "company": "SAP SE",
       "companySize": "100.000+ Mitarbeiter",
+      "companyAddress": "Dietmar-Hopp-Allee 16, 69190 Walldorf",
       "position": "Senior Backend Developer (Java/Spring)",
-      "location": "Walldorf / München",
+      "location": "Walldorf / Remote",
       "country": "Deutschland",
       "workType": "HYBRID",
       "salaryMin": 85000,
       "salaryMax": 110000,
       "currency": "EUR",
-      "matchScore": 94,
-      "matchReasons": ["Exakte Tech-Stack-Übereinstimmung", "Erfahrungslevel passt", "Gewünschter Standort"],
+      "matchScore": 87,
+      "matchReasons": ["Exakte Tech-Stack-Übereinstimmung", "Erfahrungslevel passt"],
       "requiredSkills": ["Java", "Spring Boot", "Kubernetes", "REST APIs"],
       "matchedSkills": ["Java", "Spring Boot", "REST APIs"],
       "missingSkills": ["Kubernetes"],
       "jobType": "Backend",
       "postedDaysAgo": 2,
       "applicationDeadline": "2026-07-31",
-      "companyDescription": "SAP ist Weltmarktführer für Unternehmenssoftware...",
-      "jobDescription": "Als Senior Backend Developer gestaltest du...",
-      "benefits": ["Flexible Arbeitszeiten", "30 Tage Urlaub", "Homeoffice", "Weiterbildungsbudget 5.000€/Jahr"],
+      "companyDescription": "SAP ist Weltmarktführer für Unternehmenssoftware mit 100.000+ Mitarbeitern weltweit.",
+      "jobDescription": "Als Senior Backend Developer verantwortest du die Entwicklung skalierbarer Microservices im SAP BTP Ökosystem. Du arbeitest eng mit Produkt und Architektur zusammen.",
+      "benefits": ["Flexible Arbeitszeiten", "30 Tage Urlaub", "Homeoffice bis 60%", "Weiterbildungsbudget 5.000€/Jahr"],
       "applyUrl": "https://jobs.sap.com",
       "isHighPriority": true
     }
@@ -141,31 +144,43 @@ function generateFallbackJobs(prefs: SearchPreferences): { jobs: JobMatch[]; pro
     : ["JavaScript", "TypeScript", "React", "Node.js", "SQL", "Git"];
 
   const companies = [
-    { name: "SAP SE", size: "100.000+ MA", loc: "Walldorf", country: "Deutschland", desc: "Weltmarktführer für Unternehmenssoftware mit globaler Präsenz." },
-    { name: "BMW Group", size: "100.000+ MA", loc: "München", country: "Deutschland", desc: "Führender Automobilhersteller mit starker Digitalisierungsstrategie." },
-    { name: "Siemens AG", size: "100.000+ MA", loc: "München", country: "Deutschland", desc: "Globales Technologieunternehmen in Industrie, Infrastruktur und Transport." },
-    { name: "Deutsche Telekom", size: "50.000-100.000 MA", loc: "Bonn / Remote", country: "Deutschland", desc: "Größter europäischer Telekommunikationskonzern." },
-    { name: "Zalando SE", size: "10.000-50.000 MA", loc: "Berlin (Remote)", country: "Deutschland", desc: "Europas führende Online-Modeplattform mit starker Tech-Kultur." },
-    { name: "CHECK24 GmbH", size: "1.000-10.000 MA", loc: "München", country: "Deutschland", desc: "Deutschlands größtes Vergleichsportal — agil und wachstumsstark." },
-    { name: "N26 GmbH", size: "1.000-5.000 MA", loc: "Berlin (Remote)", country: "Deutschland", desc: "Europas führende Digitalbank mit 8 Mio. Kunden in 25 Ländern." },
-    { name: "Erste Group IT", size: "5.000-10.000 MA", loc: "Wien", country: "Österreich", desc: "IT-Arm der Erste Group Bank — größter Retailbanker Österreichs." },
-    { name: "Dynatrace Austria", size: "1.000-5.000 MA", loc: "Linz / Remote", country: "Österreich", desc: "Weltmarktführer für KI-gestütztes Observability & Cloud-Monitoring." },
-    { name: "UBS AG Tech", size: "100.000+ MA", loc: "Zürich", country: "Schweiz", desc: "Globale Investmentbank mit einem der größten FinTech-Teams Europas." },
-    { name: "Celonis SE", size: "1.000-5.000 MA", loc: "München / Remote", country: "Deutschland", desc: "Weltmarktführer für Process Mining — Unicorn aus München." },
-    { name: "TeamViewer", size: "1.000-5.000 MA", loc: "Göppingen / Remote", country: "Deutschland", desc: "Globale Plattform für Remote Connectivity mit 30 Mio. Nutzern." },
+    { name: "SAP SE", size: "100.000+ MA", loc: "Walldorf", addr: "Dietmar-Hopp-Allee 16, 69190 Walldorf", country: "Deutschland", desc: "Weltmarktführer für Unternehmenssoftware mit globaler Präsenz." },
+    { name: "BMW Group", size: "100.000+ MA", loc: "München", addr: "Petuelring 130, 80788 München", country: "Deutschland", desc: "Führender Automobilhersteller mit starker Digitalisierungsstrategie." },
+    { name: "Siemens AG", size: "100.000+ MA", loc: "München", addr: "Werner-von-Siemens-Straße 1, 80333 München", country: "Deutschland", desc: "Globales Technologieunternehmen in Industrie, Infrastruktur und Transport." },
+    { name: "Deutsche Telekom", size: "50.000-100.000 MA", loc: "Bonn / Remote", addr: "Friedrich-Ebert-Allee 140, 53113 Bonn", country: "Deutschland", desc: "Größter europäischer Telekommunikationskonzern." },
+    { name: "Zalando SE", size: "10.000-50.000 MA", loc: "Berlin (Remote)", addr: "Zirkus-Krone-Straße 17, 10115 Berlin", country: "Deutschland", desc: "Europas führende Online-Modeplattform mit starker Tech-Kultur." },
+    { name: "CHECK24 GmbH", size: "1.000-10.000 MA", loc: "München", addr: "Erika-Mann-Straße 62, 80636 München", country: "Deutschland", desc: "Deutschlands größtes Vergleichsportal — agil und wachstumsstark." },
+    { name: "N26 GmbH", size: "1.000-5.000 MA", loc: "Berlin (Remote)", addr: "Voltairestraße 8, 10179 Berlin", country: "Deutschland", desc: "Europas führende Digitalbank mit 8 Mio. Kunden in 25 Ländern." },
+    { name: "DATEV eG", size: "5.000-10.000 MA", loc: "Nürnberg", addr: "Paumgartnerstraße 6-14, 90429 Nürnberg", country: "Deutschland", desc: "Führendes IT-Dienstleistungsunternehmen für Steuerberater und KMU." },
+    { name: "Bosch Digital", size: "10.000-50.000 MA", loc: "Stuttgart / Remote", addr: "Robert-Bosch-Platz 1, 70839 Gerlingen", country: "Deutschland", desc: "Digital-Einheit des Weltkonzerns Bosch — IoT, AI und Industrie 4.0." },
+    { name: "MaibornWolff GmbH", size: "500-1.000 MA", loc: "München / Remote", addr: "Hans-Pinsel-Straße 4, 85598 Baldham", country: "Deutschland", desc: "Technologieberatung & Softwareentwicklung — eine der besten Arbeitgeber Deutschlands." },
+    { name: "Capgemini Deutschland", size: "10.000-50.000 MA", loc: "Frankfurt / Remote", addr: "Potsdamer Platz 5, 10785 Berlin", country: "Deutschland", desc: "Globale IT-Beratung mit starkem DACH-Wachstum und Fokus auf Cloud & KI." },
+    { name: "Celonis SE", size: "1.000-5.000 MA", loc: "München / Remote", addr: "Theresienstraße 6, 80333 München", country: "Deutschland", desc: "Weltmarktführer für Process Mining — Unicorn aus München." },
+    { name: "TeamViewer", size: "1.000-5.000 MA", loc: "Göppingen / Remote", addr: "Bahnhofsplatz 2, 73033 Göppingen", country: "Deutschland", desc: "Globale Plattform für Remote Connectivity mit 30 Mio. Nutzern." },
+    { name: "Erste Group IT", size: "5.000-10.000 MA", loc: "Wien", addr: "Am Belvedere 1, 1100 Wien", country: "Österreich", desc: "IT-Arm der Erste Group Bank — größter Retailbanker Österreichs." },
+    { name: "Dynatrace Austria", size: "1.000-5.000 MA", loc: "Linz / Remote", addr: "Freistädter Straße 313, 4040 Linz", country: "Österreich", desc: "Weltmarktführer für KI-gestütztes Observability & Cloud-Monitoring." },
+    { name: "A1 Telekom Austria", size: "5.000-10.000 MA", loc: "Wien", addr: "Lassallestraße 9, 1020 Wien", country: "Österreich", desc: "Marktführer Telekommunikation in Österreich, starke IT-Transformation." },
+    { name: "UBS AG Tech", size: "100.000+ MA", loc: "Zürich", addr: "Bahnhofstrasse 45, 8001 Zürich", country: "Schweiz", desc: "Globale Investmentbank mit einem der größten FinTech-Teams Europas." },
+    { name: "Swisscom AG", size: "10.000-50.000 MA", loc: "Bern / Remote", addr: "Alte Tiefenaustrasse 6, 3048 Worblaufen", country: "Schweiz", desc: "Schweizer Marktführer in Telekommunikation und ICT-Lösungen." },
+    { name: "SIX Group", size: "1.000-5.000 MA", loc: "Zürich", addr: "Hardturmstraße 201, 8021 Zürich", country: "Schweiz", desc: "Schweizer Finanzmarktinfrastruktur — FinTech und digitale Transformation." },
   ];
 
   const positions = [
-    { title: "Senior Full-Stack Developer", type: "Full-Stack", skills: ["React", "Node.js", "TypeScript", "PostgreSQL", "Docker"] },
-    { title: "Backend Engineer (Node.js/TypeScript)", type: "Backend", skills: ["Node.js", "TypeScript", "REST APIs", "PostgreSQL", "Redis"] },
-    { title: "Frontend Engineer (React/Next.js)", type: "Frontend", skills: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Storybook"] },
+    { title: "Senior Full-Stack Developer (React/Node.js)", type: "Full-Stack", skills: ["React", "Node.js", "TypeScript", "PostgreSQL", "Docker"] },
+    { title: "Backend Engineer (Java/Spring Boot)", type: "Backend", skills: ["Java", "Spring Boot", "Microservices", "Kafka", "REST APIs"] },
+    { title: "Frontend Engineer (React/Next.js)", type: "Frontend", skills: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Figma"] },
     { title: "DevOps Engineer (Kubernetes/AWS)", type: "DevOps", skills: ["Kubernetes", "Docker", "AWS", "Terraform", "CI/CD"] },
     { title: "Cloud Architect (Azure/GCP)", type: "Cloud", skills: ["Azure", "GCP", "Microservices", "Docker", "Terraform"] },
-    { title: "Senior Software Engineer (Java/Spring)", type: "Backend", skills: ["Java", "Spring Boot", "Microservices", "Kafka", "Kubernetes"] },
-    { title: "Mobile Developer (React Native)", type: "Mobile", skills: ["React Native", "TypeScript", "iOS", "Android", "Firebase"] },
     { title: "Data Engineer (Python/Spark)", type: "Data", skills: ["Python", "Apache Spark", "SQL", "Airflow", "dbt"] },
-    { title: "ML Engineer (Python/TensorFlow)", type: "ML/AI", skills: ["Python", "TensorFlow", "PyTorch", "MLflow", "Docker"] },
-    { title: "Platform Engineer (Internal Developer)", type: "Platform", skills: ["Kubernetes", "Helm", "Go", "Prometheus", "GitOps"] },
+    { title: "ML/AI Engineer (Python/TensorFlow)", type: "ML/AI", skills: ["Python", "TensorFlow", "PyTorch", "MLflow", "Docker"] },
+    { title: "IT Security Engineer / Pentester", type: "Security", skills: ["Penetration Testing", "SIEM", "OWASP", "Python", "Nmap"] },
+    { title: "QA Automation Engineer (Selenium/Cypress)", type: "QA/Testing", skills: ["Selenium", "Cypress", "JavaScript", "REST APIs", "CI/CD"] },
+    { title: "SAP ABAP / Fiori Entwickler", type: "SAP/ERP", skills: ["SAP ABAP", "SAP Fiori", "SAP BTP", "ODATA", "REST APIs"] },
+    { title: "Mobile Developer (React Native / Flutter)", type: "Mobile", skills: ["React Native", "Flutter", "TypeScript", "iOS", "Android"] },
+    { title: "Embedded Software Engineer (C/C++)", type: "Embedded", skills: ["C", "C++", "RTOS", "CAN Bus", "Linux Embedded"] },
+    { title: "IT-Projektmanager (Scrum / Agile)", type: "IT-Projektmanagement", skills: ["Scrum", "Kanban", "Jira", "Confluence", "Stakeholder Management"] },
+    { title: "Platform / Site Reliability Engineer", type: "Platform", skills: ["Kubernetes", "Helm", "Go", "Prometheus", "GitOps"] },
+    { title: "Network & System Administrator (Linux)", type: "Netzwerk/Sysadmin", skills: ["Linux", "Cisco", "TCP/IP", "Docker", "Monitoring"] },
   ];
 
   const salaryRanges: Record<string, [number, number]> = {
@@ -202,6 +217,7 @@ function generateFallbackJobs(prefs: SearchPreferences): { jobs: JobMatch[]; pro
       id: `job_${i + 1}`,
       company: company.name,
       companySize: company.size,
+      companyAddress: company.addr,
       position: pos.title,
       location: company.loc,
       country: company.country,

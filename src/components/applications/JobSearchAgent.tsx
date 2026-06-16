@@ -45,6 +45,8 @@ type SortKey = "matchScore" | "salaryMax" | "postedDaysAgo";
 const JOB_TYPE_OPTIONS = [
   "Backend", "Frontend", "Full-Stack", "DevOps", "Cloud",
   "Mobile", "Data", "ML/AI", "Platform", "Security",
+  "QA/Testing", "SAP/ERP", "Embedded", "IT-Projektmanagement",
+  "Netzwerk/Sysadmin", "Blockchain", "AR/VR", "Game Dev",
 ];
 
 const WORK_TYPE_LABELS: Record<WorkType, string> = {
@@ -73,9 +75,8 @@ const WORK_LABEL: Record<string, string> = {
 
 // ── Anschreiben-Modal ─────────────────────────────────────────────────────────
 
-function CoverLetterModal({ job, userEmail, onClose }: {
+function CoverLetterModal({ job, onClose }: {
   job: JobMatch;
-  userEmail: string;
   onClose: () => void;
 }) {
   const [senderName, setSenderName] = useState("");
@@ -84,9 +85,13 @@ function CoverLetterModal({ job, userEmail, onClose }: {
   const [senderCity, setSenderCity] = useState("");
   const [senderPhone, setSenderPhone] = useState("");
   const [generating, setGenerating] = useState(false);
-  const [result, setResult] = useState<CoverLetterResult | null>(null);
+  // Versions-Historie: alle generierten Versionen
+  const [versions, setVersions] = useState<CoverLetterResult[]>([]);
+  const [versionIdx, setVersionIdx] = useState(0);
   const [copied, setCopied] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
+
+  const result = versions[versionIdx] ?? null;
 
   const generate = async () => {
     if (!senderName.trim() || !senderStreet.trim() || !senderZip.trim() || !senderCity.trim()) {
@@ -102,21 +107,29 @@ function CoverLetterModal({ job, userEmail, onClose }: {
         body: JSON.stringify({
           position: job.position,
           company: job.company,
-          companyAddress: `${job.location}, ${job.country}`,
+          companyAddress: job.companyAddress || `${job.location}, ${job.country}`,
           jobDescription: job.jobDescription,
           requiredSkills: job.requiredSkills,
-          senderName, senderStreet, senderZip, senderCity,
-          senderPhone, senderEmail: userEmail,
+          companyDescription: job.companyDescription,
+          benefits: job.benefits,
+          senderName, senderStreet, senderZip, senderCity, senderPhone,
         }),
       });
       if (!res.ok) throw new Error(await res.text());
-      setResult(await res.json());
+      const newResult: CoverLetterResult = await res.json();
+      setVersions((prev) => [...prev, newResult]);
     } catch (e) {
       setGenError(e instanceof Error ? e.message : "Fehler beim Generieren");
     } finally {
       setGenerating(false);
     }
   };
+
+  // Nach generate: immer zur neuesten Version springen
+  const versionsLen = versions.length;
+  useEffect(() => {
+    if (versionsLen > 0) setVersionIdx(versionsLen - 1);
+  }, [versionsLen]);
 
   const handleCopy = () => {
     if (!result) return;
@@ -131,40 +144,53 @@ function CoverLetterModal({ job, userEmail, onClose }: {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Anschreiben_${job.company}_${job.position}.txt`.replace(/[^a-zA-Z0-9_.-]/g, "_");
+    a.download = `Anschreiben_${job.company}_${job.position}_v${versionIdx + 1}.txt`.replace(/[^a-zA-Z0-9_.-]/g, "_");
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 p-3">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-linear-to-r from-indigo-700 to-blue-700 px-6 py-4 flex items-center justify-between shrink-0">
           <div>
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
               <PencilSquareIcon className="w-5 h-5" />
-              Anschreiben generieren
+              KI-Anschreiben Generator
             </h2>
-            <p className="text-xs text-white/70 mt-0.5">{job.position} · {job.company}</p>
+            <p className="text-xs text-white/70 mt-0.5">{job.position} · {job.company} · {job.companyAddress || job.location}</p>
           </div>
           <button onClick={onClose} className="text-white/80 hover:text-white">
             <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto flex flex-col lg:flex-row min-h-0">
+        <div className="flex-1 overflow-hidden flex flex-col lg:flex-row min-h-0">
           {/* Linke Spalte: Formular */}
-          <div className="w-full lg:w-80 shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 p-5 space-y-4 bg-gray-50">
+          <div className="w-full lg:w-72 shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 overflow-y-auto p-5 space-y-4 bg-gray-50">
+
+            {/* Stelleninfo */}
+            <div className="bg-white border border-gray-200 rounded-xl p-3 text-xs space-y-1">
+              <p className="font-semibold text-gray-700">{job.position}</p>
+              <p className="text-gray-500">{job.company}</p>
+              {job.companyAddress && <p className="text-gray-400">{job.companyAddress}</p>}
+              <div className="flex flex-wrap gap-1 mt-2">
+                {job.requiredSkills.slice(0, 5).map((s) => (
+                  <span key={s} className="px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[10px] font-medium">{s}</span>
+                ))}
+              </div>
+            </div>
+
             <h3 className="font-semibold text-gray-800 text-sm">📬 Deine Absender-Daten</h3>
 
-            {[
+            {([
               { label: "Vor- und Nachname *", value: senderName, set: setSenderName, placeholder: "Max Mustermann" },
               { label: "Straße & Hausnummer *", value: senderStreet, set: setSenderStreet, placeholder: "Musterstraße 42" },
               { label: "PLZ *", value: senderZip, set: setSenderZip, placeholder: "12345" },
               { label: "Ort *", value: senderCity, set: setSenderCity, placeholder: "Berlin" },
               { label: "Telefon", value: senderPhone, set: setSenderPhone, placeholder: "+49 151 12345678" },
-            ].map(({ label, value, set, placeholder }) => (
+            ] as { label: string; value: string; set: (v: string) => void; placeholder: string }[]).map(({ label, value, set, placeholder }) => (
               <div key={label}>
                 <label className="text-xs font-medium text-gray-500 block mb-1">{label}</label>
                 <input
@@ -177,15 +203,6 @@ function CoverLetterModal({ job, userEmail, onClose }: {
               </div>
             ))}
 
-            <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-xs text-indigo-700">
-              <p className="font-semibold mb-1">🤖 KI generiert:</p>
-              <ul className="space-y-0.5 list-disc list-inside text-indigo-600">
-                <li>DIN-5008-konformes Format</li>
-                <li>Auf Stelle & Unternehmen zugeschnitten</li>
-                <li>Basierend auf deinen Unterlagen</li>
-              </ul>
-            </div>
-
             {genError && <p className="text-xs text-red-600">{genError}</p>}
 
             <button
@@ -194,26 +211,57 @@ function CoverLetterModal({ job, userEmail, onClose }: {
               className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {generating ? (
-                <><ArrowPathIcon className="w-4 h-4 animate-spin" /> Generiere…</>
-              ) : (
+                <><ArrowPathIcon className="w-4 h-4 animate-spin" /> KI schreibt…</>
+              ) : versions.length === 0 ? (
                 <><PencilSquareIcon className="w-4 h-4" /> Anschreiben generieren</>
+              ) : (
+                <><ArrowPathIcon className="w-4 h-4" /> Neue Version generieren</>
               )}
             </button>
+
+            {versions.length > 0 && (
+              <p className="text-[10px] text-center text-gray-400">
+                {versions.length} Version{versions.length > 1 ? "en" : ""} — KI schreibt jedes Mal einen anderen Stil
+              </p>
+            )}
           </div>
 
           {/* Rechte Spalte: Ergebnis */}
-          <div className="flex-1 p-5 flex flex-col min-h-0">
+          <div className="flex-1 flex flex-col min-h-0 p-5">
             {!result ? (
               <div className="flex-1 flex items-center justify-center text-gray-400 text-sm text-center">
                 <div>
                   <PencilSquareIcon className="w-12 h-12 mx-auto mb-3 text-gray-200" />
-                  <p>Fülle die Absender-Daten aus und klicke auf<br />„Anschreiben generieren"</p>
+                  <p>Absender-Daten ausfüllen und<br />„Anschreiben generieren" klicken</p>
                 </div>
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-4 shrink-0">
-                  <h3 className="font-semibold text-gray-800">✅ Dein Anschreiben</h3>
+                {/* Toolbar */}
+                <div className="flex items-center justify-between mb-3 shrink-0 flex-wrap gap-2">
+                  {/* Versions-Navigation */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setVersionIdx((v) => Math.max(0, v - 1))}
+                      disabled={versionIdx === 0}
+                      className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-30 transition-colors"
+                      title="Vorherige Version"
+                    >
+                      <ChevronUpIcon className="w-4 h-4 -rotate-90" />
+                    </button>
+                    <span className="text-xs font-medium text-gray-600 min-w-20 text-center">
+                      Version {versionIdx + 1} / {versions.length}
+                    </span>
+                    <button
+                      onClick={() => setVersionIdx((v) => Math.min(versions.length - 1, v + 1))}
+                      disabled={versionIdx === versions.length - 1}
+                      className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-30 transition-colors"
+                      title="Nächste Version"
+                    >
+                      <ChevronDownIcon className="w-4 h-4 -rotate-90" />
+                    </button>
+                  </div>
+
                   <div className="flex gap-2">
                     <button
                       onClick={handleCopy}
@@ -227,20 +275,29 @@ function CoverLetterModal({ job, userEmail, onClose }: {
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
                     >
                       <ArrowDownTrayIcon className="w-4 h-4" />
-                      Download (.txt)
+                      Download
                     </button>
                   </div>
                 </div>
 
-                {/* Brief-Vorschau */}
-                <div className="flex-1 overflow-y-auto bg-white border border-gray-200 rounded-xl p-6 font-mono text-sm text-gray-800 leading-relaxed whitespace-pre-wrap shadow-inner">
-                  <div className="text-xs text-gray-500 font-sans mb-4 pb-3 border-b border-gray-100">{result.senderBlock}</div>
-                  <div className="text-xs text-gray-500 font-sans mb-4">{result.recipientBlock}</div>
-                  <div className="text-xs text-gray-400 font-sans mb-4">{result.date}</div>
-                  <div className="font-semibold font-sans mb-4 text-gray-900">{result.subject}</div>
-                  <div className="font-sans mb-4">{result.salutation}</div>
-                  <div className="font-sans mb-4 whitespace-pre-line">{result.body}</div>
-                  <div className="font-sans whitespace-pre-line text-gray-700">{result.closing}</div>
+                {/* Brief-Vorschau im DIN-5008 Layout */}
+                <div className="flex-1 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-inner">
+                  <div className="max-w-2xl mx-auto p-8 text-sm text-gray-800 leading-relaxed font-sans">
+                    {/* Absender */}
+                    <div className="text-xs text-gray-500 mb-8 whitespace-pre-line border-b border-gray-100 pb-4">{result.senderBlock}</div>
+                    {/* Empfänger */}
+                    <div className="text-sm text-gray-800 mb-6 whitespace-pre-line font-medium">{result.recipientBlock}</div>
+                    {/* Datum */}
+                    <div className="text-right text-sm text-gray-600 mb-6">{result.date}</div>
+                    {/* Betreff */}
+                    <div className="font-bold text-gray-900 mb-6 text-base">{result.subject}</div>
+                    {/* Anrede */}
+                    <div className="mb-4">{result.salutation}</div>
+                    {/* Brieftext */}
+                    <div className="mb-6 whitespace-pre-line leading-7">{result.body}</div>
+                    {/* Grußformel */}
+                    <div className="whitespace-pre-line text-gray-700">{result.closing}</div>
+                  </div>
                 </div>
               </>
             )}
@@ -318,7 +375,7 @@ function JobCard({
               <span className="text-xs text-gray-400">· {job.companySize}</span>
             </div>
 
-            {/* Ort + Gehalt */}
+            {/* Ort + Adresse + Gehalt */}
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <MapPinIcon className="w-3.5 h-3.5" />
@@ -327,6 +384,9 @@ function JobCard({
                   <span className="ml-1 text-xs text-blue-600 font-medium">({job.country})</span>
                 )}
               </span>
+              {job.companyAddress && (
+                <span className="text-xs text-gray-400 italic">{job.companyAddress}</span>
+              )}
               <span className="flex items-center gap-1">
                 <CurrencyEuroIcon className="w-3.5 h-3.5" />
                 {job.salaryMin.toLocaleString("de")} – {job.salaryMax.toLocaleString("de")} {job.currency}/Jahr
@@ -634,7 +694,6 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
     {coverLetterJob && (
       <CoverLetterModal
         job={coverLetterJob}
-        userEmail={documents.length > 0 ? "" : ""}
         onClose={() => setCoverLetterJob(null)}
       />
     )}
@@ -987,7 +1046,7 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
             <button
               onClick={startSearch}
               disabled={searching}
-              className="w-full py-3 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-60 disabled:cursor-wait"
+              className="w-full py-3 bg-linear-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-md disabled:opacity-60 disabled:cursor-wait"
             >
               {searching ? (
                 <>
@@ -1057,7 +1116,7 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
             {/* Ergebnis-Liste */}
             {jobs.length === 0 && !searching && (
               <div className="h-full flex flex-col items-center justify-center text-center py-16 px-8">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-100 to-blue-100 flex items-center justify-center mb-6">
+                <div className="w-20 h-20 rounded-2xl bg-linear-to-br from-violet-100 to-blue-100 flex items-center justify-center mb-6">
                   <CpuChipIcon className="w-10 h-10 text-violet-500" />
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">Agent bereit</h3>
@@ -1082,7 +1141,7 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
 
             {searching && (
               <div className="h-full flex flex-col items-center justify-center text-center py-16">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center mb-4 animate-pulse">
+                <div className="w-16 h-16 rounded-full bg-linear-to-br from-violet-500 to-blue-600 flex items-center justify-center mb-4 animate-pulse">
                   <MagnifyingGlassIcon className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">Agent sucht...</h3>

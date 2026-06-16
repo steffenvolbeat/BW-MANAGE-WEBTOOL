@@ -21,6 +21,8 @@ interface CoverLetterRequest {
   companyAddress?: string;
   jobDescription?: string;
   requiredSkills?: string[];
+  companyDescription?: string;
+  benefits?: string[];
   // Absender (vom Benutzer ausgefüllt)
   senderName: string;
   senderStreet: string;
@@ -28,9 +30,6 @@ interface CoverLetterRequest {
   senderCity: string;
   senderPhone?: string;
   senderEmail?: string;
-  // Optionale Angaben
-  salutation?: string;
-  language?: "de" | "en";
 }
 
 function buildPrompt(req: CoverLetterRequest, documents: string, applications: string): string {
@@ -51,8 +50,10 @@ E-Mail: ${req.senderEmail || "—"}
 Position: ${req.position}
 Unternehmen: ${req.company}
 Adresse Unternehmen: ${req.companyAddress || req.company}
-Stellenbeschreibung / Anforderungen: ${req.jobDescription || "Nicht angegeben"}
+Über das Unternehmen: ${req.companyDescription || "Führendes Technologieunternehmen im DACH-Raum"}
+Stellenbeschreibung: ${req.jobDescription || "Nicht angegeben"}
 Geforderte Skills: ${req.requiredSkills?.join(", ") || "Nicht angegeben"}
+Benefits / Vorteile: ${req.benefits?.join(", ") || "Nicht angegeben"}
 
 === BISHERIGE BEWERBUNGEN (Kontext) ===
 ${applications || "Keine vorhanden"}
@@ -61,14 +62,16 @@ ${applications || "Keine vorhanden"}
 ${documents || "Keine"}
 
 === REGELN ===
-1. Exakt DIN-5008-konform: Absender, Empfänger, Datum, Betreff, Anrede, 3-4 Absätze, Grußformel
-2. Persönlich und überzeugend — keine Floskeln wie "teamfähig und kommunikativ"
-3. Beziehe dich konkret auf die Stelle und das Unternehmen
-4. Hebe passende Skills und Erfahrungen hervor
-5. Einstiegsabsatz: Warum diese Stelle / dieses Unternehmen
-6. Hauptteil: Qualifikationen, konkrete Erfolge, Mehrwert für Arbeitgeber
-7. Schluss: Gesprächswunsch, Verfügbarkeit
-8. Ton: professionell, selbstsicher, authentisch
+1. DIN-5008-konform: Absender, Empfänger, Datum, Betreff, Anrede, 3-4 Absätze, Grußformel
+2. PFLICHT: Nenne das Unternehmen ${req.company} und die Position ${req.position} EXPLIZIT im Brief
+3. PFLICHT: Beziehe dich auf mindestens 2 konkrete Anforderungen oder Benefits aus den Stellendetails
+4. PFLICHT: Erwähne etwas Spezifisches über ${req.company} (Branche, Größe, Marktposition, Produkte)
+5. Keine Floskeln ("teamfähig", "kommunikativ", "motiviert") — stattdessen konkrete Belege
+6. Einstiegsabsatz: Warum genau DIESES Unternehmen + DIESE Stelle — spezifisch, nicht generisch
+7. Hauptteil: Qualifikationen mit Bezug zu den geforderten Skills, bisherige Bewerbungen als Kontext
+8. Schluss: Konkreter Gesprächswunsch, Verfügbarkeit
+9. Ton: professionell, selbstsicher, präzise — kein Marketing-Speak
+10. Jede Version soll einen ANDEREN Stil/Einstieg haben (bei Neu-Generierung)
 
 Antworte AUSSCHLIESSLICH als JSON ohne Codeblock:
 {
