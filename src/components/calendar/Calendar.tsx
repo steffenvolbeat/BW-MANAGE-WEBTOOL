@@ -389,8 +389,9 @@ export default function Calendar() {
               </div>
             </div>
 
-            {/* Calendar Grid */}
-            <div className="grid grid-cols-7 gap-0">
+            {/* Calendar Grid — overflow-x-auto für Mobile */}
+            <div className="overflow-x-auto -mx-px">
+            <div className="grid grid-cols-7 gap-0 min-w-84">
               {/* Days of week header */}
               {"So Mo Di Mi Do Fr Sa".split(" ").map((day) => (
                 <div
@@ -462,6 +463,7 @@ export default function Calendar() {
                 </div>
               ))}
             </div>
+            </div>{/* /overflow-x-auto */}
           </div>
         </div>
           {/* Sidebar */}

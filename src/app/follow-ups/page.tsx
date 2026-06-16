@@ -134,7 +134,7 @@ export default function FollowUpsPage() {
     new Date(d).toLocaleDateString("de-DE", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-4xl mx-auto">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">⏰ Smart Follow-up Timeline</h1>

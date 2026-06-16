@@ -126,7 +126,7 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold">🌐 Portfolio-Website-Generator</h1>
         <p className="text-(--muted) mt-2">
@@ -137,7 +137,7 @@ export default function PortfolioPage() {
 
       {/* Stats aus echten Daten */}
       {userData && (
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
+        <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-4 mb-8">
           {[
             { label: "Bewerbungen", value: userData.applications.length, icon: "📨" },
             { label: "Dokumente", value: userData.documents.length, icon: "📄" },
@@ -194,7 +194,7 @@ export default function PortfolioPage() {
             {/* Theme-Auswahl */}
             <div>
               <label className="text-sm font-medium text-(--muted) mb-2 block">Design-Theme</label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {THEMES.map((theme) => (
                   <button key={theme.id} onClick={() => setForm((f) => ({ ...f, theme: theme.id }))}
                     className={`flex-1 py-2 rounded-lg text-xs font-medium text-white transition ${theme.bg} ${form.theme === theme.id ? "ring-2 ring-offset-2 ring-blue-400" : "opacity-70 hover:opacity-100"}`}>
@@ -234,7 +234,7 @@ export default function PortfolioPage() {
           {profile && form.isPublic && (
             <div className="bg-(--card) border border-(--border) rounded-xl p-4">
               <p className="text-sm font-medium mb-2">🔗 Öffentlicher Link</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <input ref={linkRef} type="text" readOnly value={publicUrl}
                   className="flex-1 px-3 py-2 bg-(--surface) border border-(--border) rounded-lg text-sm text-(--muted)" />
                 <button onClick={() => { linkRef.current?.select(); navigator.clipboard.writeText(publicUrl); }}

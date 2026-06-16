@@ -89,7 +89,7 @@ export default function VideoCoachPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold">🎥 Video-Interview-Coach</h1>
         <p className="text-(--muted) mt-2">

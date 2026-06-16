@@ -115,7 +115,7 @@ export default function CareerTwinPage() {
   }
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-5xl mx-auto">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">🧬 Digital Career Twin</h1>
@@ -162,7 +162,7 @@ export default function CareerTwinPage() {
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
           {[
             { label: "Bewerbungen", val: stats.total, color: "text-blue-600" },
             { label: "Interviews", val: stats.interviews, color: "text-purple-600" },

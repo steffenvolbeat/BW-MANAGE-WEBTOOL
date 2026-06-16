@@ -333,18 +333,18 @@ export function TrustedKanban() {
                           <button
                             title="Bearbeiten"
                             onClick={() => openEditCard(card)}
-                            className="text-gray-400 hover:text-blue-600"
+                            className="p-1.5 text-gray-400 hover:text-blue-600 rounded"
                           >
-                            <PencilSquareIcon className="w-3.5 h-3.5" />
+                            <PencilSquareIcon className="w-4 h-4" />
                           </button>
                           )}
                           {!isReadOnly && (
                           <button
                             title="Löschen"
                             onClick={() => handleDeleteCard(card.id)}
-                            className="text-gray-400 hover:text-red-600"
+                            className="p-1.5 text-gray-400 hover:text-red-600 rounded"
                           >
-                            <TrashIcon className="w-3.5 h-3.5" />
+                            <TrashIcon className="w-4 h-4" />
                           </button>
                           )}
                         </div>

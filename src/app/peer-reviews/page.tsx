@@ -129,7 +129,7 @@ export default function PeerReviewsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold">👥 Peer-Review-Netzwerk</h1>
         <p className="text-(--muted) mt-2">
@@ -139,7 +139,7 @@ export default function PeerReviewsPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6 border-b border-(--border) pb-2">
+      <div className="flex flex-wrap gap-2 mb-6 border-b border-(--border) pb-2">
         {tabs.map((t) => (
           <button
             key={t.id}

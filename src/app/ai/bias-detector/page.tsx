@@ -72,7 +72,7 @@ export default function BiasDetektorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
           🔍 Echtzeit-Bias-Detektor
@@ -85,7 +85,7 @@ export default function BiasDetektorPage() {
 
       <div className="bg-(--card) border border-(--border) rounded-xl p-6 mb-6">
         {/* Typ-Auswahl */}
-        <div className="flex gap-3 mb-4">
+        <div className="flex flex-wrap gap-3 mb-4">
           {(["job_posting", "cover_letter", "cv"] as const).map((t) => (
             <button
               key={t}

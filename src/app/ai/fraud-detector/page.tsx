@@ -71,7 +71,7 @@ export default function FraudDetektorPage() {
   const recStyle = result ? (RECOMMENDATION_STYLES[result.recommendation] ?? RECOMMENDATION_STYLES.CAUTION) : null;
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
           🚨 Bewerbungs-Fraud-Detektor
@@ -154,7 +154,7 @@ export default function FraudDetektorPage() {
               <h3 className="text-lg font-semibold text-red-600 mb-4">🚩 Warnsignale ({result.redFlags.length})</h3>
               <div className="space-y-3">
                 {result.redFlags.map((flag, i) => (
-                  <div key={i} className="flex gap-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
+                  <div key={i} className="flex flex-wrap gap-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200">
                     <span className="text-red-500 text-lg flex-shrink-0">
                       {flag.severity === "CRITICAL" ? "🚨" : flag.severity === "HIGH" ? "🔴" : "⚠️"}
                     </span>

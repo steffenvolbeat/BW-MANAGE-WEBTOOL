@@ -40,7 +40,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
         {/* Main Content */}
         <main className="flex-1 md:ml-0">
-          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">{children}</div>
+          <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 pb-24">{children}</div>
         </main>
       </div>
 

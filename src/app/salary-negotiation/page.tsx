@@ -76,7 +76,7 @@ export default function SalaryCoachPage() {
   const strategy = result ? (STRATEGY_LABELS[result.negotiationStrategy] ?? STRATEGY_LABELS.MODERATE) : null;
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold">💰 Gehalts-Verhandlungs-Coach</h1>
         <p className="text-(--muted) mt-2">
@@ -170,7 +170,7 @@ export default function SalaryCoachPage() {
           {/* Gesprächs-Skripte */}
           <div className="bg-(--card) border border-(--border) rounded-xl p-6">
             <h3 className="font-semibold mb-4">🎙️ Gesprächs-Skripte</h3>
-            <div className="flex gap-2 mb-4">
+            <div className="flex flex-wrap gap-2 mb-4">
               {(["opening", "counteroffer", "closing"] as const).map((s) => (
                 <button
                   key={s}

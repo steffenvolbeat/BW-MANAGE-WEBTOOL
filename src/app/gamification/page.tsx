@@ -82,7 +82,7 @@ export default function GamificationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-5xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">🏆 Gamification & Achievements</h1>
         <p className="text-(--muted) mt-2">
@@ -138,7 +138,7 @@ export default function GamificationPage() {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex flex-wrap gap-3 mb-6">
         {(["all", "unlocked", "locked"] as const).map((f) => (
           <button
             key={f}

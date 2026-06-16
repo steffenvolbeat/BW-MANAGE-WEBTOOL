@@ -104,7 +104,7 @@ export default function MentoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-6xl mx-auto">
+    <div className="min-h-screen bg-(--surface) text-foreground px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-6xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl sm:text-3xl font-bold">🎓 Mentoring-Marktplatz</h1>
         <p className="text-(--muted) mt-2">
@@ -113,7 +113,7 @@ export default function MentoringPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-3 mb-6">
+      <div className="flex flex-wrap gap-3 mb-6">
         <button
           onClick={() => setTab("browse")}
           className={`px-6 py-2 rounded-lg font-medium transition border ${tab === "browse" ? "bg-blue-600 text-white border-blue-600" : "bg-(--surface) border-(--border) hover:border-blue-400"}`}
@@ -182,7 +182,7 @@ export default function MentoringPage() {
       )}
 
       {tab === "become" && (
-        <div className="bg-(--card) border border-(--border) rounded-xl p-6 max-w-2xl">
+        <div className="bg-(--card) border border-(--border) rounded-xl px-4 py-4 sm:px-6 sm:py-6 pb-24 max-w-2xl">
           <h2 className="text-lg font-semibold mb-6">{myProfile ? "Mentor-Profil bearbeiten" : "Mentor-Profil erstellen"}</h2>
           <div className="space-y-4">
             {[
