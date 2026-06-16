@@ -23,9 +23,13 @@ import {
   DocumentTextIcon,
   ArrowUpTrayIcon,
   TrashIcon,
+  PencilSquareIcon,
+  ClipboardDocumentIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleSolid, StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import type { JobMatch, ProfileAnalysis } from "@/app/api/agents/job-search/route";
+import type { CoverLetterResult } from "@/app/api/agents/cover-letter/route";
 
 // ── Typen ─────────────────────────────────────────────────────────────────────
 
@@ -67,16 +71,198 @@ const WORK_LABEL: Record<string, string> = {
   REMOTE: "Remote", HYBRID: "Hybrid", ONSITE: "Vor Ort",
 };
 
+// ── Anschreiben-Modal ─────────────────────────────────────────────────────────
+
+function CoverLetterModal({ job, userEmail, onClose }: {
+  job: JobMatch;
+  userEmail: string;
+  onClose: () => void;
+}) {
+  const [senderName, setSenderName] = useState("");
+  const [senderStreet, setSenderStreet] = useState("");
+  const [senderZip, setSenderZip] = useState("");
+  const [senderCity, setSenderCity] = useState("");
+  const [senderPhone, setSenderPhone] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [result, setResult] = useState<CoverLetterResult | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  const generate = async () => {
+    if (!senderName.trim() || !senderStreet.trim() || !senderZip.trim() || !senderCity.trim()) {
+      setGenError("Bitte alle Absender-Felder ausfüllen.");
+      return;
+    }
+    setGenerating(true);
+    setGenError(null);
+    try {
+      const res = await fetch("/api/agents/cover-letter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          position: job.position,
+          company: job.company,
+          companyAddress: `${job.location}, ${job.country}`,
+          jobDescription: job.jobDescription,
+          requiredSkills: job.requiredSkills,
+          senderName, senderStreet, senderZip, senderCity,
+          senderPhone, senderEmail: userEmail,
+        }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      setResult(await res.json());
+    } catch (e) {
+      setGenError(e instanceof Error ? e.message : "Fehler beim Generieren");
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleCopy = () => {
+    if (!result) return;
+    navigator.clipboard.writeText(result.fullText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    if (!result) return;
+    const blob = new Blob([result.fullText], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `Anschreiben_${job.company}_${job.position}.txt`.replace(/[^a-zA-Z0-9_.-]/g, "_");
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/70 p-3">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="bg-linear-to-r from-indigo-700 to-blue-700 px-6 py-4 flex items-center justify-between shrink-0">
+          <div>
+            <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <PencilSquareIcon className="w-5 h-5" />
+              Anschreiben generieren
+            </h2>
+            <p className="text-xs text-white/70 mt-0.5">{job.position} · {job.company}</p>
+          </div>
+          <button onClick={onClose} className="text-white/80 hover:text-white">
+            <XMarkIcon className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto flex flex-col lg:flex-row min-h-0">
+          {/* Linke Spalte: Formular */}
+          <div className="w-full lg:w-80 shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 p-5 space-y-4 bg-gray-50">
+            <h3 className="font-semibold text-gray-800 text-sm">📬 Deine Absender-Daten</h3>
+
+            {[
+              { label: "Vor- und Nachname *", value: senderName, set: setSenderName, placeholder: "Max Mustermann" },
+              { label: "Straße & Hausnummer *", value: senderStreet, set: setSenderStreet, placeholder: "Musterstraße 42" },
+              { label: "PLZ *", value: senderZip, set: setSenderZip, placeholder: "12345" },
+              { label: "Ort *", value: senderCity, set: setSenderCity, placeholder: "Berlin" },
+              { label: "Telefon", value: senderPhone, set: setSenderPhone, placeholder: "+49 151 12345678" },
+            ].map(({ label, value, set, placeholder }) => (
+              <div key={label}>
+                <label className="text-xs font-medium text-gray-500 block mb-1">{label}</label>
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => set(e.target.value)}
+                  placeholder={placeholder}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+              </div>
+            ))}
+
+            <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-xs text-indigo-700">
+              <p className="font-semibold mb-1">🤖 KI generiert:</p>
+              <ul className="space-y-0.5 list-disc list-inside text-indigo-600">
+                <li>DIN-5008-konformes Format</li>
+                <li>Auf Stelle & Unternehmen zugeschnitten</li>
+                <li>Basierend auf deinen Unterlagen</li>
+              </ul>
+            </div>
+
+            {genError && <p className="text-xs text-red-600">{genError}</p>}
+
+            <button
+              onClick={generate}
+              disabled={generating}
+              className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {generating ? (
+                <><ArrowPathIcon className="w-4 h-4 animate-spin" /> Generiere…</>
+              ) : (
+                <><PencilSquareIcon className="w-4 h-4" /> Anschreiben generieren</>
+              )}
+            </button>
+          </div>
+
+          {/* Rechte Spalte: Ergebnis */}
+          <div className="flex-1 p-5 flex flex-col min-h-0">
+            {!result ? (
+              <div className="flex-1 flex items-center justify-center text-gray-400 text-sm text-center">
+                <div>
+                  <PencilSquareIcon className="w-12 h-12 mx-auto mb-3 text-gray-200" />
+                  <p>Fülle die Absender-Daten aus und klicke auf<br />„Anschreiben generieren"</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4 shrink-0">
+                  <h3 className="font-semibold text-gray-800">✅ Dein Anschreiben</h3>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleCopy}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    >
+                      <ClipboardDocumentIcon className="w-4 h-4" />
+                      {copied ? "Kopiert!" : "Kopieren"}
+                    </button>
+                    <button
+                      onClick={handleDownload}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <ArrowDownTrayIcon className="w-4 h-4" />
+                      Download (.txt)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Brief-Vorschau */}
+                <div className="flex-1 overflow-y-auto bg-white border border-gray-200 rounded-xl p-6 font-mono text-sm text-gray-800 leading-relaxed whitespace-pre-wrap shadow-inner">
+                  <div className="text-xs text-gray-500 font-sans mb-4 pb-3 border-b border-gray-100">{result.senderBlock}</div>
+                  <div className="text-xs text-gray-500 font-sans mb-4">{result.recipientBlock}</div>
+                  <div className="text-xs text-gray-400 font-sans mb-4">{result.date}</div>
+                  <div className="font-semibold font-sans mb-4 text-gray-900">{result.subject}</div>
+                  <div className="font-sans mb-4">{result.salutation}</div>
+                  <div className="font-sans mb-4 whitespace-pre-line">{result.body}</div>
+                  <div className="font-sans whitespace-pre-line text-gray-700">{result.closing}</div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Job-Karte ─────────────────────────────────────────────────────────────────
 
 function JobCard({
   job,
   addedIds,
   onAdd,
+  onGenerateLetter,
 }: {
   job: JobMatch;
   addedIds: Set<string>;
   onAdd: (job: JobMatch) => void;
+  onGenerateLetter: (job: JobMatch) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -180,6 +366,13 @@ function JobCard({
                   Bewerben
                 </>
               )}
+            </button>
+            <button
+              onClick={() => onGenerateLetter(job)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 transition-all"
+            >
+              <PencilSquareIcon className="w-3.5 h-3.5" />
+              Anschreiben
             </button>
           </div>
         </div>
@@ -423,6 +616,9 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
     }
   }, [onApplicationCreated]);
 
+  // Cover-Letter State
+  const [coverLetterJob, setCoverLetterJob] = useState<JobMatch | null>(null);
+
   // Sortierung
   const sortedJobs = [...jobs].sort((a, b) => {
     if (sortKey === "matchScore") return b.matchScore - a.matchScore;
@@ -434,11 +630,19 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
   const highMatches = jobs.filter((j) => j.matchScore >= 85).length;
 
   return (
+    <>
+    {coverLetterJob && (
+      <CoverLetterModal
+        job={coverLetterJob}
+        userEmail={documents.length > 0 ? "" : ""}
+        onClose={() => setCoverLetterJob(null)}
+      />
+    )}
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 sm:p-4">
       <div className="bg-gray-50 rounded-2xl shadow-2xl w-full max-w-7xl h-[96vh] flex flex-col overflow-hidden">
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <div className="bg-gradient-to-r from-violet-700 via-blue-700 to-indigo-700 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0">
+        <div className="bg-linear-to-r from-violet-700 via-blue-700 to-indigo-700 px-4 sm:px-6 py-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
               <CpuChipIcon className="w-6 h-6 text-white" />
@@ -898,6 +1102,7 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
                   job={job}
                   addedIds={addedIds}
                   onAdd={handleAddApplication}
+                  onGenerateLetter={(j) => setCoverLetterJob(j)}
                 />
               ))}
             </div>
@@ -905,5 +1110,6 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
         </div>
       </div>
     </div>
+    </>
   );
 }

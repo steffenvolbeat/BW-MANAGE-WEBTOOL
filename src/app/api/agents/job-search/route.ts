@@ -178,7 +178,13 @@ function generateFallbackJobs(prefs: SearchPreferences): { jobs: JobMatch[]; pro
 
   const [baseSalMin, baseSalMax] = salaryRanges[prefs.jobLevel] || salaryRanges.ANY;
 
-  const jobs: JobMatch[] = companies.slice(0, 10).map((company, i) => {
+  // Nur Firmen aus den ausgewählten Ländern
+  const filteredCompanies = prefs.countries && prefs.countries.length > 0
+    ? companies.filter((c) => prefs.countries.includes(c.country))
+    : companies;
+  const activeCompanies = filteredCompanies.length > 0 ? filteredCompanies : companies;
+
+  const jobs: JobMatch[] = activeCompanies.slice(0, 10).map((company, i) => {
     const pos = positions[i % positions.length];
     const matched = pos.skills.filter((s) =>
       detectedSkills.some((d) => d.toLowerCase() === s.toLowerCase())
