@@ -11,7 +11,7 @@
  * Sicherheit: Kein Caching von Auth/PII-Daten. Sessions werden niemals gecached.
  */
 
-const CACHE_VERSION = "v9";
+const CACHE_VERSION = "v10";
 const STATIC_CACHE = `bw-manage-static-${CACHE_VERSION}`;
 const PAGE_CACHE = `bw-manage-pages-${CACHE_VERSION}`;
 const SYNC_TAG = "bw-manage-sync";
