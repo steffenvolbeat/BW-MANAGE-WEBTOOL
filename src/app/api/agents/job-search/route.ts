@@ -316,7 +316,7 @@ export async function POST(request: Request) {
     const [allApplications, allDocuments] = await Promise.all([
       db.application.findMany({
         select: { companyName: true, position: true, status: true, location: true },
-        orderBy: { updatedAt: "desc" },
+        orderBy: { appliedAt: "desc" },
       }),
       db.document.findMany({
         select: { name: true, fileType: true },

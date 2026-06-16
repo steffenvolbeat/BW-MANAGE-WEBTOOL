@@ -52,9 +52,17 @@ function isAsset(pathname: string): boolean {
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/uploads") ||
     pathname.startsWith("/workers") ||
+    pathname.startsWith("/icons/") ||
+    pathname.startsWith("/screenshots/") ||
+    pathname === "/manifest.json" ||
+    pathname === "/sw.js" ||
+    pathname === "/offline" ||
     pathname.endsWith(".ico") ||
     pathname.endsWith(".png") ||
-    pathname.endsWith(".svg")
+    pathname.endsWith(".svg") ||
+    pathname.endsWith(".webp") ||
+    pathname.endsWith(".jpg") ||
+    pathname.endsWith(".jpeg")
   );
 }
 
