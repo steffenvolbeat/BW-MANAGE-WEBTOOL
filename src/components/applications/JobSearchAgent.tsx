@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import Link from "next/link";
 import {
   XMarkIcon,
   MagnifyingGlassIcon,
@@ -19,6 +20,9 @@ import {
   ArrowPathIcon,
   ExclamationTriangleIcon,
   InformationCircleIcon,
+  DocumentTextIcon,
+  ArrowUpTrayIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { CheckCircleIcon as CheckCircleSolid, StarIcon as StarSolid } from "@heroicons/react/24/solid";
 import type { JobMatch, ProfileAnalysis } from "@/app/api/agents/job-search/route";
@@ -300,6 +304,53 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
   const [sortKey, setSortKey] = useState<SortKey>("matchScore");
   const [lastSearched, setLastSearched] = useState<Date | null>(null);
 
+  // Dokumente
+  const [documents, setDocuments] = useState<{ id: string; name: string; type: string; fileType: string }[]>([]);
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch("/api/documents")
+      .then((r) => r.json())
+      .then((d) => setDocuments(Array.isArray(d) ? d : (d.documents ?? [])))
+      .catch(() => {});
+  }, []);
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingDoc(true);
+    setUploadError(null);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      const form = new FormData();
+      form.append("file", file);
+      form.append("name", file.name);
+      // Typ automatisch erkennen
+      const type =
+        ext === "pdf" && file.name.toLowerCase().includes("lebenslauf") ? "CV"
+        : ext === "pdf" && file.name.toLowerCase().includes("anschreiben") ? "COVER_LETTER"
+        : file.name.toLowerCase().includes("zeugnis") || file.name.toLowerCase().includes("zertifikat") || file.name.toLowerCase().includes("certificate") ? "CERTIFICATE"
+        : "OTHER";
+      form.append("type", type);
+      const res = await fetch("/api/documents", { method: "POST", body: form });
+      if (!res.ok) throw new Error(await res.text());
+      const newDoc = await res.json();
+      setDocuments((prev) => [newDoc, ...prev]);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload fehlgeschlagen");
+    } finally {
+      setUploadingDoc(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleDocDelete = async (id: string) => {
+    await fetch(`/api/documents/${id}`, { method: "DELETE" }).catch(() => {});
+    setDocuments((prev) => prev.filter((d) => d.id !== id));
+  };
+
   // Tech-Stack Tag hinzufügen
   const addTechTag = () => {
     const tag = techStackInput.trim();
@@ -421,6 +472,81 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
 
           {/* ── Linke Spalte: Einstellungen ────────────────────────────── */}
           <div className="w-full lg:w-80 xl:w-96 shrink-0 overflow-y-auto border-b lg:border-b-0 lg:border-r border-gray-200 bg-white p-4 space-y-5">
+
+            {/* ── Meine Unterlagen ──────────────────────────────────────── */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-blue-800 text-sm flex items-center gap-2">
+                  <DocumentTextIcon className="w-4 h-4" />
+                  Meine Unterlagen
+                </h3>
+                <Link
+                  href="/documents"
+                  target="_blank"
+                  className="text-xs text-blue-600 hover:underline font-medium"
+                >
+                  Alle verwalten →
+                </Link>
+              </div>
+
+              {/* Hochgeladene Dokumente */}
+              {documents.length === 0 ? (
+                <p className="text-xs text-blue-600 mb-3">
+                  Noch keine Dokumente hochgeladen. Der Agent nutzt deine Unterlagen für bessere Treffer.
+                </p>
+              ) : (
+                <ul className="space-y-1.5 mb-3">
+                  {documents.map((doc) => (
+                    <li key={doc.id} className="flex items-center gap-2 text-xs bg-white border border-blue-100 rounded-lg px-2 py-1.5">
+                      <span className={`shrink-0 px-1.5 py-0.5 rounded text-white font-bold text-[10px] ${
+                        doc.type === "CV" ? "bg-blue-600"
+                        : doc.type === "COVER_LETTER" ? "bg-indigo-500"
+                        : doc.type === "CERTIFICATE" ? "bg-green-600"
+                        : doc.type === "PORTFOLIO" ? "bg-purple-600"
+                        : "bg-gray-400"
+                      }`}>
+                        {doc.type === "CV" ? "CV"
+                         : doc.type === "COVER_LETTER" ? "ABS"
+                         : doc.type === "CERTIFICATE" ? "ZERT"
+                         : doc.type === "PORTFOLIO" ? "PORT"
+                         : "DOK"}
+                      </span>
+                      <span className="flex-1 truncate text-gray-700">{doc.name}</span>
+                      <button
+                        onClick={() => handleDocDelete(doc.id)}
+                        className="text-red-400 hover:text-red-600 shrink-0"
+                        title="Löschen"
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Upload */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                className="hidden"
+                onChange={handleDocUpload}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingDoc}
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors disabled:opacity-60"
+              >
+                <ArrowUpTrayIcon className="w-3.5 h-3.5" />
+                {uploadingDoc ? "Wird hochgeladen…" : "Lebenslauf / Zertifikat hochladen"}
+              </button>
+              {uploadError && (
+                <p className="text-xs text-red-600 mt-1.5">{uploadError}</p>
+              )}
+              <p className="text-[10px] text-blue-500 mt-2">
+                PDF, DOC, DOCX, Bild · Der Agent analysiert deine Unterlagen automatisch bei der nächsten Suche.
+              </p>
+            </div>
 
             {/* Profil-Analyse */}
             {profileAnalysis && (
