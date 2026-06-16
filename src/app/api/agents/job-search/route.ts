@@ -92,7 +92,7 @@ Länder (NUR diese): ${prefs.countries.join(", ") || "Deutschland, Österreich, 
 === AUFGABE ===
 1. Analysiere Profil genau — erkenne Skills, Erfahrungslevel, Stärken aus Bewerbungshistorie und Dokumenten
 2. Generiere EXAKT 10 Stellen — NUR aus den angegebenen Ländern
-3. Decke ALLE IT-Bereiche ab: Backend, Frontend, Full-Stack, DevOps/Cloud, Mobile, Data/BI, ML/KI, Security/Pentesting, QA/Testing, Embedded/IoT, SAP/ERP, IT-Projektmanagement, Scrum/Agile, Netzwerk/Sysadmin, Blockchain, AR/VR, Game Dev — passe an Job-Typ Präferenz an
+3. Decke ALLE IT-Bereiche ab: Backend, Frontend, Full-Stack, DevOps/Cloud, Mobile, Data/BI, ML/KI, Security/Pentesting, QA/Testing, Embedded/IoT, SAP/ERP, IT-Projektmanagement, Scrum/Agile, Netzwerk/Sysadmin, IT-Support/Helpdesk, 1st-Level-Support, 2nd-Level-Support, IT-Systemintegration, ITSM, Blockchain, AR/VR, Game Dev — passe an Job-Typ Präferenz an
 4. Nutze echte Firmen: SAP, BMW, Siemens, Bosch, Allianz, Telekom, Zalando, TeamViewer, Celonis, CHECK24, N26, Porsche Digital, MaibornWolff, msg systems, Capgemini, Accenture, DATEV, Sopra Steria, Atruvia, Dynatrace, Red Hat, SUSE, Wacker Chemie, Evonik, BASF Digital, Roche Informatics, Novartis IT, ABB, Hilti, PostFinance, SIX Group, Swisscom, A1 Telekom Austria, Erste Group, Raiffeisen Bank International
 5. Berechne Match-Score 0-100 — präzise, nicht immer 90+
 6. companyAddress = vollständige Postadresse (Straße, PLZ, Ort)
@@ -181,6 +181,10 @@ function generateFallbackJobs(prefs: SearchPreferences): { jobs: JobMatch[]; pro
     { title: "IT-Projektmanager (Scrum / Agile)", type: "IT-Projektmanagement", skills: ["Scrum", "Kanban", "Jira", "Confluence", "Stakeholder Management"] },
     { title: "Platform / Site Reliability Engineer", type: "Platform", skills: ["Kubernetes", "Helm", "Go", "Prometheus", "GitOps"] },
     { title: "Network & System Administrator (Linux)", type: "Netzwerk/Sysadmin", skills: ["Linux", "Cisco", "TCP/IP", "Docker", "Monitoring"] },
+    { title: "IT-Support Specialist / Helpdesk (m/w/d)", type: "IT-Support/Helpdesk", skills: ["Windows", "Active Directory", "Ticketsystem", "Remote Support", "ITIL"] },
+    { title: "1st-Level-Support / User Helpdesk (m/w/d)", type: "1st-Level-Support", skills: ["Windows", "Office 365", "Ticketsystem", "Telefonsupport", "Remote Desktop"] },
+    { title: "2nd-Level-Support Specialist IT (m/w/d)", type: "2nd-Level-Support", skills: ["Windows Server", "Active Directory", "Exchange", "Scripting", "ITIL"] },
+    { title: "IT-Systemintegrator / IT-Administrator (m/w/d)", type: "IT-Systemintegration", skills: ["VMware", "Hyper-V", "Active Directory", "Netzwerk", "Backup-Systeme"] },
   ];
 
   const salaryRanges: Record<string, [number, number]> = {

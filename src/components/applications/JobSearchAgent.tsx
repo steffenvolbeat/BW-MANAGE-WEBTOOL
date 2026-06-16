@@ -46,7 +46,8 @@ const JOB_TYPE_OPTIONS = [
   "Backend", "Frontend", "Full-Stack", "DevOps", "Cloud",
   "Mobile", "Data", "ML/AI", "Platform", "Security",
   "QA/Testing", "SAP/ERP", "Embedded", "IT-Projektmanagement",
-  "Netzwerk/Sysadmin", "Blockchain", "AR/VR", "Game Dev",
+  "Netzwerk/Sysadmin", "IT-Support/Helpdesk", "1st-Level-Support", "2nd-Level-Support",
+  "IT-Systemintegration", "Blockchain", "AR/VR", "Game Dev",
 ];
 
 const WORK_TYPE_LABELS: Record<WorkType, string> = {
