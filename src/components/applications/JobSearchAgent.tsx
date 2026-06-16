@@ -186,15 +186,17 @@ function CoverLetterModal({ job, onClose }: {
             <h3 className="font-semibold text-gray-800 text-sm">📬 Deine Absender-Daten</h3>
 
             {([
-              { label: "Vor- und Nachname *", value: senderName, set: setSenderName, placeholder: "Max Mustermann" },
-              { label: "Straße & Hausnummer *", value: senderStreet, set: setSenderStreet, placeholder: "Musterstraße 42" },
-              { label: "PLZ *", value: senderZip, set: setSenderZip, placeholder: "12345" },
-              { label: "Ort *", value: senderCity, set: setSenderCity, placeholder: "Berlin" },
-              { label: "Telefon", value: senderPhone, set: setSenderPhone, placeholder: "+49 151 12345678" },
-            ] as { label: string; value: string; set: (v: string) => void; placeholder: string }[]).map(({ label, value, set, placeholder }) => (
-              <div key={label}>
-                <label className="text-xs font-medium text-gray-500 block mb-1">{label}</label>
+              { label: "Vor- und Nachname *", id: "cl-sender-name",   value: senderName,   set: setSenderName,   placeholder: "Max Mustermann" },
+              { label: "Straße & Hausnummer *", id: "cl-sender-street", value: senderStreet, set: setSenderStreet, placeholder: "Musterstraße 42" },
+              { label: "PLZ *",                 id: "cl-sender-zip",   value: senderZip,    set: setSenderZip,    placeholder: "12345" },
+              { label: "Ort *",                 id: "cl-sender-city",  value: senderCity,   set: setSenderCity,   placeholder: "Berlin" },
+              { label: "Telefon",               id: "cl-sender-phone", value: senderPhone,  set: setSenderPhone,  placeholder: "+49 151 12345678" },
+            ] as { label: string; id: string; value: string; set: (v: string) => void; placeholder: string }[]).map(({ label, id, value, set, placeholder }) => (
+              <div key={id}>
+                <label htmlFor={id} className="text-xs font-medium text-gray-500 block mb-1">{label}</label>
                 <input
+                  id={id}
+                  name={id}
                   type="text"
                   value={value}
                   onChange={(e) => set(e.target.value)}
@@ -869,16 +871,18 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
               <div className="space-y-4">
                 {/* Standort */}
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1.5">
-                    Standort / Region
+                  <label htmlFor="search-location" className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1.5">
+                    Standort / Stadt
                   </label>
                   <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
                     <MapPinIcon className="w-4 h-4 text-gray-400 shrink-0" />
                     <input
+                      id="search-location"
+                      name="search-location"
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      placeholder="z.B. München, Berlin, Remote..."
+                      placeholder="z.B. München, Wien, Zürich…"
                       className="flex-1 bg-transparent text-sm outline-none text-gray-800 placeholder-gray-400"
                     />
                   </div>
@@ -936,8 +940,10 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
                   </label>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <span className="text-xs text-gray-400 mb-1 block">Minimum</span>
+                      <label htmlFor="search-salary-min" className="text-xs text-gray-400 mb-1 block">Minimum</label>
                       <input
+                        id="search-salary-min"
+                        name="search-salary-min"
                         type="number"
                         value={salaryMin}
                         onChange={(e) => setSalaryMin(Number(e.target.value))}
@@ -946,8 +952,10 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
                       />
                     </div>
                     <div>
-                      <span className="text-xs text-gray-400 mb-1 block">Maximum</span>
+                      <label htmlFor="search-salary-max" className="text-xs text-gray-400 mb-1 block">Maximum</label>
                       <input
+                        id="search-salary-max"
+                        name="search-salary-max"
                         type="number"
                         value={salaryMax}
                         onChange={(e) => setSalaryMax(Number(e.target.value))}
@@ -960,10 +968,12 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
 
                 {/* Level */}
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1.5">
+                  <label htmlFor="search-level" className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1.5">
                     Erfahrungslevel
                   </label>
                   <select
+                    id="search-level"
+                    name="search-level"
                     value={jobLevel}
                     onChange={(e) => setJobLevel(e.target.value as JobLevel)}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400"
@@ -1002,11 +1012,13 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
 
                 {/* Tech-Stack */}
                 <div>
-                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1.5">
+                  <label htmlFor="search-tech-stack" className="text-xs font-medium text-gray-500 uppercase tracking-wide block mb-1.5">
                     Mein Tech-Stack
                   </label>
                   <div className="flex gap-2">
                     <input
+                      id="search-tech-stack"
+                      name="search-tech-stack"
                       type="text"
                       value={techStackInput}
                       onChange={(e) => setTechStackInput(e.target.value)}
@@ -1100,8 +1112,10 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Sortieren:</span>
+                  <label htmlFor="search-sort" className="text-xs text-gray-500">Sortieren:</label>
                   <select
+                    id="search-sort"
+                    name="search-sort"
                     value={sortKey}
                     onChange={(e) => setSortKey(e.target.value as SortKey)}
                     className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-white outline-none"

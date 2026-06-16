@@ -91,11 +91,13 @@ Länder (NUR diese): ${prefs.countries.join(", ") || "Deutschland, Österreich, 
 
 === AUFGABE ===
 1. Analysiere Profil genau — erkenne Skills, Erfahrungslevel, Stärken aus Bewerbungshistorie und Dokumenten
-2. Generiere EXAKT 10 Stellen — NUR aus den angegebenen Ländern
-3. Decke ALLE IT-Bereiche ab: Backend, Frontend, Full-Stack, DevOps/Cloud, Mobile, Data/BI, ML/KI, Security/Pentesting, QA/Testing, Embedded/IoT, SAP/ERP, IT-Projektmanagement, Scrum/Agile, Netzwerk/Sysadmin, IT-Support/Helpdesk, 1st-Level-Support, 2nd-Level-Support, IT-Systemintegration, ITSM, Blockchain, AR/VR, Game Dev — passe an Job-Typ Präferenz an
-4. Nutze echte Firmen: SAP, BMW, Siemens, Bosch, Allianz, Telekom, Zalando, TeamViewer, Celonis, CHECK24, N26, Porsche Digital, MaibornWolff, msg systems, Capgemini, Accenture, DATEV, Sopra Steria, Atruvia, Dynatrace, Red Hat, SUSE, Wacker Chemie, Evonik, BASF Digital, Roche Informatics, Novartis IT, ABB, Hilti, PostFinance, SIX Group, Swisscom, A1 Telekom Austria, Erste Group, Raiffeisen Bank International
-5. Berechne Match-Score 0-100 — präzise, nicht immer 90+
-6. companyAddress = vollständige Postadresse (Straße, PLZ, Ort)
+2. Generiere 15 bis 20 Stellen — NUR aus den angegebenen Ländern
+3. STADTFILTER PFLICHT: Wenn Standort angegeben (z.B. "München"), dann müssen ALLE Stellen in dieser Stadt oder max. 30km Umkreis liegen — KEINE Stellen aus anderen Städten!
+4. Decke ALLE IT-Bereiche ab: Backend, Frontend, Full-Stack, DevOps/Cloud, Mobile, Data/BI, ML/KI, Security/Pentesting, QA/Testing, Embedded/IoT, SAP/ERP, IT-Projektmanagement, Scrum/Agile, Netzwerk/Sysadmin, IT-Support/Helpdesk, 1st-Level-Support, 2nd-Level-Support, IT-Systemintegration, ITSM, Blockchain, AR/VR, Game Dev — passe an Job-Typ Präferenz an
+5. ECHTE UNTERNEHMEN PFLICHT: Nur real existierende Firmen mit echten Niederlassungen in der angegebenen Stadt/Region. KEINE erfundenen Firmen, KEINE Fantasienamen.
+   Nutze z.B.: SAP, BMW, Siemens, Bosch, Allianz, Telekom, Zalando, TeamViewer, Celonis, CHECK24, N26, Porsche Digital, MaibornWolff, msg systems, Capgemini, Accenture, DATEV, Sopra Steria, Atruvia, Dynatrace, Red Hat, SUSE, Wacker Chemie, Evonik, BASF Digital, Roche Informatics, Novartis IT, ABB, Hilti, PostFinance, SIX Group, Swisscom, A1 Telekom Austria, Erste Group, Raiffeisen Bank International, Infineon, MAN, Knorr-Bremse, Wirecard-Nachfolger, Rohde & Schwarz, GfK, Linde, comdirect, ING Deutschland, DZ Bank, HVB, BayWa, Fraunhofer, TU München, Stadtwerke München, Lufthansa Systems, DB Systel, E.ON Digital, EnBW, Thales, Airbus, MTU Aero Engines — wähle Firmen die WIRKLICH in der angefragten Stadt präsent sind
+6. Berechne Match-Score 0-100 — präzise, nicht immer 90+
+7. companyAddress = vollständige Postadresse (Straße, PLZ, Ort) in der angegebenen Stadt
 
 WICHTIG: Antworte NUR als valides JSON:
 {
@@ -198,12 +200,22 @@ function generateFallbackJobs(prefs: SearchPreferences): { jobs: JobMatch[]; pro
   const [baseSalMin, baseSalMax] = salaryRanges[prefs.jobLevel] || salaryRanges.ANY;
 
   // Nur Firmen aus den ausgewählten Ländern
-  const filteredCompanies = prefs.countries && prefs.countries.length > 0
+  let filteredCompanies = prefs.countries && prefs.countries.length > 0
     ? companies.filter((c) => prefs.countries.includes(c.country))
     : companies;
+
+  // Stadt-Filter: wenn Standort angegeben, nur Firmen in dieser Stadt/Region
+  if (prefs.location && prefs.location.trim().length > 0) {
+    const locLower = prefs.location.trim().toLowerCase();
+    const cityFiltered = filteredCompanies.filter((c) =>
+      c.loc.toLowerCase().includes(locLower) || locLower.includes(c.loc.toLowerCase())
+    );
+    if (cityFiltered.length >= 3) filteredCompanies = cityFiltered;
+  }
+
   const activeCompanies = filteredCompanies.length > 0 ? filteredCompanies : companies;
 
-  const jobs: JobMatch[] = activeCompanies.slice(0, 10).map((company, i) => {
+  const jobs: JobMatch[] = activeCompanies.slice(0, 19).map((company, i) => {
     const pos = positions[i % positions.length];
     const matched = pos.skills.filter((s) =>
       detectedSkills.some((d) => d.toLowerCase() === s.toLowerCase())
@@ -293,7 +305,7 @@ async function callClaude(
       },
       body: JSON.stringify({
         model: "claude-3-5-haiku-20241022",
-        max_tokens: 4096,
+        max_tokens: 8192,
         messages: [
           {
             role: "user",
