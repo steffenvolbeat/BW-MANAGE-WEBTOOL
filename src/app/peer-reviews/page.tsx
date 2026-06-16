@@ -131,7 +131,7 @@ export default function PeerReviewsPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">👥 Peer-Review-Netzwerk</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">👥 Peer-Review-Netzwerk</h1>
         <p className="text-(--muted) mt-2">
           Erhalte anonymes Feedback von anderen Bewerbern. 
           Hilf anderen und erhalte selbst wertvolle Einschätzungen.

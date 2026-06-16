@@ -109,7 +109,7 @@ export default function CardScannerPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">📇 AR Visitenkarten-Scanner</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">📇 AR Visitenkarten-Scanner</h1>
         <p className="text-(--muted) mt-2">
           Scanne Visitenkarten mit der Kamera oder gib den Text manuell ein. 
           KI extrahiert Kontaktdaten automatisch.

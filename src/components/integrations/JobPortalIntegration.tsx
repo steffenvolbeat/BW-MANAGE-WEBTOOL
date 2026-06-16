@@ -336,7 +336,7 @@ export default function JobPortalIntegration({
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Job-Portal Integration</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Job-Portal Integration</h1>
           <p className="mt-2 text-gray-600">
             Durchsuchen Sie verschiedene Job-Portale nach neuen Möglichkeiten
           </p>

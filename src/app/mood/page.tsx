@@ -100,7 +100,7 @@ export default function StimmungsBarometerPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-4xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold flex items-center gap-3">😊 Stimmungs-Barometer</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">😊 Stimmungs-Barometer</h1>
         <p className="text-(--muted) mt-2">
           Tracke deine tägliche Stimmung, Energie und Stress während der Jobsuche. Erkenne Burnout-Muster frühzeitig.
         </p>
@@ -169,7 +169,7 @@ export default function StimmungsBarometerPage() {
 
       {/* Durchschnittswerte */}
       {averages && (
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
           {[
             { label: "Ø Stimmung", value: averages.mood, icon: "😊", color: "text-yellow-600" },
             { label: "Ø Energie", value: averages.energy, icon: "⚡", color: "text-blue-600" },

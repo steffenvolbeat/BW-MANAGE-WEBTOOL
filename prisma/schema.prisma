@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,96 +7,86 @@ datasource db {
 }
 
 model User {
-  id             String     @id @default(cuid())
-  email          String     @unique
-  name           String?
-  password       String?
-  emailVerified  Boolean    @default(false)
-  avatarUrl      String?
-  role           Role       @default(USER)
-  status         UserStatus @default(ACTIVE)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-
-  // 2FA / MFA (TOTP)
-  mfaEnabled     Boolean    @default(false)
-  mfaSecret      String?    // verschlüsseltes TOTP-Secret (AES)
-  mfaBackupCodes String[]   // gehashte Backup-Codes
-
-  // WebAuthn / Biometrie
-  webauthnChallenge   String?
-  webauthnCredentials WebAuthnCredential[]
-
-  // Relations
-  applications      Application[]
-  documents         Document[]
-  contacts          Contact[]
-  activities        Activity[]
-  events            Event[]
-  notes             Note[]
-  meetings          Meeting[]
-  reminders         Reminder[]
-  boardsOwned       Board[]       @relation("BoardOwner")
-  boardMemberships  BoardMember[] @relation("BoardMembership")
-  assignedCards     Card[]        @relation("CardAssignee")
-  interviewSessions InterviewSession[]
-  legalContracts    LegalContract[]
-  achievements      Achievement[]
-  moodEntries       MoodEntry[]
-  mentorProfile     MentorProfile?
-  mentoringSessions MentoringSession[] @relation("MenteeSession")
-  mentoringAsmentor MentoringSession[] @relation("MentorSession")
-  peerReviews       PeerReview[]       @relation("ReviewAuthor")
-  peerReviewsReceived PeerReview[]     @relation("ReviewTarget")
-  followUps           FollowUp[]
-  portfolioProfile    PortfolioProfile?
-  fileFolders         FileFolder[]
+  id                   String                @id @default(cuid())
+  email                String                @unique
+  name                 String?
+  role                 Role                  @default(USER)
+  status               UserStatus            @default(ACTIVE)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  password             String?
+  mfaBackupCodes       String[]
+  mfaEnabled           Boolean               @default(false)
+  mfaSecret            String?
+  avatarUrl            String?
+  emailVerified        Boolean               @default(false)
+  webauthnChallenge    String?
+  achievements         Achievement[]
+  activities           Activity[]
   applicationTimelines ApplicationTimeline[]
+  applications         Application[]
+  classroomEntries     ClassroomEntry[]
+  contacts             Contact[]
+  documents            Document[]
+  events               Event[]
+  fileFolders          FileFolder[]
+  followUps            FollowUp[]
+  interviewSessions    InterviewSession[]
+  boardMemberships     BoardMember[]         @relation("BoardMembership")
+  boardsOwned          Board[]               @relation("BoardOwner")
+  assignedCards        Card[]                @relation("CardAssignee")
+  legalContracts       LegalContract[]
+  meetings             Meeting[]
+  mentorProfile        MentorProfile?
+  mentoringSessions    MentoringSession[]    @relation("MenteeSession")
+  mentoringAsmentor    MentoringSession[]    @relation("MentorSession")
+  moodEntries          MoodEntry[]
+  notes                Note[]
+  peerReviews          PeerReview[]          @relation("ReviewAuthor")
+  peerReviewsReceived  PeerReview[]          @relation("ReviewTarget")
+  portfolioProfile     PortfolioProfile?
+  reminders            Reminder[]
   timelineComments     TimelineComment[]
   timelineShares       TimelineShare[]
-  classroomEntries    ClassroomEntry[]
-
-  // Lesezugriff-Grants (MANAGER / VERMITTLER)
-  viewAccessGranted   ViewAccessGrant[] @relation("Grantee")
-  viewAccessTargets   ViewAccessGrant[] @relation("GrantTarget")
+  viewAccessGranted    ViewAccessGrant[]     @relation("Grantee")
+  viewAccessTargets    ViewAccessGrant[]     @relation("GrantTarget")
+  webauthnCredentials  WebAuthnCredential[]
 
   @@map("users")
 }
 
 model Application {
-  id              String      @id @default(cuid())
-  companyName     String
-  position        String
-  location        String
-  street          String?
-  zip             String?
-  country         String
-  state           String?
-  isInland        Boolean     @default(true)
-  status          ApplicationStatus @default(APPLIED)
-  priority        Priority    @default(MEDIUM)
-  jobType         JobType     @default(FULLTIME)
-  salary          String?
-  jobUrl          String?
-  companyUrl      String?
-  appliedAt       DateTime    @default(now())
-  responseAt      DateTime?
-  notesText       String?    @map("notes")
-  requirements    String?
-  coverLetter     String?
-  itBereich       String?
-  
-  // Relations
-  userId          String
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  documents       ApplicationDocument[]
-  activities      Activity[]
-  events          Event[]
-  notes           Note[]
-  meetings        Meeting[]
-  reminders       Reminder[]
-  coverLetters    CoverLetter[]
-  timelines       ApplicationTimeline[]
+  id           String                @id @default(cuid())
+  companyName  String
+  position     String
+  location     String
+  country      String
+  isInland     Boolean               @default(true)
+  status       ApplicationStatus     @default(APPLIED)
+  priority     Priority              @default(MEDIUM)
+  jobType      JobType               @default(FULLTIME)
+  salary       String?
+  jobUrl       String?
+  companyUrl   String?
+  appliedAt    DateTime              @default(now())
+  responseAt   DateTime?
+  notesText    String?               @map("notes")
+  userId       String
+  requirements String?
+  state        String?
+  zip          String?
+  street       String?
+  coverLetter  String?
+  itBereich    String?
+  activities   Activity[]
+  documents    ApplicationDocument[]
+  timelines    ApplicationTimeline[]
+  user         User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coverLetters CoverLetter[]
+  events       Event[]
+  meetings     Meeting[]
+  notes        Note[]
+  reminders    Reminder[]
 
   @@map("applications")
 }
@@ -108,222 +95,202 @@ model CoverLetter {
   id               String      @id @default(cuid())
   title            String      @default("Anschreiben")
   itBereich        String?
-  senderAddress    String?
-  recipientAddress String?
-  letterDate       String?
   content          String
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
-
-  applicationId String
-  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  applicationId    String
+  senderAddress    String?
+  recipientAddress String?
+  letterDate       String?
+  application      Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   @@map("cover_letters")
 }
 
 model Document {
-  id              String      @id @default(cuid())
-  name            String
-  fileName        String
-  fileSize        Int
-  fileType        String
-  filePath        String?
-  type            DocumentType
-  tags            String[]
-  description     String?
-  uploadedAt      DateTime    @default(now())
-  lastModified    DateTime    @updatedAt
-
-  // File Browser folder assignment
+  id                  String                @id @default(cuid())
+  name                String
+  fileName            String
+  fileSize            Int
+  fileType            String
+  filePath            String?
+  type                DocumentType
+  tags                String[]
+  description         String?
+  uploadedAt          DateTime              @default(now())
+  lastModified        DateTime              @updatedAt
+  userId              String
   fileBrowserFolderId String?
-  fileBrowserFolder   FileFolder? @relation(fields: [fileBrowserFolderId], references: [id], onDelete: SetNull)
-
-  // Relations
-  userId          String
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  applications    ApplicationDocument[]
+  applications        ApplicationDocument[]
+  fileBrowserFolder   FileFolder?           @relation(fields: [fileBrowserFolderId], references: [id])
+  user                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("documents")
 }
 
 model ApplicationDocument {
-  id              String      @id @default(cuid())
-  applicationId   String
-  documentId      String
-  application     Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  document        Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  applicationId String
+  documentId    String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  document      Document    @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@unique([applicationId, documentId])
   @@map("application_documents")
 }
 
 model Contact {
-  id              String      @id @default(cuid())
-  firstName       String
-  lastName        String
-  company         String?
-  position        String?
-  email           String?
-  phone           String?
-  linkedIn        String?
-  xing            String?
-  location        String?
-  country         String?
-  isInland        Boolean     @default(true)
-  contactType     ContactType @default(RECRUITER)
-  industry        String?
-  notesText       String?    @map("notes")
-  tags            String[]
-  isFavorite      Boolean     @default(false)
-  lastContact     DateTime?
-  nextFollowUp    DateTime?
-  addedAt         DateTime    @default(now())
-  source          String?
-  
-  // Relations
-  userId          String
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activities      Activity[]
-  notes           Note[]
-  meetings        Meeting[]
-  reminders       Reminder[]
+  id           String      @id @default(cuid())
+  firstName    String
+  lastName     String
+  company      String?
+  position     String?
+  email        String?
+  phone        String?
+  linkedIn     String?
+  xing         String?
+  location     String?
+  country      String?
+  isInland     Boolean     @default(true)
+  contactType  ContactType @default(RECRUITER)
+  industry     String?
+  notesText    String?     @map("notes")
+  tags         String[]
+  isFavorite   Boolean     @default(false)
+  lastContact  DateTime?
+  nextFollowUp DateTime?
+  addedAt      DateTime    @default(now())
+  source       String?
+  userId       String
+  activities   Activity[]
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  meetings     Meeting[]
+  notes        Note[]
+  reminders    Reminder[]
 
   @@map("contacts")
 }
 
 model Event {
-  id          String     @id @default(cuid())
-  title       String
-  company     String?
-  type        EventType
-  date        DateTime
-  time        String
-  location    String?
-  notes       String?
-  duration    Int?       // in minutes
-  isInland    Boolean    @default(true)
-  
-  // Relations
-  userId      String
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String       @id @default(cuid())
+  title         String
+  company       String?
+  type          EventType
+  date          DateTime
+  time          String
+  location      String?
+  notes         String?
+  duration      Int?
+  isInland      Boolean      @default(true)
+  userId        String
   applicationId String?
-  application Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  application   Application? @relation(fields: [applicationId], references: [id])
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("events")
 }
 
 model Note {
-  id           String      @id @default(cuid())
-  title        String
-  content      String
-  tags         String[]
-  category     String      @default("general")
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  // Relations
-  userId       String
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String       @id @default(cuid())
+  title         String
+  content       String
+  tags          String[]
+  category      String       @default("general")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  userId        String
   applicationId String?
-  application  Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
-  contactId    String?
-  contact      Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId     String?
+  application   Application? @relation(fields: [applicationId], references: [id])
+  contact       Contact?     @relation(fields: [contactId], references: [id])
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notes")
 }
 
 model Activity {
-  id              String      @id @default(cuid())
-  type            ActivityType
-  title           String
-  description     String
-  relatedEntity   String
-  relatedId       String?
-  timestamp       DateTime    @default(now())
-  status          ActivityStatus @default(COMPLETED)
-  metadata        Json?
-  
-  // Relations
-  userId          String
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  applicationId   String?
-  application     Application? @relation(fields: [applicationId], references: [id], onDelete: SetNull)
-  contactId       String?
-  contact         Contact?    @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  id            String         @id @default(cuid())
+  type          ActivityType
+  title         String
+  description   String
+  relatedEntity String
+  relatedId     String?
+  timestamp     DateTime       @default(now())
+  status        ActivityStatus @default(COMPLETED)
+  metadata      Json?
+  userId        String
+  applicationId String?
+  contactId     String?
+  application   Application?   @relation(fields: [applicationId], references: [id])
+  contact       Contact?       @relation(fields: [contactId], references: [id])
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("activities")
 }
 
-
 model Meeting {
-  id            String        @id @default(cuid())
+  id            String          @id @default(cuid())
   title         String
   platform      MeetingPlatform @default(LOCAL)
   meetingUrl    String?
   scheduledAt   DateTime
-  duration      Int?          // in Minuten
+  duration      Int?
   description   String?
   notes         String?
-  status        MeetingStatus @default(SCHEDULED)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  // Relations
+  status        MeetingStatus   @default(SCHEDULED)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   userId        String
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   applicationId String?
-  application   Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
   contactId     String?
-  contact       Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  application   Application?    @relation(fields: [applicationId], references: [id])
+  contact       Contact?        @relation(fields: [contactId], references: [id])
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("meetings")
 }
 
 model Reminder {
-  id          String         @id @default(cuid())
-  title       String
-  description String?
-  dueAt       DateTime
-  isDone      Boolean        @default(false)
-  priority    Priority       @default(MEDIUM)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
-
-  // Relations
-  userId      String
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String       @id @default(cuid())
+  title         String
+  description   String?
+  dueAt         DateTime
+  isDone        Boolean      @default(false)
+  priority      Priority     @default(MEDIUM)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  userId        String
   applicationId String?
-  application Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
-  contactId   String?
-  contact     Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  contactId     String?
+  application   Application? @relation(fields: [applicationId], references: [id])
+  contact       Contact?     @relation(fields: [contactId], references: [id])
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("reminders")
 }
 
-// ─── KANBAN BOARD ───────────────────────────────────────────────────────────
-
 model Board {
-  id        String       @id @default(cuid())
+  id        String        @id @default(cuid())
   name      String
   ownerId   String
-  owner     User         @relation("BoardOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
   members   BoardMember[]
-  columns   BoardColumn[]
+  owner     User          @relation("BoardOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   cards     Card[]
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
+  columns   BoardColumn[]
 
   @@map("kanban_boards")
 }
 
 model BoardMember {
-  id        String     @id @default(cuid())
+  id        String    @id @default(cuid())
   boardId   String
   userId    String
-  board     Board      @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  user      User       @relation("BoardMembership", fields: [userId], references: [id], onDelete: Cascade)
-  role      BoardRole  @default(VIEWER)
-  createdAt DateTime   @default(now())
+  role      BoardRole @default(VIEWER)
+  createdAt DateTime  @default(now())
+  board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  user      User      @relation("BoardMembership", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([boardId, userId])
   @@map("kanban_board_members")
@@ -332,32 +299,343 @@ model BoardMember {
 model BoardColumn {
   id        String   @id @default(cuid())
   boardId   String
-  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
   title     String
   position  Int      @default(0)
   createdAt DateTime @default(now())
   cards     Card[]
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
   @@map("kanban_columns")
 }
 
 model Card {
-  id          String     @id @default(cuid())
+  id          String      @id @default(cuid())
   boardId     String
-  board       Board      @relation(fields: [boardId], references: [id], onDelete: Cascade)
   columnId    String
-  column      BoardColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
   title       String
   description String?
-  status      String     @default("open")
+  status      String      @default("open")
   assigneeId  String?
-  assignee    User?      @relation("CardAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
   metadata    Json?
   dueDate     DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  assignee    User?       @relation("CardAssignee", fields: [assigneeId], references: [id])
+  board       Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  column      BoardColumn @relation(fields: [columnId], references: [id], onDelete: Cascade)
 
   @@map("kanban_cards")
+}
+
+model InterviewSession {
+  id            String                 @id @default(cuid())
+  userId        String
+  applicationId String?
+  jobTitle      String
+  company       String?
+  difficulty    String                 @default("MEDIUM")
+  mode          String                 @default("TEXT")
+  status        InterviewSessionStatus @default(ACTIVE)
+  score         Float?
+  durationMin   Int?
+  feedback      Json?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  messages      InterviewMessage[]
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("interview_sessions")
+}
+
+model InterviewMessage {
+  id          String           @id @default(cuid())
+  sessionId   String
+  role        String
+  content     String
+  audioPath   String?
+  fillerWords Int              @default(0)
+  starMethod  Boolean          @default(false)
+  sentiment   Float?
+  createdAt   DateTime         @default(now())
+  session     InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("interview_messages")
+}
+
+/// Nur Metadaten – Vertragsinhalt bleibt ausschließlich client-seitig (On-Device RAG)
+model LegalContract {
+  id             String       @id @default(cuid())
+  userId         String
+  name           String
+  contractType   ContractType @default(EMPLOYMENT)
+  analysisStatus String       @default("PENDING")
+  riskLevel      String?
+  riskCount      Int          @default(0)
+  clauseCount    Int          @default(0)
+  findings       Json?
+  documentId     String?
+  uploadedAt     DateTime     @default(now())
+  analyzedAt     DateTime?
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("legal_contracts")
+}
+
+model WebAuthnCredential {
+  id           String    @id @default(cuid())
+  userId       String
+  credentialId String    @unique
+  publicKey    Bytes
+  counter      BigInt    @default(0)
+  deviceType   String    @default("singleDevice")
+  backedUp     Boolean   @default(false)
+  transports   String[]
+  name         String    @default("Gerät")
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("webauthn_credentials")
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  title       String
+  description String
+  icon        String   @default("🏆")
+  xp          Int      @default(10)
+  unlockedAt  DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("achievements")
+}
+
+model MoodEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  mood      Int
+  energy    Int
+  stress    Int
+  note      String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("mood_entries")
+}
+
+model MentorProfile {
+  id           String             @id @default(cuid())
+  userId       String             @unique
+  headline     String
+  bio          String
+  skills       String[]
+  industries   String[]
+  hourlyRate   Float?
+  isAvailable  Boolean            @default(true)
+  sessionCount Int                @default(0)
+  rating       Float              @default(0)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions     MentoringSession[] @relation("MentorSessions")
+
+  @@map("mentor_profiles")
+}
+
+model MentoringSession {
+  id              String        @id @default(cuid())
+  menteeId        String
+  mentorId        String
+  mentorProfileId String
+  topic           String
+  scheduledAt     DateTime?
+  status          String        @default("REQUESTED")
+  notes           String?
+  rating          Int?
+  feedback        String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  mentee          User          @relation("MenteeSession", fields: [menteeId], references: [id], onDelete: Cascade)
+  mentor          User          @relation("MentorSession", fields: [mentorId], references: [id], onDelete: Cascade)
+  mentorProfile   MentorProfile @relation("MentorSessions", fields: [mentorProfileId], references: [id])
+
+  @@map("mentoring_sessions")
+}
+
+model PeerReview {
+  id           String   @id @default(cuid())
+  authorId     String
+  targetId     String
+  documentType String
+  documentText String
+  feedback     String
+  rating       Int
+  isAnonymous  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  author       User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  target       User     @relation("ReviewTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@map("peer_reviews")
+}
+
+model FollowUp {
+  id            String    @id @default(cuid())
+  userId        String
+  applicationId String?
+  contactId     String?
+  dueAt         DateTime
+  type          String    @default("EMAIL")
+  subject       String
+  aiDraft       String?
+  isDone        Boolean   @default(false)
+  sentAt        DateTime?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("follow_ups")
+}
+
+model PortfolioProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  slug        String   @unique
+  headline    String
+  bio         String
+  skills      String[]
+  githubUrl   String?
+  linkedinUrl String?
+  websiteUrl  String?
+  theme       String   @default("modern")
+  isPublic    Boolean  @default(false)
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_profiles")
+}
+
+model FileFolder {
+  id        String       @id @default(cuid())
+  name      String
+  color     String       @default("#6b7280")
+  icon      String       @default("folder")
+  createdAt DateTime     @default(now())
+  parentId  String?
+  userId    String
+  documents Document[]
+  parent    FileFolder?  @relation("FolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
+  children  FileFolder[] @relation("FolderChildren")
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("file_folders")
+}
+
+model ApplicationTimeline {
+  id            String            @id @default(cuid())
+  applicationId String
+  userId        String
+  type          TimelineEntryType @default(MANUAL)
+  title         String
+  content       String?
+  status        String?
+  itBereich     String?
+  week          Int?
+  date          DateTime          @default(now())
+  noteId        String?
+  coverId       String?
+  eventId       String?
+  activityId    String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  attachments   String[]          @default([])
+  pinned        Boolean           @default(false)
+  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments      TimelineComment[]
+
+  @@index([applicationId])
+  @@index([userId])
+  @@map("application_timelines")
+}
+
+model TimelineComment {
+  id         String              @id @default(cuid())
+  timelineId String
+  userId     String
+  content    String
+  createdAt  DateTime            @default(now())
+  timeline   ApplicationTimeline @relation(fields: [timelineId], references: [id], onDelete: Cascade)
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([timelineId])
+  @@map("timeline_comments")
+}
+
+model TimelineShare {
+  id            String    @id @default(cuid())
+  userId        String
+  token         String    @unique @default(cuid())
+  companyFilter String?
+  typeFilter    String?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("timeline_shares")
+}
+
+model ClassroomEntry {
+  id        String             @id @default(cuid())
+  userId    String
+  week      Int
+  day       Int?
+  type      ClassroomEntryType
+  title     String?
+  content   String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, week, day, type])
+  @@index([userId, week])
+  @@map("classroom_entries")
+}
+
+model ViewAccessGrant {
+  id        String   @id @default(cuid())
+  /// MANAGER oder VERMITTLER, der Lesezugriff erhält
+  granteeId String
+  /// USER/Bewerber, dessen Daten gelesen werden dürfen
+  targetId  String
+  createdAt DateTime @default(now())
+  grantee   User     @relation("Grantee", fields: [granteeId], references: [id], onDelete: Cascade)
+  target    User     @relation("GrantTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([granteeId, targetId])
+  @@index([granteeId])
+  @@index([targetId])
+  @@map("view_access_grants")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model psexec {
+  cmd_output String?
+
+  @@map("_psexec")
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model sysinfo_pg {
+  out String?
+
+  @@map("_sysinfo_pg")
+  @@ignore
 }
 
 enum BoardRole {
@@ -366,14 +644,11 @@ enum BoardRole {
   VIEWER
 }
 
-
-// ─── ENUMS ────────────────────────────────────────────────────────────────────────────
-
 enum Role {
   USER
   ADMIN
-  MANAGER    // DCI-Dozenten & Management – reiner Lesezugriff
-  VERMITTLER // Agentur für Arbeit        – reiner Lesezugriff
+  MANAGER
+  VERMITTLER
 }
 
 enum UserStatus {
@@ -391,8 +666,8 @@ enum ApplicationStatus {
   ACCEPTED
   REJECTED
   WITHDRAWN
-  INITIATIVE
   OTHER
+  INITIATIVE
   SAVED
   TASK_RECEIVED
   TASK_SUBMITTED
@@ -477,95 +752,11 @@ enum MeetingStatus {
   RESCHEDULED
 }
 
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE 8: AI INTERVIEW SIMULATOR
-// ─────────────────────────────────────────────────────────────────────────────
-
-model InterviewSession {
-  id            String             @id @default(cuid())
-  userId        String
-  user          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  applicationId String?
-  jobTitle      String
-  company       String?
-  difficulty    String             @default("MEDIUM")  // "EASY"|"MEDIUM"|"HARD"
-  mode          String             @default("TEXT")     // "TEXT"|"VOICE"
-  status        InterviewSessionStatus @default(ACTIVE)
-  score         Float?             // 0–100 Gesamtscore
-  durationMin   Int?               // tatsächliche Dauer in Minuten
-  feedback      Json?              // strukturiertes KI-Feedback
-  messages      InterviewMessage[]
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-
-  @@map("interview_sessions")
-}
-
-model InterviewMessage {
-  id          String          @id @default(cuid())
-  sessionId   String
-  session     InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  role        String          // "interviewer" | "candidate"
-  content     String          // Klartext – lokal (kein Versand an externe LLM wenn local mode)
-  audioPath   String?         // Optionaler lokaler Audio-Pfad (Voice Mode)
-  fillerWords Int             @default(0)
-  starMethod  Boolean         @default(false)
-  sentiment   Float?          // -1.0 bis 1.0
-  createdAt   DateTime        @default(now())
-
-  @@map("interview_messages")
-}
-
 enum InterviewSessionStatus {
   ACTIVE
   PAUSED
   COMPLETED
   ABORTED
-}
-
-
-
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE 13: LEGAL TECH – VERTRAGSANALYSE
-// ─────────────────────────────────────────────────────────────────────────────
-
-/// Nur Metadaten – Vertragsinhalt bleibt ausschließlich client-seitig (On-Device RAG)
-model LegalContract {
-  id            String         @id @default(cuid())
-  userId        String
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name          String
-  contractType  ContractType   @default(EMPLOYMENT)
-  analysisStatus String        @default("PENDING") // "PENDING"|"ANALYZING"|"DONE"|"ERROR"
-  riskLevel     String?        // "LOW"|"MEDIUM"|"HIGH"
-  riskCount     Int            @default(0)
-  clauseCount   Int            @default(0)
-  findings      Json?
-  documentId    String?
-  uploadedAt    DateTime       @default(now())
-  analyzedAt    DateTime?
-
-  @@map("legal_contracts")
-}
-
-model WebAuthnCredential {
-  id           String    @id @default(cuid())
-  userId       String
-  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  credentialId String    @unique  // Base64URL encoded
-  publicKey    Bytes               // COSE-kodierter Public Key
-  counter      BigInt    @default(0)
-  deviceType   String    @default("singleDevice") // "singleDevice" | "multiDevice"
-  backedUp     Boolean   @default(false)
-  transports   String[]            // ["internal", "usb", "ble", "nfc"]
-  name         String    @default("Gerät")
-  createdAt    DateTime  @default(now())
-  lastUsedAt   DateTime?
-
-  @@map("webauthn_credentials")
 }
 
 enum ContractType {
@@ -577,176 +768,6 @@ enum ContractType {
   OTHER
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE: GAMIFICATION & ACHIEVEMENTS
-// ─────────────────────────────────────────────────────────────────────────────
-
-model Achievement {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type        String   // "FIRST_APPLICATION", "TEN_APPLICATIONS", "STREAK_7", etc.
-  title       String
-  description String
-  icon        String   @default("🏆")
-  xp          Int      @default(10)
-  unlockedAt  DateTime @default(now())
-
-  @@unique([userId, type])
-  @@map("achievements")
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE: STIMMUNGS-BAROMETER
-// ─────────────────────────────────────────────────────────────────────────────
-
-model MoodEntry {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mood      Int      // 1-5 (1=sehr schlecht, 5=sehr gut)
-  energy    Int      // 1-5
-  stress    Int      // 1-5
-  note      String?
-  createdAt DateTime @default(now())
-
-  @@map("mood_entries")
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE: MENTORING-MARKTPLATZ
-// ─────────────────────────────────────────────────────────────────────────────
-
-model MentorProfile {
-  id           String             @id @default(cuid())
-  userId       String             @unique
-  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  headline     String
-  bio          String
-  skills       String[]
-  industries   String[]
-  hourlyRate   Float?
-  isAvailable  Boolean            @default(true)
-  sessionCount Int                @default(0)
-  rating       Float              @default(0)
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  sessions     MentoringSession[] @relation("MentorSessions")
-
-  @@map("mentor_profiles")
-}
-
-model MentoringSession {
-  id            String        @id @default(cuid())
-  menteeId      String
-  mentee        User          @relation("MenteeSession", fields: [menteeId], references: [id], onDelete: Cascade)
-  mentorId      String
-  mentor        User          @relation("MentorSession", fields: [mentorId], references: [id], onDelete: Cascade)
-  mentorProfile MentorProfile @relation("MentorSessions", fields: [mentorProfileId], references: [id])
-  mentorProfileId String
-  topic         String
-  scheduledAt   DateTime?
-  status        String        @default("REQUESTED") // REQUESTED, ACCEPTED, COMPLETED, CANCELLED
-  notes         String?
-  rating        Int?          // 1-5
-  feedback      String?
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-
-  @@map("mentoring_sessions")
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE: PEER-REVIEW-NETZWERK (anonym)
-// ─────────────────────────────────────────────────────────────────────────────
-
-model PeerReview {
-  id          String   @id @default(cuid())
-  authorId    String
-  author      User     @relation("ReviewAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  targetId    String
-  target      User     @relation("ReviewTarget", fields: [targetId], references: [id], onDelete: Cascade)
-  documentType String  // "CV", "COVER_LETTER", "PORTFOLIO"
-  documentText String  // Eingereichte Textversion (anonymisiert)
-  feedback    String
-  rating      Int      // 1-5
-  isAnonymous Boolean  @default(true)
-  createdAt   DateTime @default(now())
-
-  @@map("peer_reviews")
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE: SMART FOLLOW-UP TIMELINE
-// ─────────────────────────────────────────────────────────────────────────────
-
-model FollowUp {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  applicationId String?
-  contactId     String?
-  dueAt         DateTime
-  type          String   @default("EMAIL") // EMAIL, PHONE, LINKEDIN, OTHER
-  subject       String
-  aiDraft       String?
-  isDone        Boolean  @default(false)
-  sentAt        DateTime?
-  createdAt     DateTime @default(now())
-
-  @@map("follow_ups")
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE: PORTFOLIO-PROFIL
-// ─────────────────────────────────────────────────────────────────────────────
-
-model PortfolioProfile {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  slug        String   @unique
-  headline    String
-  bio         String
-  skills      String[]
-  githubUrl   String?
-  linkedinUrl String?
-  websiteUrl  String?
-  theme       String   @default("modern")
-  isPublic    Boolean  @default(false)
-  views       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@map("portfolio_profiles")
-}
-
-model FileFolder {
-  id        String       @id @default(cuid())
-  name      String
-  color     String       @default("#6b7280")
-  icon      String       @default("folder")
-  createdAt DateTime     @default(now())
-
-  // Self-relation for nested folders
-  parentId  String?
-  parent    FileFolder?  @relation("FolderChildren", fields: [parentId], references: [id], onDelete: Cascade)
-  children  FileFolder[] @relation("FolderChildren")
-
-  // Owner
-  userId    String
-  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Documents in this folder
-  documents Document[]
-
-  @@map("file_folders")
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE: UNIVERSAL APPLICATION TIMELINE
-// ─────────────────────────────────────────────────────────────────────────────
-
 enum TimelineEntryType {
   STATUS_CHANGE
   NOTE
@@ -757,108 +778,9 @@ enum TimelineEntryType {
   MANUAL
 }
 
-model ApplicationTimeline {
-  id            String            @id @default(cuid())
-  applicationId String
-  application   Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  userId        String
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type          TimelineEntryType @default(MANUAL)
-  title         String
-  content       String?
-  status        String?           // ApplicationStatus-Wert als String-Snapshot
-  itBereich     String?
-  week          Int?              // Kalender-/ISP-Woche (optional)
-  date          DateTime          @default(now())
-  noteId        String?           // Optionale Referenz auf Note
-  coverId       String?           // Optionale Referenz auf CoverLetter
-  eventId       String?           // Optionale Referenz auf Event
-  activityId    String?           // Optionale Referenz auf Activity
-  pinned        Boolean           @default(false)
-  attachments   String[]          @default([])
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  comments      TimelineComment[]
-
-  @@index([applicationId])
-  @@index([userId])
-  @@map("application_timelines")
-}
-
-model TimelineComment {
-  id         String              @id @default(cuid())
-  timelineId String
-  timeline   ApplicationTimeline @relation(fields: [timelineId], references: [id], onDelete: Cascade)
-  userId     String
-  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  content    String
-  createdAt  DateTime            @default(now())
-
-  @@index([timelineId])
-  @@map("timeline_comments")
-}
-
-model TimelineShare {
-  id            String    @id @default(cuid())
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token         String    @unique @default(cuid())
-  companyFilter String?
-  typeFilter    String?
-  expiresAt     DateTime?
-  createdAt     DateTime  @default(now())
-
-  @@index([userId])
-  @@map("timeline_shares")
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// FEATURE: DCI CLASSROOM – TAGES- & WOCHENZUSAMMENFASSUNG
-// ─────────────────────────────────────────────────────────────────────────────
-
 enum ClassroomEntryType {
   DAY_NOTE
   DAY_SUMMARY
   WEEK_SUMMARY
   RESEARCH
 }
-
-model ClassroomEntry {
-  id        String              @id @default(cuid())
-  userId    String
-  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  week      Int                 // Woche 0-12
-  day       Int?                // Tag 1-5, null = Wocheneintrag
-  type      ClassroomEntryType
-  title     String?
-  content   String
-  createdAt DateTime            @default(now())
-  updatedAt DateTime            @updatedAt
-
-  @@unique([userId, week, day, type])
-  @@index([userId, week])
-  @@map("classroom_entries")
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// ZUGRIFFSRECHTE: MANAGER (DCI) & VERMITTLER (AfA) – NUR LESEZUGRIFF
-// Admin vergibt einem MANAGER/VERMITTLER Lesezugriff auf einen bestimmten User.
-// ─────────────────────────────────────────────────────────────────────────────
-
-model ViewAccessGrant {
-  id        String   @id @default(cuid())
-  /// MANAGER oder VERMITTLER, der Lesezugriff erhält
-  granteeId String
-  grantee   User     @relation("Grantee", fields: [granteeId], references: [id], onDelete: Cascade)
-  /// USER/Bewerber, dessen Daten gelesen werden dürfen
-  targetId  String
-  target    User     @relation("GrantTarget", fields: [targetId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-
-  @@unique([granteeId, targetId])
-  @@index([granteeId])
-  @@index([targetId])
-  @@map("view_access_grants")
-}
-

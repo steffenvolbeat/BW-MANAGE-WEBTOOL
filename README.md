@@ -46,7 +46,7 @@
 	- Alternativ Infura: `IPFS_INFURA_PROJECT_ID`, `IPFS_INFURA_PROJECT_SECRET`.
 	- Alternativ eigener Node: `IPFS_LOCAL_ENDPOINT` (z.B. `http://127.0.0.1:5001`).
 - Optional: `IPFS_GATEWAY` wenn nicht `https://w3s.link/ipfs/` genutzt werden soll.
-- App neu starten (`NEXT_DISABLE_TURBOPACK=1 npm run dev -- --hostname 127.0.0.1 --port 3000`).
+- App neu starten (`NEXT_DISABLE_TURBOPACK=1 npm run dev -- --hostname 127.0.0.1 --port 5001`).
 - Upload-UI: Checkbox „Auf IPFS speichern“ (nur in Kombination mit Verschlüsselung aktiv).
 
 ## Development

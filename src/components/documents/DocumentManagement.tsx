@@ -364,9 +364,9 @@ export default function DocumentManagement() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dokumente</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dokumente</h1>
           <p className="mt-2 text-gray-600">Verwalten Sie Ihre Bewerbungsdokumente und Vorlagen.</p>
           {false && <p className="text-sm text-gray-500 mt-1">Lade Benutzer...</p>}
           {error && <p className="text-sm text-red-600 mt-1">{error}</p>}

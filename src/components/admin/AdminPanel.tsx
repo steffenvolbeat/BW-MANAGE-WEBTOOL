@@ -610,14 +610,14 @@ export default function AdminPanel() {
       </div>
 
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Admin Panel</h1>
           <p className="mt-2 text-gray-600">
             Erweiterte System-Verwaltung und Monitoring-Tools.
           </p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-3 shrink-0">
           <div className="flex items-center space-x-2">
             <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-sm text-gray-600">System Online</span>
@@ -630,7 +630,7 @@ export default function AdminPanel() {
 
       {/* Navigation Tabs */}
       <div className="border-b border-gray-200">
-        <nav className="flex space-x-8">
+        <nav className="flex overflow-x-auto whitespace-nowrap gap-x-2 sm:gap-x-0 sm:space-x-8 pb-px">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (

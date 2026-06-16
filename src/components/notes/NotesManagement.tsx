@@ -228,9 +228,9 @@ export default function NotesManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Notizen</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Notizen</h1>
           <p className="mt-2 text-gray-600">
             Verwalten Sie Ihre Bewerbungsnotizen und wichtigen Informationen
           </p>

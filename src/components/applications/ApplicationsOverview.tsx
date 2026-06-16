@@ -3,6 +3,8 @@ import { useAppUser } from "@/hooks/useAppUser";
 import { useReadOnly } from "@/hooks/useReadOnly";
 import ApplicationTimeline from "@/components/timeline/ApplicationTimeline";
 import GlobalApplicationTimeline from "@/components/timeline/GlobalApplicationTimeline";
+import RelocationManager from "@/components/applications/RelocationManager";
+import JobSearchAgent from "@/components/applications/JobSearchAgent";
 
 import { useEffect, useRef, useState, type ChangeEvent, Fragment } from "react";
 import {
@@ -24,6 +26,7 @@ import {
   DocumentTextIcon,
   ChatBubbleLeftEllipsisIcon,
   DocumentDuplicateIcon,
+  CpuChipIcon,
 } from "@heroicons/react/24/outline";
 import { useRouter, useSearchParams } from "next/navigation";
 interface Application {
@@ -147,6 +150,12 @@ export default function ApplicationsOverview() {
   const [rowDocsLoading, setRowDocsLoading] = useState<string | null>(null);
   const [rowDocsError, setRowDocsError] = useState<string | null>(null);
   const [undoDoc, setUndoDoc] = useState<{ doc: DocumentPreview; appId: string; timer: ReturnType<typeof setTimeout> } | null>(null);
+
+  // Relocation Manager
+  const [relocationApp, setRelocationApp] = useState<Application | null>(null);
+
+  // Job-Suche Agent
+  const [showJobSearchAgent, setShowJobSearchAgent] = useState(false);
 
   // Cover Letters – row expand
   const [rowCLExpanded, setRowCLExpanded] = useState<string | null>(null);
@@ -1003,9 +1012,9 @@ export default function ApplicationsOverview() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Bewerbungen</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Bewerbungen</h1>
           <p className="mt-2 text-gray-600">
             Verwalten Sie alle Ihre Bewerbungen an einem Ort.
           </p>
@@ -1014,13 +1023,20 @@ export default function ApplicationsOverview() {
           )}
           {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            onClick={() => setShowJobSearchAgent(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white text-sm rounded-lg transition-all shadow-sm font-medium"
+          >
+            <CpuChipIcon className="w-4 h-4" />
+            <span>🤖 KI Job-Suche</span>
+          </button>
           <button
             onClick={() => setShowGlobalTimeline(true)}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-lg transition-colors"
           >
             <ClockIcon className="w-4 h-4" />
-            Gesamter Verlauf
+            <span className="hidden sm:inline">Gesamter Verlauf</span>
           </button>
           <button
             onClick={() => (window.location.href = "/applications/new")}
@@ -1029,7 +1045,8 @@ export default function ApplicationsOverview() {
             style={isReadOnly ? { display: "none" } : undefined}
           >
             <PlusIcon className="w-4 h-4 mr-2" />
-            Neue Bewerbung
+            <span className="hidden sm:inline">Neue Bewerbung</span>
+            <span className="sm:hidden">Neu</span>
           </button>
         </div>
       </div>
@@ -1090,7 +1107,7 @@ export default function ApplicationsOverview() {
       )}
 
       {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">
@@ -1384,8 +1401,8 @@ export default function ApplicationsOverview() {
       </div>
       <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
         {showEdit && editingId && (
-          <div className="fixed inset-0 bg-black/40 z-30 flex items-center justify-center px-4 py-6">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl border border-gray-200 relative flex flex-col max-h-[90vh]">
+          <div className="fixed inset-0 bg-black/40 z-30 flex items-center justify-center px-3 py-4 sm:px-6 sm:py-8">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl border border-gray-200 relative flex flex-col max-h-[92vh] sm:max-h-[90vh]">
               <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100 shrink-0">
                 <h3 className="text-xl font-semibold text-gray-900 flex items-center">
                   <PencilSquareIcon className="w-5 h-5 mr-2 text-indigo-600" />
@@ -2196,6 +2213,19 @@ export default function ApplicationsOverview() {
                           >
                             <ArrowPathIcon className="w-4 h-4" />
                           </button>
+                          {!application.isInland && (
+                            <button
+                              className={`p-1 transition-colors ${
+                                ["OFFER_RECEIVED", "ACCEPTED", "NEGOTIATION"].includes(application.status)
+                                  ? "text-teal-600 hover:text-teal-900"
+                                  : "text-teal-400 hover:text-teal-700"
+                              }`}
+                              title="Umzugsmanagement öffnen"
+                              onClick={() => setRelocationApp(application)}
+                            >
+                              <GlobeEuropeAfricaIcon className="w-4 h-4" />
+                            </button>
+                          )}
                           <button
                             className="text-red-600 hover:text-red-900 p-1 disabled:opacity-60"
                             onClick={() => handleDelete(application.id)}
@@ -2337,8 +2367,8 @@ export default function ApplicationsOverview() {
       </div>
 
       {showDetail && detailApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col max-h-[80vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-3 py-4 sm:px-6" role="dialog" aria-modal="true">
+          <div className="w-full max-w-3xl bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-gray-200 dark:border-slate-700 overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[80vh]">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-slate-700">
               <div>
                 <p className="text-xs uppercase tracking-wide text-gray-500 dark:text-slate-400">Bewerbung</p>
@@ -2888,6 +2918,31 @@ export default function ApplicationsOverview() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── Relocation Manager ──────────────────────────────────────────── */}
+      {relocationApp && (
+        <RelocationManager
+          applicationId={relocationApp.id}
+          companyName={relocationApp.companyName}
+          position={relocationApp.position}
+          country={relocationApp.country}
+          city={relocationApp.location}
+          status={relocationApp.status}
+          onClose={() => setRelocationApp(null)}
+        />
+      )}
+
+      {/* ── KI Job-Suche Agent ─────────────────────────────────────────── */}
+      {showJobSearchAgent && (
+        <JobSearchAgent
+          onClose={() => setShowJobSearchAgent(false)}
+          onApplicationCreated={() => {
+            setShowJobSearchAgent(false);
+            // Bewerbungsliste neu laden
+            window.location.reload();
+          }}
+        />
       )}
 
       {/* ── Schnell-Notiz Modal ─────────────────────────────────────────── */}

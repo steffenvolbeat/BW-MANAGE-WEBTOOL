@@ -233,11 +233,11 @@ export function TrustedKanban() {
   );
 
   return (
-    <div className="flex flex-col gap-4 min-h-[80vh]">
+    <div className="flex flex-col gap-4 min-h-[60vh] sm:min-h-[80vh]">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-gray-900">Kanban Board</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Kanban Board</h2>
           {boards.length > 1 && (
             <select
               id="kanban-board-select"
@@ -490,7 +490,7 @@ export function TrustedKanban() {
       {/* Modal: Karte bearbeiten */}
       {editCard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-lg flex flex-col max-h-[80vh]">
+          <div className="bg-white dark:bg-gray-900 rounded-xl shadow-xl w-full max-w-lg flex flex-col max-h-[88vh] sm:max-h-[80vh]">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <PencilSquareIcon className="w-5 h-5 text-blue-600" />

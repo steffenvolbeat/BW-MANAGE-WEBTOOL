@@ -91,7 +91,7 @@ export default function VideoCoachPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">🎥 Video-Interview-Coach</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">🎥 Video-Interview-Coach</h1>
         <p className="text-(--muted) mt-2">
           KI-Analyse deiner Körpersprache, Mimik und Körperhaltung für perfekte Interviews.
           Kamera bleibt vollständig lokal — kein Video wird gespeichert.
@@ -183,7 +183,7 @@ export default function VideoCoachPage() {
               {/* Einzel-Scores */}
               <div className="bg-(--card) border border-(--border) rounded-xl p-6">
                 <p className="text-sm font-semibold mb-4">Detailwertung</p>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   <ScoreCircle label="Blickkontakt" value={analysis.eyeContact} />
                   <ScoreCircle label="Haltung" value={analysis.posture} />
                   <ScoreCircle label="Ausstrahlung" value={analysis.confidence} />

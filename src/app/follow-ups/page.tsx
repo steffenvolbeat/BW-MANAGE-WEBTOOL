@@ -135,9 +135,9 @@ export default function FollowUpsPage() {
 
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">⏰ Smart Follow-up Timeline</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">⏰ Smart Follow-up Timeline</h1>
           <p className="text-(--muted) mt-1">
             KI-generierte Nachfass-Entwürfe für Bewerbungen und Kontakte
           </p>
@@ -154,7 +154,7 @@ export default function FollowUpsPage() {
       {showCreate && (
         <div className="bg-(--card) border border-(--border) rounded-xl p-6 mb-6">
           <h2 className="text-base font-semibold mb-4">Neues Follow-up</h2>
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="text-sm text-(--muted) block mb-1">Typ</label>
               <select

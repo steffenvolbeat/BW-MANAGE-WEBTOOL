@@ -693,7 +693,7 @@ export default function GlobalApplicationTimeline({ onOpenApplication, viewAs }:
             <p className="text-gray-400 text-sm text-center py-8">Keine Daten für Gantt-Ansicht.</p>
           ) : (
             <div className="overflow-x-auto">
-              <div className="space-y-2 min-w-[500px]">
+              <div className="space-y-2 min-w-75 sm:min-w-125">
                 {/* X-Achse Labels */}
                 <div className="flex items-center gap-2 pl-44 mb-1">
                   <div className="flex-1 flex justify-between text-[10px] text-gray-400">

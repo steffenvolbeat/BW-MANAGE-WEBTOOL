@@ -17,7 +17,7 @@ import type {
 
 export const RP_ID   = process.env.WEBAUTHN_RP_ID     ?? "localhost";
 export const RP_NAME = process.env.WEBAUTHN_RP_NAME   ?? "BW-Manage";
-export const RP_ORIGIN = process.env.WEBAUTHN_ORIGIN  ?? "http://localhost:3000";
+export const RP_ORIGIN = process.env.WEBAUTHN_ORIGIN  ?? "http://localhost:5001";
 
 export {
   generateRegistrationOptions,

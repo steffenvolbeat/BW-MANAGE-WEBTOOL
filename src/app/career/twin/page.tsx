@@ -116,9 +116,9 @@ export default function CareerTwinPage() {
 
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
-      <div className="flex items-start justify-between mb-8">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold">🧬 Digital Career Twin</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">🧬 Digital Career Twin</h1>
           <p className="text-(--muted) mt-2">
             Dein KI-generiertes digitales Karriere-Alter-Ego — 
             basierend auf deiner echten Bewerbungshistorie.
@@ -162,7 +162,7 @@ export default function CareerTwinPage() {
 
       {/* Stats */}
       {stats && (
-        <div className="grid grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-8">
           {[
             { label: "Bewerbungen", val: stats.total, color: "text-blue-600" },
             { label: "Interviews", val: stats.interviews, color: "text-purple-600" },
@@ -202,7 +202,7 @@ export default function CareerTwinPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {/* Stärken */}
             <div className="bg-(--card) border border-(--border) rounded-xl p-6">
               <h3 className="font-semibold mb-3 text-green-700 dark:text-green-400">💪 Stärken</h3>

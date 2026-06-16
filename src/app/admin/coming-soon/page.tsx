@@ -788,35 +788,35 @@ export default function ComingSoonPage() {
     <div className="min-h-screen bg-(--surface) text-foreground">
       {/* Header */}
       <header className="bg-(--card) shadow-sm border-b border-(--border)">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
                 IT-Bewerbungs-Management-Tool
               </h1>
-              <p className="text-lg text-(--muted) mt-2">
-                Coming Soon - Revolutionäres Bewerbungsmanagement für IT-Profis
+              <p className="text-base sm:text-lg text-(--muted) mt-2">
+                Coming Soon – Revolutionäres Bewerbungsmanagement für IT-Profis
               </p>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
                 In Entwicklung
               </span>
-              <span className="text-sm text-(--muted)">
-                Stand: 3. März 2026 - Phase 7 aktiv 🔄
+              <span className="text-xs sm:text-sm text-(--muted)">
+                Stand: 3. März 2026 – Phase 7 aktiv 🔄
               </span>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8 py-6 sm:py-10 lg:py-12">
         {/* Vision & Mission */}
-        <section className="bg-(--card) border border-(--border) rounded-xl shadow-sm p-8 mb-12">
+        <section className="bg-(--card) border border-(--border) rounded-xl shadow-sm p-4 sm:p-8 mb-8 sm:mb-12">
           <h2 className="text-2xl font-bold text-foreground mb-6">
             Vision & Mission
           </h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             <div>
               <h3 className="text-xl font-semibold text-blue-500 mb-4">
                 🎯 Unsere Vision
@@ -843,11 +843,11 @@ export default function ComingSoonPage() {
         </section>
 
         {/* Geplante Features */}
-        <section className="mb-12">
+        <section className="mb-8 sm:mb-12">
           <h2 className="text-2xl font-bold text-foreground mb-8">
             🎨 Features & Entwicklungsstand
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {features.map((feature, index) => {
               const fSt = getSt(`f_${index}`, feature.status);
               return (
@@ -861,10 +861,10 @@ export default function ComingSoonPage() {
                       : "border-l-4 border-gray-500"
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex flex-col xs:flex-row xs:items-center justify-between mb-3 gap-2">
                     <div className="flex items-center space-x-2">
                       {getStatusIcon(fSt)}
-                      <span className="text-sm text-(--muted) font-medium">
+                      <span className="text-xs sm:text-sm text-(--muted) font-medium">
                         {feature.phase}
                       </span>
                     </div>
@@ -874,10 +874,10 @@ export default function ComingSoonPage() {
                       </span>
                     )}
                   </div>
-                  <h3 className="text-lg font-semibold text-foreground mb-3">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 sm:mb-3">
                     {feature.title}
                   </h3>
-                  <p className="text-(--muted) text-sm leading-relaxed">
+                  <p className="text-(--muted) text-xs sm:text-sm leading-relaxed mb-2">
                     {feature.description}
                   </p>
                   <StatusToggle id={`f_${index}`} def={feature.status} />
@@ -897,7 +897,7 @@ export default function ComingSoonPage() {
           </div>
           <p className="text-(--muted) text-sm mb-8">48 geplante Erweiterungen – von lokalen LLMs (Ollama/Llama) über Multi-Agent-Systeme bis hin zu Neuromorphic Computing und Digital Twins.</p>
 
-          <div className="space-y-10">
+          <div className="space-y-8 sm:space-y-10">
             {futuristicFeatures.map((cat) => (
               <div key={cat.category}>
                 {/* Kategorie-Header */}
@@ -905,13 +905,13 @@ export default function ComingSoonPage() {
                   <span className={`text-transparent bg-clip-text bg-linear-to-r ${cat.color}`}>{cat.category}</span>
                 </div>
 
-                <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
                   {cat.items.map((item) => {
                     const iSt = getSt(`fi_${item.id}`, item.status);
                     return (
                       <div
                         key={item.id}
-                        className={`relative bg-(--card) border border-(--border) rounded-xl shadow-sm hover:shadow-md transition-all p-5 ${
+                        className={`relative bg-(--card) border border-(--border) rounded-xl shadow-sm hover:shadow-md transition-all p-4 sm:p-5 ${
                           iSt === "completed" ? "border-l-4 border-green-500" :
                           iSt === "in-progress" ? "border-l-4 border-blue-500" :
                           "border-l-4 border-slate-600"
@@ -921,14 +921,14 @@ export default function ComingSoonPage() {
                         <span className="absolute top-3 right-3 text-xs font-bold text-(--muted)">Feature {item.id}</span>
 
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xl">{item.icon}</span>
-                          <h3 className="font-semibold text-foreground text-sm leading-tight pr-6">{item.title}</h3>
+                          <span className="text-lg sm:text-xl">{item.icon}</span>
+                          <h3 className="font-semibold text-foreground text-xs sm:text-sm leading-tight pr-4 sm:pr-6">{item.title}</h3>
                         </div>
 
-                        <p className="text-(--muted) text-xs leading-relaxed mb-3">{item.desc}</p>
+                        <p className="text-(--muted) text-xs leading-relaxed mb-2 sm:mb-3">{item.desc}</p>
 
                         {/* Tech-Stack Badges */}
-                        <div className="flex flex-wrap gap-1 mb-3">
+                        <div className="flex flex-wrap gap-1 mb-2 sm:mb-3">
                           {item.tech.map((t) => (
                             <span key={t} className="px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                               {t}
@@ -962,15 +962,15 @@ export default function ComingSoonPage() {
         </section>
 
         {/* Entwicklungsplan */}
-        <section className="mb-12">
+        <section className="mb-8 sm:mb-12">
           <h2 className="text-2xl font-bold text-foreground mb-8">
             📅 Entwicklungsplan
           </h2>
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {roadmap.map((phase, index) => {
               const rSt = getSt(`r_${index}`, phase.status);
               return (
-                <div key={index} className="bg-(--card) border border-(--border) rounded-xl shadow-sm p-8">
+                <div key={index} className="bg-(--card) border border-(--border) rounded-xl shadow-sm p-4 sm:p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center space-x-4">
                       <h3 className="text-xl font-bold text-foreground">
@@ -1010,7 +1010,7 @@ export default function ComingSoonPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
                     {phase.items.map((item, itemIndex) => (
                       <div
                         key={itemIndex}
@@ -1027,12 +1027,12 @@ export default function ComingSoonPage() {
         </section>
 
         {/* Technologie-Stack */}
-        <section className="mb-12">
+        <section className="mb-8 sm:mb-12">
           <h2 className="text-2xl font-bold text-foreground mb-8">
             ⚡ Technologie-Stack
           </h2>
-          <div className="bg-(--card) border border-(--border) rounded-xl shadow-sm p-8">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="bg-(--card) border border-(--border) rounded-xl shadow-sm p-4 sm:p-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {Object.entries(techStack).map(([category, technologies]) => (
                 <div key={category}>
                   <h3 className="text-lg font-semibold text-foreground mb-4 capitalize">
@@ -1057,7 +1057,7 @@ export default function ComingSoonPage() {
         </section>
 
         {/* Admin Panel Toggle */}
-        <section className="bg-red-950/20 dark:bg-red-950/30 rounded-xl p-8 border border-red-800/40">
+        <section className="bg-red-950/20 dark:bg-red-950/30 rounded-xl p-4 sm:p-8 border border-red-800/40">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold text-red-400 mb-2">
@@ -1108,13 +1108,13 @@ export default function ComingSoonPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-(--card) border-t border-(--border) mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <footer className="bg-(--card) border-t border-(--border) mt-10 sm:mt-16">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8">
           <div className="text-center">
-            <p className="text-foreground">
+            <p className="text-foreground text-xs sm:text-base">
               © 2026 BW-Manage – Bewerbungsmanagement für IT-Profis
             </p>
-            <p className="text-sm text-(--muted) mt-2">
+            <p className="text-xs sm:text-sm text-(--muted) mt-2">
               Next.js 16 · React 18 · TypeScript · Tailwind CSS 4 · Prisma · PostgreSQL
             </p>
           </div>

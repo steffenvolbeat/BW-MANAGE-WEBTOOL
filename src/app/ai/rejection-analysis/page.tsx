@@ -84,7 +84,7 @@ export default function RejectionAnalysisPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">📉 Predictive Rejection Analysis</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">📉 Predictive Rejection Analysis</h1>
         <p className="text-(--muted) mt-2">
           KI analysiert deine Bewerbungshistorie und erkennt Muster in Absagen. 
           Konkrete Handlungsempfehlungen für mehr Erfolg.
@@ -93,7 +93,7 @@ export default function RejectionAnalysisPage() {
 
       {/* Stats-Überblick */}
       {stats && (
-        <div className="grid grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
             { label: "Bewerbungen", value: stats.total, color: "text-blue-600" },
             { label: "Erfolgreich", value: stats.successful, color: "text-green-600" },
@@ -128,7 +128,7 @@ export default function RejectionAnalysisPage() {
           {analysis.predictedOutcome && (
             <div className="bg-gradient-to-r from-blue-600 to-purple-700 text-white rounded-xl p-6">
               <h2 className="text-lg font-semibold mb-4">🔮 Erfolgsprognose</h2>
-              <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                 <div>
                   <p className="text-blue-200 text-sm">Aktuelle Erfolgsrate</p>
                   <p className="text-3xl font-bold">{analysis.predictedOutcome.currentSuccessRate}%</p>

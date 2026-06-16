@@ -326,14 +326,14 @@ export default function Calendar() {
   return (
     <div className="calendar-shell space-y-6">
       {/* Header */}
-      <div className={`${tone.panel} rounded-xl p-6 shadow-lg border ${tone.border}`}>
+      <div className={`${tone.panel} rounded-xl p-4 sm:p-6 shadow-lg border ${tone.border}`}>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-200">
               <CalendarDaysIcon className="h-4 w-4" />
               Bewerbungs-Kalender
             </div>
-            <h1 className="mt-3 text-3xl font-bold text-white">Kalender</h1>
+            <h1 className="mt-3 text-2xl sm:text-3xl font-bold text-white">Kalender</h1>
             <p className="mt-2 text-slate-200/80">
               Termine, Interviews und Deadlines im Blick – kein Platz für Überraschungen.
             </p>
@@ -395,7 +395,7 @@ export default function Calendar() {
               {"So Mo Di Mi Do Fr Sa".split(" ").map((day) => (
                 <div
                   key={day}
-                  className="bg-slate-50 dark:bg-slate-900 p-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-(--border)"
+                  className="bg-slate-50 dark:bg-slate-900 p-1 sm:p-3 text-center text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-200 border-b border-slate-200 dark:border-(--border)"
                 >
                   {day}
                 </div>
@@ -405,7 +405,7 @@ export default function Calendar() {
               {days.map((day, dayIdx) => (
                 <div
                   key={dayIdx}
-                  className={`min-h-30 p-3 border-r border-b border-slate-200 dark:border-(--border) ${
+                  className={`min-h-16 sm:min-h-30 p-1 sm:p-3 border-r border-b border-slate-200 dark:border-(--border) ${
                     selectedDate?.toDateString() === day.date.toDateString()
                       ? "bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-inset ring-indigo-400"
                       : !day.isCurrentMonth

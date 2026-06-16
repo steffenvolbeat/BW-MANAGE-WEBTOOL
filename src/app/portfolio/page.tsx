@@ -128,7 +128,7 @@ export default function PortfolioPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">🌐 Portfolio-Website-Generator</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">🌐 Portfolio-Website-Generator</h1>
         <p className="text-(--muted) mt-2">
           Erstelle deine professionelle Portfolio-Website automatisch aus deinen Bewerbungsdaten.
           Teile sie mit Recruitern als öffentlichen Link.
@@ -137,7 +137,7 @@ export default function PortfolioPage() {
 
       {/* Stats aus echten Daten */}
       {userData && (
-        <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-8">
           {[
             { label: "Bewerbungen", value: userData.applications.length, icon: "📨" },
             { label: "Dokumente", value: userData.documents.length, icon: "📄" },

@@ -84,7 +84,7 @@ export default function GamificationPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold flex items-center gap-3">🏆 Gamification & Achievements</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">🏆 Gamification & Achievements</h1>
         <p className="text-(--muted) mt-2">
           Sammle XP für jede Aktivität und schalte Achievements frei. Verfolge deinen Karriere-Fortschritt!
         </p>

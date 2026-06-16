@@ -126,9 +126,9 @@ export default function ReportsAnalytics() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Reports & Analytics
           </h1>
           <p className="mt-2 text-gray-600">
@@ -136,7 +136,7 @@ export default function ReportsAnalytics() {
             Erfolgsraten.
           </p>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
           <select
             id="time-range"
             name="timeRange"

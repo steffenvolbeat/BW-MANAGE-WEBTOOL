@@ -513,9 +513,9 @@ export default function ContactsManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Kontakte</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Kontakte</h1>
           <p className="mt-2 text-gray-600">
             Verwalten Sie Ihr berufliches Netzwerk und Recruiting-Kontakte.
           </p>
@@ -533,7 +533,7 @@ export default function ContactsManagement() {
       </div>
 
       {/* Statistics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
           <div className="flex items-center">
             <div className="p-2 bg-blue-100 rounded-lg">

@@ -558,7 +558,7 @@ export default function ApplicationTimeline({
           <h3 className="font-medium text-gray-900 dark:text-white text-sm">
             Neuer Timeline-Eintrag
           </h3>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label htmlFor="tl-add-type" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                 Typ
@@ -627,7 +627,7 @@ export default function ApplicationTimeline({
               className="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 bg-white dark:bg-gray-900 text-gray-900 dark:text-white resize-none"
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label htmlFor="tl-add-itbereich" className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                 IT-Bereich (optional)

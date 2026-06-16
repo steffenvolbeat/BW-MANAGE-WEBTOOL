@@ -385,7 +385,7 @@ export default function ActivitiesOverview() {
       {/* Header */}
       <div className="flex flex-wrap justify-between items-start gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Aktivitäten</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Aktivitäten</h1>
           <p className="mt-2 text-gray-600">
             Übersicht über alle Ihre Bewerbungsaktivitäten und Aktionen.
           </p>

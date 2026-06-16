@@ -73,7 +73,7 @@ export default function FraudDetektorPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold flex items-center gap-3">
+        <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-3">
           🚨 Bewerbungs-Fraud-Detektor
         </h1>
         <p className="text-(--muted) mt-2">
@@ -82,7 +82,7 @@ export default function FraudDetektorPage() {
       </div>
 
       <div className="bg-(--card) border border-(--border) rounded-xl p-6 mb-6">
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="text-sm font-medium text-(--muted) mb-1 block">Firmenname (optional)</label>
             <input

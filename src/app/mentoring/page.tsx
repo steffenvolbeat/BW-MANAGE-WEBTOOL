@@ -106,7 +106,7 @@ export default function MentoringPage() {
   return (
     <div className="min-h-screen bg-(--surface) text-foreground p-6 max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">🎓 Mentoring-Marktplatz</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold">🎓 Mentoring-Marktplatz</h1>
         <p className="text-(--muted) mt-2">
           Finde erfahrene Mentoren aus der IT-Branche oder biete selbst Mentoring an.
         </p>

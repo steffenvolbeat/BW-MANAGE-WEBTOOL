@@ -175,7 +175,7 @@ export default function LegalContractAnalyzerPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                     <div className="p-3 bg-red-50 rounded-lg">
                       <div className="text-2xl font-bold text-red-600">
                         {analysis.clauses.filter(c => c.riskLevel === 'HIGH' || c.riskLevel === 'CRITICAL').length}
