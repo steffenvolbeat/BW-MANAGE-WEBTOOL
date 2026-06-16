@@ -3,6 +3,7 @@ import { Inter, Roboto_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { AuthProvider } from "@/components/AuthProvider";
 import JobCoachProvider from "@/components/ai/JobCoachProvider";
+import DashboardBackButton from "@/components/layout/DashboardBackButton";
 import "./globals.css";
 
 const sans = Inter({
@@ -53,6 +54,7 @@ export default function RootLayout({
           <AuthProvider>
             {children}
             <JobCoachProvider />
+            <DashboardBackButton />
           </AuthProvider>
         </ThemeProvider>
       </body>
