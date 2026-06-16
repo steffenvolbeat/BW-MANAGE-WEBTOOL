@@ -728,7 +728,7 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
           location: job.location,
           country: job.country,
           isInland,
-          status: "WISHLIST",
+          status: "SAVED",
           notes: `KI-Suche: ${job.matchScore}% Match · ${job.jobType} · Gehalt: ${job.salaryMin.toLocaleString("de")}–${job.salaryMax.toLocaleString("de")} ${job.currency}/Jahr\nGefundene Skills: ${job.matchedSkills.join(", ")}`,
           salary: `${job.salaryMin}–${job.salaryMax}`,
         }),
