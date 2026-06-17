@@ -193,7 +193,7 @@ function generateFallbackJobs(prefs: SearchPreferences): { jobs: JobMatch[]; pro
     { name: "SAP SE", size: "100.000+ MA", loc: "Walldorf", addr: "Dietmar-Hopp-Allee 16, 69190 Walldorf", country: "Deutschland", desc: "Weltmarktführer für Unternehmenssoftware mit globaler Präsenz." },
     { name: "BMW Group", size: "100.000+ MA", loc: "München", addr: "Petuelring 130, 80788 München", country: "Deutschland", desc: "Führender Automobilhersteller mit starker Digitalisierungsstrategie." },
     { name: "Siemens AG", size: "100.000+ MA", loc: "München", addr: "Werner-von-Siemens-Straße 1, 80333 München", country: "Deutschland", desc: "Globales Technologieunternehmen in Industrie, Infrastruktur und Transport." },
-    { name: "Deutsche Telekom", size: "50.000-100.000 MA", loc: "Bonn / Remote", addr: "Friedrich-Ebert-Allee 140, 53113 Bonn", country: "Deutschland", desc: "Größter europäischer Telekommunikationskonzern." },
+    { name: "Deutsche Telekom AG", size: "50.000-100.000 MA", loc: "Bonn / Remote", addr: "Friedrich-Ebert-Allee 140, 53113 Bonn", country: "Deutschland", desc: "Größter europäischer Telekommunikationskonzern." },
     { name: "Zalando SE", size: "10.000-50.000 MA", loc: "Berlin (Remote)", addr: "Zirkus-Krone-Straße 17, 10115 Berlin", country: "Deutschland", desc: "Europas führende Online-Modeplattform mit starker Tech-Kultur." },
     { name: "CHECK24 GmbH", size: "1.000-10.000 MA", loc: "München", addr: "Erika-Mann-Straße 62, 80636 München", country: "Deutschland", desc: "Deutschlands größtes Vergleichsportal — agil und wachstumsstark." },
     { name: "N26 GmbH", size: "1.000-5.000 MA", loc: "Berlin (Remote)", addr: "Voltairestraße 8, 10179 Berlin", country: "Deutschland", desc: "Europas führende Digitalbank mit 8 Mio. Kunden in 25 Ländern." },
@@ -203,12 +203,27 @@ function generateFallbackJobs(prefs: SearchPreferences): { jobs: JobMatch[]; pro
     { name: "Capgemini Deutschland", size: "10.000-50.000 MA", loc: "Frankfurt / Remote", addr: "Potsdamer Platz 5, 10785 Berlin", country: "Deutschland", desc: "Globale IT-Beratung mit starkem DACH-Wachstum und Fokus auf Cloud & KI." },
     { name: "Celonis SE", size: "1.000-5.000 MA", loc: "München / Remote", addr: "Theresienstraße 6, 80333 München", country: "Deutschland", desc: "Weltmarktführer für Process Mining — Unicorn aus München." },
     { name: "TeamViewer", size: "1.000-5.000 MA", loc: "Göppingen / Remote", addr: "Bahnhofsplatz 2, 73033 Göppingen", country: "Deutschland", desc: "Globale Plattform für Remote Connectivity mit 30 Mio. Nutzern." },
-    { name: "Erste Group IT", size: "5.000-10.000 MA", loc: "Wien", addr: "Am Belvedere 1, 1100 Wien", country: "Österreich", desc: "IT-Arm der Erste Group Bank — größter Retailbanker Österreichs." },
-    { name: "Dynatrace Austria", size: "1.000-5.000 MA", loc: "Linz / Remote", addr: "Freistädter Straße 313, 4040 Linz", country: "Österreich", desc: "Weltmarktführer für KI-gestütztes Observability & Cloud-Monitoring." },
-    { name: "A1 Telekom Austria", size: "5.000-10.000 MA", loc: "Wien", addr: "Lassallestraße 9, 1020 Wien", country: "Österreich", desc: "Marktführer Telekommunikation in Österreich, starke IT-Transformation." },
+    { name: "T-Systems GmbH", size: "10.000-50.000 MA", loc: "Frankfurt / Remote", addr: "Hahnstraße 43d, 60528 Frankfurt am Main", country: "Deutschland", desc: "IT-Dienstleistungsarm der Deutschen Telekom — Cloud, Security und IT-Betrieb." },
+    { name: "IBM Deutschland GmbH", size: "10.000-50.000 MA", loc: "Ehningen / Stuttgart", addr: "IBM-Allee 1, 71139 Ehningen", country: "Deutschland", desc: "Weltführender IT-Konzern mit starken Bereichen AI, Cloud und Beratung." },
+    { name: "Computacenter AG", size: "5.000-10.000 MA", loc: "Kerpen / Remote", addr: "Europaallee 10, 50226 Frechen", country: "Deutschland", desc: "Europas führender IT-Infrastruktur-Dienstleister — Managed Services & IT-Support." },
+    { name: "CANCOM GmbH", size: "1.000-5.000 MA", loc: "München / Remote", addr: "Erika-Mann-Straße 69, 80636 München", country: "Deutschland", desc: "Systemhaus für IT-Lösungen, Cloud und Managed Services im DACH-Raum." },
+    { name: "Vodafone GmbH", size: "10.000-50.000 MA", loc: "Düsseldorf / Remote", addr: "Ferdinand-Braun-Platz 1, 40549 Düsseldorf", country: "Deutschland", desc: "Einer der größten Telekommunikationsanbieter Europas mit starkem IT-Bereich." },
+    { name: "msg systems ag", size: "5.000-10.000 MA", loc: "Ismaning / München", addr: "Robert-Bürkle-Straße 1, 85737 Ismaning", country: "Deutschland", desc: "Unabhängige IT-Beratung & Softwareentwicklung im DACH-Raum." },
+    { name: "Sopra Steria GmbH", size: "5.000-10.000 MA", loc: "Hamburg / Remote", addr: "Werinherstraße 79, 81541 München", country: "Deutschland", desc: "Europäische IT- und Managementberatung mit Schwerpunkt Digitalisierung." },
+    { name: "Atruvia AG", size: "1.000-5.000 MA", loc: "Karlsruhe / Münster", addr: "Hervester Straße 33, 46244 Bottrop", country: "Deutschland", desc: "IT-Dienstleister der Genossenschaftsbanken — Bankensoftware und IT-Betrieb." },
+    { name: "Volkswagen AG Digital", size: "100.000+ MA", loc: "Wolfsburg / Remote", addr: "Berliner Ring 2, 38440 Wolfsburg", country: "Deutschland", desc: "IT und Digitalisierungseinheit des VW-Konzerns — Plattformen, Data und KI." },
+    { name: "Infineon Technologies AG", size: "50.000-100.000 MA", loc: "München / Neubiberg", addr: "Am Campeon 1-15, 85579 Neubiberg", country: "Deutschland", desc: "Weltmarktführer für Halbleiter und Embedded-Lösungen aus München." },
+    { name: "Rohde & Schwarz GmbH", size: "10.000-50.000 MA", loc: "München / Remote", addr: "Mühldorfstraße 15, 81671 München", country: "Deutschland", desc: "Führender Hersteller von Mess-, Kommunikations- und IT-Sicherheitslösungen." },
+    { name: "ING Deutschland", size: "1.000-5.000 MA", loc: "Frankfurt / Remote", addr: "Theodor-Heuss-Allee 106, 60486 Frankfurt", country: "Deutschland", desc: "Deutschlands größte Direktbank mit moderner Cloud-Architektur." },
+    { name: "Erste Group IT GmbH", size: "5.000-10.000 MA", loc: "Wien", addr: "Am Belvedere 1, 1100 Wien", country: "Österreich", desc: "IT-Arm der Erste Group Bank — größter Retailbanker Österreichs." },
+    { name: "Dynatrace Austria GmbH", size: "1.000-5.000 MA", loc: "Linz / Remote", addr: "Freistädter Straße 313, 4040 Linz", country: "Österreich", desc: "Weltmarktführer für KI-gestütztes Observability & Cloud-Monitoring." },
+    { name: "A1 Telekom Austria AG", size: "5.000-10.000 MA", loc: "Wien", addr: "Lassallestraße 9, 1020 Wien", country: "Österreich", desc: "Marktführer Telekommunikation in Österreich, starke IT-Transformation." },
+    { name: "Kapsch BusinessCom AG", size: "1.000-5.000 MA", loc: "Wien / Remote", addr: "Am Europlatz 2, 1120 Wien", country: "Österreich", desc: "ICT-Systemintegrator & Managed Services — größtes österreichisches IT-Systemhaus." },
     { name: "UBS AG Tech", size: "100.000+ MA", loc: "Zürich", addr: "Bahnhofstrasse 45, 8001 Zürich", country: "Schweiz", desc: "Globale Investmentbank mit einem der größten FinTech-Teams Europas." },
     { name: "Swisscom AG", size: "10.000-50.000 MA", loc: "Bern / Remote", addr: "Alte Tiefenaustrasse 6, 3048 Worblaufen", country: "Schweiz", desc: "Schweizer Marktführer in Telekommunikation und ICT-Lösungen." },
-    { name: "SIX Group", size: "1.000-5.000 MA", loc: "Zürich", addr: "Hardturmstraße 201, 8021 Zürich", country: "Schweiz", desc: "Schweizer Finanzmarktinfrastruktur — FinTech und digitale Transformation." },
+    { name: "SIX Group AG", size: "1.000-5.000 MA", loc: "Zürich", addr: "Hardturmstraße 201, 8021 Zürich", country: "Schweiz", desc: "Schweizer Finanzmarktinfrastruktur — FinTech und digitale Transformation." },
+    { name: "Adnovum AG", size: "500-1.000 MA", loc: "Zürich / Remote", addr: "Badenerstrasse 170, 8003 Zürich", country: "Schweiz", desc: "Schweizer Software-Innovationspartner mit Fokus auf Security und Digitalisierung." },
+    { name: "PostFinance AG", size: "1.000-5.000 MA", loc: "Bern / Remote", addr: "Mingerstrasse 20, 3030 Bern", country: "Schweiz", desc: "Digitale Bank der Schweizer Post — modernes Tech-Stack und agile Entwicklung." },
   ];
 
   const positions = [
@@ -259,7 +274,7 @@ function generateFallbackJobs(prefs: SearchPreferences): { jobs: JobMatch[]; pro
 
   const activeCompanies = filteredCompanies.length > 0 ? filteredCompanies : companies;
 
-  const jobs: JobMatch[] = activeCompanies.slice(0, 19).map((company, i) => {
+  const jobs: JobMatch[] = activeCompanies.slice(0, 24).map((company, i) => {
     const pos = positions[i % positions.length];
     const matched = pos.skills.filter((s) =>
       detectedSkills.some((d) => d.toLowerCase() === s.toLowerCase())
@@ -353,7 +368,7 @@ async function callClaude(
         messages: [
           {
             role: "user",
-            content: "Analysiere das Profil und generiere 10 passende Stellenangebote als JSON.",
+            content: "Analysiere das Profil und generiere 20 bis 25 passende Stellenangebote als JSON.",
           },
         ],
         system: systemPrompt,

@@ -77,10 +77,19 @@ const WORK_LABEL: Record<string, string> = {
 
 // ── Anschreiben-Modal ─────────────────────────────────────────────────────────
 
-function CoverLetterModal({ job, onClose }: {
+type CoverLetterMode = "DIREKT" | "INITIATIV";
+
+function CoverLetterModal({ job, onClose, documents }: {
   job: JobMatch;
   onClose: () => void;
+  documents: { id: string; name: string; type: string; fileType: string }[];
 }) {
+  const [mode, setMode] = useState<CoverLetterMode>("DIREKT");
+  const [initiativPosition, setInitiativPosition] = useState("");
+  // Muster-Anschreiben
+  const [sampleLetter, setSampleLetter] = useState("");
+  const [showSampleInput, setShowSampleInput] = useState(false);
+  // Absender
   const [senderName, setSenderName] = useState("");
   const [senderStreet, setSenderStreet] = useState("");
   const [senderZip, setSenderZip] = useState("");
@@ -94,6 +103,17 @@ function CoverLetterModal({ job, onClose }: {
   const [genError, setGenError] = useState<string | null>(null);
 
   const result = versions[versionIdx] ?? null;
+  const coverLetterDocs = documents.filter((d) => d.type === "COVER_LETTER");
+  const hasSampleText = sampleLetter.trim().length > 50;
+
+  const pasteFromClipboard = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setSampleLetter(text);
+    } catch {
+      setGenError("Zwischenablage-Zugriff verweigert — bitte direkt einfügen.");
+    }
+  };
 
   const generate = async () => {
     if (!senderName.trim() || !senderStreet.trim() || !senderZip.trim() || !senderCity.trim()) {
@@ -107,6 +127,9 @@ function CoverLetterModal({ job, onClose }: {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          mode,
+          initiativPosition: mode === "INITIATIV" ? initiativPosition.trim() || undefined : undefined,
+          sampleLetter: hasSampleText ? sampleLetter.trim() : undefined,
           position: job.position,
           company: job.company,
           companyAddress: job.companyAddress || `${job.location}, ${job.country}`,
@@ -172,11 +195,150 @@ function CoverLetterModal({ job, onClose }: {
           {/* Linke Spalte: Formular */}
           <div className="w-full lg:w-72 shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 overflow-y-auto p-5 space-y-4 bg-gray-50">
 
+            {/* Bewerbungsart */}
+            <div>
+              <p className="text-xs font-semibold text-gray-600 mb-2">📋 Bewerbungsart</p>
+              <div className="grid grid-cols-2 gap-2">
+                {(["DIREKT", "INITIATIV"] as CoverLetterMode[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className={`py-2.5 px-3 rounded-xl border-2 text-xs font-semibold transition-all text-left ${
+                      mode === m
+                        ? m === "DIREKT"
+                          ? "bg-green-600 text-white border-green-600"
+                          : "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    {m === "DIREKT" ? (
+                      <><span className="block text-[10px] font-normal opacity-80">Auf Stellenanzeige</span>Direktbewerbung</>
+                    ) : (
+                      <><span className="block text-[10px] font-normal opacity-80">Eigeninitiative</span>Initiativbewerbung</>
+                    )}
+                  </button>
+                ))}
+              </div>
+              {mode === "INITIATIV" && (
+                <div className="mt-2">
+                  <label htmlFor="cl-initiativ-pos" className="text-xs font-medium text-gray-500 block mb-1">
+                    Gewünschter Bereich <span className="text-gray-400">(optional)</span>
+                  </label>
+                  <input
+                    id="cl-initiativ-pos"
+                    name="cl-initiativ-pos"
+                    type="text"
+                    value={initiativPosition}
+                    onChange={(e) => setInitiativPosition(e.target.value)}
+                    placeholder="z.B. IT-Support, Backend, DevOps…"
+                    className="w-full border border-blue-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50"
+                  />
+                </div>
+              )}
+              {mode === "DIREKT" && (
+                <div className="mt-2 p-2 bg-green-50 rounded-lg">
+                  <p className="text-[10px] text-green-700">Anschreiben wird direkt auf die ausgeschriebene Stelle <strong>{job.position}</strong> zugeschnitten.</p>
+                </div>
+              )}
+              {mode === "INITIATIV" && (
+                <div className="mt-2 p-2 bg-blue-50 rounded-lg">
+                  <p className="text-[10px] text-blue-700">KI schreibt eine Initiativbewerbung — ohne Bezug auf eine konkrete Stellenanzeige.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Muster-Anschreiben */}
+            <div className="border border-amber-200 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setShowSampleInput((v) => !v)}
+                className={`w-full flex items-center justify-between px-3 py-2.5 text-xs font-semibold transition-colors ${
+                  hasSampleText
+                    ? "bg-amber-500 text-white"
+                    : "bg-amber-50 text-amber-800 hover:bg-amber-100"
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <DocumentTextIcon className="w-3.5 h-3.5 shrink-0" />
+                  {hasSampleText
+                    ? "✓ Muster-Anschreiben aktiv — KI adaptiert deinen Stil"
+                    : "📄 Muster-Anschreiben verwenden (optional)"}
+                </span>
+                {showSampleInput
+                  ? <ChevronUpIcon className="w-3.5 h-3.5 shrink-0" />
+                  : <ChevronDownIcon className="w-3.5 h-3.5 shrink-0" />}
+              </button>
+
+              {showSampleInput && (
+                <div className="p-3 bg-amber-50 space-y-2">
+                  <p className="text-[11px] text-amber-700 leading-relaxed">
+                    Füge ein vorhandenes Anschreiben ein. Die KI analysiert deinen persönlichen Schreibstil und schreibt es für <strong>{job.company}</strong> neu — zugeschnitten auf diese Stelle.
+                  </p>
+
+                  {/* Vorhandene Anschreiben als Hinweis */}
+                  {coverLetterDocs.length > 0 && (
+                    <div className="bg-white border border-amber-200 rounded-lg p-2">
+                      <p className="text-[10px] font-semibold text-amber-700 mb-1.5">
+                        💡 Deine gespeicherten Anschreiben:
+                      </p>
+                      {coverLetterDocs.map((doc) => (
+                        <div key={doc.id} className="flex items-center gap-1.5 text-[10px] text-gray-600 py-0.5">
+                          <DocumentTextIcon className="w-3 h-3 text-indigo-400 shrink-0" />
+                          <span className="truncate">{doc.name}</span>
+                          <span className="text-gray-400 shrink-0">→ Text kopieren & unten einfügen</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex gap-1.5">
+                    <textarea
+                      value={sampleLetter}
+                      onChange={(e) => setSampleLetter(e.target.value)}
+                      placeholder={"Füge hier dein vorhandenes Anschreiben ein...\n\nBeispiel:\nSehr geehrte Damen und Herren,\nmit großem Interesse bewerbe ich mich auf..."}
+                      rows={6}
+                      className="flex-1 bg-white border border-amber-200 rounded-lg px-3 py-2 text-xs text-gray-800 outline-none focus:ring-2 focus:ring-amber-400 placeholder-gray-400 resize-y min-h-24"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => void pasteFromClipboard()}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-medium border border-amber-300 bg-white text-amber-700 rounded-lg hover:bg-amber-50 transition-colors"
+                    >
+                      <ClipboardDocumentIcon className="w-3.5 h-3.5" />
+                      Aus Zwischenablage einfügen
+                    </button>
+                    {sampleLetter && (
+                      <button
+                        onClick={() => setSampleLetter("")}
+                        className="px-2.5 py-1.5 text-[11px] text-red-500 hover:text-red-700 border border-red-200 bg-white rounded-lg hover:bg-red-50 transition-colors"
+                        title="Muster löschen"
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {hasSampleText && (
+                    <p className="text-[10px] text-green-700 bg-green-50 border border-green-200 rounded-lg px-2 py-1.5">
+                      ✓ {sampleLetter.trim().split(/\s+/).length} Wörter · KI übernimmt deinen Schreibstil beim nächsten Generieren
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* Stelleninfo */}
             <div className="bg-white border border-gray-200 rounded-xl p-3 text-xs space-y-1">
               <p className="font-semibold text-gray-700">{job.position}</p>
               <p className="text-gray-500">{job.company}</p>
               {job.companyAddress && <p className="text-gray-400">{job.companyAddress}</p>}
+              {job.applyUrl && (
+                <a href={job.applyUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-blue-600 hover:underline mt-1">
+                  <LinkIcon className="w-3 h-3 shrink-0" />
+                  <span className="truncate">{job.applyUrl}</span>
+                </a>
+              )}
               <div className="flex flex-wrap gap-1 mt-2">
                 {job.requiredSkills.slice(0, 5).map((s) => (
                   <span key={s} className="px-1.5 py-0.5 bg-indigo-50 text-indigo-600 rounded text-[10px] font-medium">{s}</span>
@@ -398,6 +560,18 @@ function JobCard({
               <span className="text-xs text-gray-400">
                 vor {job.postedDaysAgo} {job.postedDaysAgo === 1 ? "Tag" : "Tagen"}
               </span>
+              {job.applyUrl && (
+                <a
+                  href={job.applyUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <LinkIcon className="w-3.5 h-3.5 shrink-0" />
+                  Zur Stelle →
+                </a>
+              )}
             </div>
           </div>
 
@@ -531,6 +705,20 @@ function JobCard({
               <ExclamationTriangleIcon className="w-3.5 h-3.5 shrink-0" />
               Bewerbungsfrist: {new Date(job.applicationDeadline).toLocaleDateString("de-DE")}
             </div>
+          )}
+
+          {/* Unternehmens-/Stellen-Link */}
+          {job.applyUrl && (
+            <a
+              href={job.applyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <LinkIcon className="w-3.5 h-3.5" />
+              Zur Stellenanzeige / Karriereseite →
+            </a>
           )}
         </div>
       )}
@@ -760,6 +948,7 @@ export default function JobSearchAgent({ onClose, onApplicationCreated }: Props)
       <CoverLetterModal
         job={coverLetterJob}
         onClose={() => setCoverLetterJob(null)}
+        documents={documents}
       />
     )}
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 sm:p-4">
